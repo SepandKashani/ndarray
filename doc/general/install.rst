@@ -7,7 +7,7 @@
 Installation
 ============
 
-*Ndarray* is a header-only C++14 library and tested on x86_64 systems running Linux.
+*Ndarray* is a header-only C++14 library tested on x86_64 systems running Linux.
 
 The following libraries must be available on the system before installing *Ndarray*:
 

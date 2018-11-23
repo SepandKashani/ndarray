@@ -33,20 +33,7 @@ install(EXPORT Ndarray
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/ndarray
         FILE NdarrayConfig.cmake)
 
-set(NDARRAY_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndarray.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndarray.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndcontainer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndcontainer.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndfunc.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndfunc.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_nditer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_nditer.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndlinalg.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndlinalg.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndtype.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndutil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/_ndutil.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ndarray.hpp)
-install(FILES ${NDARRAY_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ndarray)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.hpp"
+                       PATTERN "*.cpp")
