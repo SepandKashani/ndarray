@@ -5,7 +5,6 @@
 # #############################################################################
 
 find_package(GTest 1.8 REQUIRED)
-find_package(Ndarray REQUIRED)
 
 set(NDARRAY_TESTS
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndarray_constructor.cpp
@@ -22,4 +21,4 @@ set(NDARRAY_TESTS
 set(NDARRAY_TARGET test_ndarray)
 
 add_executable(${NDARRAY_TARGET} ${NDARRAY_TESTS})
-target_link_libraries(${NDARRAY_TARGET} gtest gtest_main Ndarray::Ndarray)
+target_link_libraries(${NDARRAY_TARGET} gtest gtest_main Ndarray)

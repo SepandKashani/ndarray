@@ -30,7 +30,7 @@ Headers
     $ cd <root_dir>/
     $ mkdir -p build/ndarray
     $ cd build/ndarray
-    $ cmake -DCMAKE_BUILD_TYPE=Release ../..
+    $ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON ../..
     $ make install
 
 

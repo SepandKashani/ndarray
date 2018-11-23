@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD          14)
 set(CMAKE_CXX_EXTENSIONS        OFF)  # Force c++1[4y] instead of gnu++1[4y]
 set(CMAKE_CXX_STANDARD_REQUIRED ON)   # Fail if no c++14 compiler available
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/src/)
+add_subdirectory(${PROJECT_SOURCE_DIR}/ndarray/)
 if(BUILD_TESTS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/test/)
 endif()
