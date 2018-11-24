@@ -16,6 +16,7 @@ set(NDARRAY_TESTS
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndarray_util.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndarray_linalg.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndcontainer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_ndfunc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndutil.cpp)
 
 set(NDARRAY_TARGET test_ndarray)

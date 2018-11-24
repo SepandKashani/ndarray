@@ -15,6 +15,24 @@
 
 namespace nd {
     /*
+     * Returns
+     * -------
+     * pi : T
+     *     Mathematical constant \pi \approx 3.1415
+     */
+    template <typename T>
+    T pi();
+
+    /*
+     * Returns
+     * -------
+     * e : T
+     *     Euler's constant e \approx 2.71828
+     */
+    template <typename T>
+    T e();
+
+    /*
      * Return a contiguous array in memory (C-order).
      *
      * Parameters

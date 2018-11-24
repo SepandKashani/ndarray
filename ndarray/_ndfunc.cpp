@@ -7,7 +7,9 @@
 #ifndef _FUNC_CPP
 #define _FUNC_CPP
 
+#include <cmath>
 #include <algorithm>
+#include <type_traits>
 #include <vector>
 
 #include "_ndarray.hpp"
@@ -16,6 +18,22 @@
 #include "_ndutil.hpp"
 
 namespace nd {
+    template <typename T>
+    inline T pi() {
+        static constexpr bool is_float = std::is_floating_point<T>::value;
+        static_assert(is_float, "Only {float} types allowed.");
+
+        return static_cast<T>(M_PI);
+    }
+
+    template <typename T>
+    inline T e() {
+        static constexpr bool is_float = std::is_floating_point<T>::value;
+        static_assert(is_float, "Only {float} types allowed.");
+
+        return static_cast<T>(M_E);
+    }
+
     template <typename T>
     inline ndarray<T> ascontiguousarray(ndarray<T> const& x) {
         if(x.is_contiguous()) {
