@@ -32,6 +32,7 @@ Headers
     $ cd build/ndarray
     $ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON ../..
     $ make install
+    $ ./test/test_ndarray
 
 
 Documentation
