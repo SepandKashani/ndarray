@@ -89,7 +89,7 @@ namespace nd {
 
     TYPED_TEST_P(TestNdFuncUtility, TestEye) {
         size_t const N = 5;
-        ndarray<TypeParam> I = eye<TypeParam>(N, N);
+        ndarray<TypeParam> I = eye<TypeParam>(N);
 
         ASSERT_EQ(I.shape(), shape_t({N, N}));
         for(size_t i = 0; i < N; ++i) {

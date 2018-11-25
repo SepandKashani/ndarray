@@ -457,12 +457,15 @@ namespace nd {
         }}
     }
 
+    TYPED_TEST_P(TestNdArrayFilter, TestFilter) {}
+
     typedef ::testing::Types<bool, int, size_t,
                              float, double,
                              std::complex<float>,
                              std::complex<double>> MyNdArrayFilterTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayFilter,
-                               TestWhere);
+                               TestWhere,
+                               TestFilter);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayFilter, MyNdArrayFilterTypes);
 
     template <typename T>
@@ -925,7 +928,21 @@ namespace nd {
         ASSERT_TRUE(x.equals(y));}
     }
 
-    typedef ::testing::Types<bool, int, size_t,
+    TYPED_TEST_P(TestNdArrayManipulation, TestCast) {
+        using T = float;
+
+        ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        // ndarray<T> y = x.cast<T>();
+
+        // auto it_x = x.begin();
+        // for(auto it_y = y.begin(); it_y != y.end(); ++it_x, ++it_y) {
+        //     TypeParam const& correct_elem = static_cast<T>(*it_x);
+        //     T         const& tested_elem  = *it_y;
+        //     ASSERT_EQ(tested_elem, correct_elem);
+        // }
+    }
+
+    typedef ::testing::Types<int, size_t,
                              float, double,
                              std::complex<float>,
                              std::complex<double>> MyNdArrayManipulationTypes;
@@ -935,7 +952,8 @@ namespace nd {
                                TestSqueeze,
                                TestReshape,
                                TestRavel,
-                               TestBroadcastTo);
+                               TestBroadcastTo,
+                               TestCast);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayManipulation, MyNdArrayManipulationTypes);
 
     /* Mathematical Functions ============================================== */

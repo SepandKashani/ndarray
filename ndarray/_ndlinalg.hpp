@@ -7,7 +7,7 @@
 #ifndef _NDLINALG_HPP
 #define _NDLINALG_HPP
 
-#include "_ndarray.hpp"
+namespace nd { template <typename T> class ndarray; }
 
 namespace nd { namespace linalg {
     /*
@@ -32,7 +32,9 @@ namespace nd { namespace linalg {
      *     C[i,j,k,l] = \sum_{q = 0}^{3} A[i,j,q] B[q,k,l]
      */
     template <typename T>
-    ndarray<T> mm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr);
+    ndarray<T> mm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr) {
+        return A + B;
+    }
 
     /*
      * Batch Matrix-Multiplication.

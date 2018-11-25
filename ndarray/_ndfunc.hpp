@@ -7,13 +7,19 @@
 #ifndef _NDFUNC_HPP
 #define _NDFUNC_HPP
 
+#include <algorithm>
+#include <cmath>
 #include <complex>
+#include <type_traits>
 #include <vector>
 
 #include "_ndarray.hpp"
 #include "_ndtype.hpp"
+#include "_ndutil.hpp"
 
 namespace nd {
+    template <typename T> class ndarray;
+
     /*
      * Returns
      * -------
@@ -21,7 +27,12 @@ namespace nd {
      *     Mathematical constant \pi \approx 3.1415
      */
     template <typename T>
-    T pi();
+    T pi() {
+        static constexpr bool is_float = std::is_floating_point<T>::value;
+        static_assert(is_float, "Only {float} types allowed.");
+
+        return static_cast<T>(M_PI);
+    }
 
     /*
      * Returns
@@ -30,7 +41,12 @@ namespace nd {
      *     Euler's constant e \approx 2.71828
      */
     template <typename T>
-    T e();
+    T e() {
+        static constexpr bool is_float = std::is_floating_point<T>::value;
+        static_assert(is_float, "Only {float} types allowed.");
+
+        return static_cast<T>(M_E);
+    }
 
     /*
      * Return a contiguous array in memory (C-order).
@@ -47,7 +63,13 @@ namespace nd {
      *     If `x` was already contiguous, then a view is returned.
      */
     template <typename T>
-    ndarray<T> ascontiguousarray(ndarray<T> const& x);
+    ndarray<T> ascontiguousarray(ndarray<T> const& x) {
+        if(x.is_contiguous()) {
+            return x;
+        } else {
+            return x.copy();
+        }
+    }
 
     /*
      * Create 1-D array from elements.
@@ -58,7 +80,12 @@ namespace nd {
      *     1-D array containing elements from `x`.
      */
     template <typename T>
-    ndarray<T> r_(std::vector<T> const& x);
+    ndarray<T> r_(std::vector<T> const& x) {
+        ndarray<T> y(shape_t({x.size()}));
+
+        std::copy_n(x.cbegin(), x.size(), y.data());
+        return y;
+    }
 
     /*
      * Evenly-spaced values in a given interval.
@@ -137,7 +164,12 @@ namespace nd {
      *     Array of zeros of the given shape.
      */
     template <typename T>
-    ndarray<T> zeros(shape_t const& shape);
+    ndarray<T> zeros(shape_t const& shape) {
+        ndarray<T> out(shape);
+        std::fill_n(out.data(), out.size(), T(0.0));
+
+        return out;
+    }
 
     /*
      * Returns
@@ -146,7 +178,12 @@ namespace nd {
      *     Array of ones of the given shape.
      */
     template <typename T>
-    ndarray<T> ones(shape_t const& shape);
+    ndarray<T> ones(shape_t const& shape) {
+        ndarray<T> out(shape);
+        std::fill_n(out.data(), out.size(), T(1.0));
+
+        return out;
+    }
 
     /*
      * Returns
@@ -155,30 +192,39 @@ namespace nd {
      *     Array of `value` of the given shape.
      */
     template <typename T>
-    ndarray<T> full(shape_t const& shape, T const value);
+    ndarray<T> full(shape_t const& shape, T const value) {
+        ndarray<T> out(shape);
+        std::fill_n(out.data(), out.size(), value);
+
+        return out;
+    }
 
     /*
-     * 2-D array with ones on a diagonal and zeros elsewhere.
+     * 2-D array with ones on the main diagonal and zeros elsewhere.
      *
      * Parameters
      * ----------
      * N : size_t const
      *     Number of rows.
-     * M : size_t const
-     *     Number of columns.
-     * k : int const
-     *     Index of the diagonal.
-     *     Positive values refer to upper-diagonals.
-     *     Negative values refer to lower-diagonals.
      *
      * Returns
      * -------
      * I : ndarray<T>
-     *     (N, M) array where all elements are 0, except on the k-th diagonal
+     *     (N, N) array where all elements are 0, except on the main diagonal
      *     where they are 1.
      */
     template <typename T>
-    ndarray<T> eye(size_t const N, size_t const M, int const k = 0);
+    ndarray<T> eye(size_t const N) {
+        ndarray<T> I = zeros<T>({N, N});
+        int const step = I.strides()[0] + I.strides()[1];
+        byte_t* data = reinterpret_cast<byte_t*>(I.data());
+        for(size_t i = 0; i < N; ++i) {
+            reinterpret_cast<T*>(data)[0] = static_cast<T>(1.0);
+            data += step;
+        }
+
+        return I;
+    }
 
     /*
      * Logical OR along specified axes.
