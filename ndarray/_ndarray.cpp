@@ -222,6 +222,27 @@ namespace nd {
     }
 
     template <typename T>
+    inline ndarray<T> ndarray<T>::where(ndarray<bool> const& mask) const {
+        /*
+         * Suboptimal solution: use a vector to store the extracted elements,
+         * then perform a second copy into an ndarray<T> object.
+         */
+        ndarray<bool> const mask_bcast = mask.broadcast_to(m_shape);
+        auto it_this = this->begin();
+        std::vector<T> buffer;
+        for(auto it_mask = mask_bcast.begin();
+            it_mask != mask_bcast.end();
+            ++it_mask, ++it_this) {
+            if(*it_mask) {
+                buffer.push_back(*it_this);
+            }
+        }
+
+        ndarray<T> const out = r_(buffer);
+        return out;
+    }
+
+    template <typename T>
     inline ndarray<T> ndarray<T>::copy() const {
         ndarray<T> cpy(m_shape);
 

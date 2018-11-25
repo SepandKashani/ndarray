@@ -420,6 +420,52 @@ namespace nd {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIndex, MyNdArrayIndexTypes);
 
     template <typename T>
+    class TestNdArrayFilter : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayFilter);
+
+    TYPED_TEST_P(TestNdArrayFilter, TestWhere) {
+        // shape(mask) == shape(array)
+       {ndarray<bool> mask = nd::r_(std::vector<bool>({true, false, true, false})).reshape({2, 2});
+        ndarray<TypeParam> x = zeros<TypeParam>({2, 2});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y = x.where(mask);
+        ASSERT_EQ(y.shape(), shape_t({2,}));
+        ASSERT_EQ(y.size(), 2);
+        for(size_t i = 0; i < 2; ++i) {
+            TypeParam const& tested_elem = y[{i}];
+            TypeParam const& correct_elem = x[{i, 0}];
+            ASSERT_EQ(tested_elem, correct_elem);
+        }}
+
+        // shape(mask) broadcasts
+       {ndarray<bool> mask = nd::r_(std::vector<bool>({true, false}));
+        ndarray<TypeParam> x = zeros<TypeParam>({2, 2});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y = x.where(mask);
+        ASSERT_EQ(y.shape(), shape_t({2,}));
+        ASSERT_EQ(y.size(), 2);
+        for(size_t i = 0; i < 2; ++i) {
+            TypeParam const& tested_elem = y[{i}];
+            TypeParam const& correct_elem = x[{i, 0}];
+            ASSERT_EQ(tested_elem, correct_elem);
+        }}
+    }
+
+    typedef ::testing::Types<bool, int, size_t,
+                             float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdArrayFilterTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayFilter,
+                               TestWhere);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayFilter, MyNdArrayFilterTypes);
+
+    template <typename T>
     class TestNdArrayIterate : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayIterate);
     TYPED_TEST_P(TestNdArrayIterate, TestNdArrayBeginEnd) {
