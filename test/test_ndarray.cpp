@@ -1,12 +1,13 @@
 // ############################################################################
-// test_ndarray_manipulation.cpp
-// =============================
+// test_ndarray.cpp
+// ================
 // Author : Sepand KASHANI [kashani.sepand@gmail.com]
 // ############################################################################
 
-#ifndef TEST_NDARRAY_MANIPULATION_CPP
-#define TEST_NDARRAY_MANIPULATION_CPP
+#ifndef TEST_NDARRAY_CPP
+#define TEST_NDARRAY_CPP
 
+#include <complex>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -14,6 +15,449 @@
 #include "ndarray/ndarray.hpp"
 
 namespace nd {
+    /* Constructors ======================================================== */
+    template <typename T>
+    class TestNdArrayConstructor : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayConstructor);
+
+    TYPED_TEST_P(TestNdArrayConstructor, TestScalar) {
+        TypeParam scalar = TypeParam(1.0);
+
+        ndarray<TypeParam> x(scalar);
+
+        ASSERT_EQ(x.data()[0], scalar);
+        ASSERT_EQ(x.shape(), shape_t({1}));
+
+        using stride_tt = stride_t::value_type;
+        auto expected_strides = stride_t({static_cast<stride_tt>(sizeof(TypeParam))});
+        ASSERT_EQ(x.strides(), expected_strides);
+    }
+
+    TYPED_TEST_P(TestNdArrayConstructor, TestShape) {
+        shape_t const shape({1, 2, 3});
+        ndarray<TypeParam> x(shape);
+
+        ASSERT_NE(x.data(), nullptr);
+        ASSERT_EQ(x.shape(), shape);
+        using stride_tt = stride_t::value_type;
+        auto expected_strides = stride_t({
+                                  static_cast<stride_tt>(6 * sizeof(TypeParam)),
+                                  static_cast<stride_tt>(3 * sizeof(TypeParam)),
+                                  static_cast<stride_tt>(sizeof(TypeParam))});
+        ASSERT_EQ(x.strides(), expected_strides);
+        ASSERT_TRUE(x.is_contiguous());
+    }
+
+    TYPED_TEST_P(TestNdArrayConstructor, TestCopyExplicit) {
+        shape_t const shape({1, 2, 3});
+        ndarray<TypeParam> x(shape);
+        ASSERT_EQ(x.base().use_count(), 1);
+
+        ndarray<TypeParam> y(x.base(), reinterpret_cast<byte_t*>(x.data()), x.shape(), x.strides());
+
+        ASSERT_EQ(x.base(), y.base());
+        ASSERT_EQ(x.data(), y.data());
+        ASSERT_EQ(x.shape(), y.shape());
+        ASSERT_EQ(x.strides(), y.strides());
+        ASSERT_EQ(x.base().use_count(), 2);
+        ASSERT_TRUE(y.is_contiguous());
+    }
+
+    TYPED_TEST_P(TestNdArrayConstructor, TestCopy) {
+        size_t const nelem = 50;
+        auto x = new ndarray<TypeParam>(shape_t({nelem}));
+        ASSERT_EQ((x->base()).use_count(), 1);
+        for(size_t i = 0; i < nelem; ++i) {
+            x->data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y(*x);
+        ASSERT_EQ((x->base()).use_count(), 2);
+        ASSERT_EQ(y.base().use_count(), 2);
+
+        delete x;
+        ASSERT_EQ(y.base().use_count(), 1);
+        for(size_t i = 0; i < y.size(); ++i) {
+            ASSERT_EQ(y.data()[i], TypeParam(i));
+        }
+    }
+
+    TYPED_TEST_P(TestNdArrayConstructor, TestPointerAndShape) {
+        shape_t const shape({3, 4, 5});
+        size_t const nelem = 3 * 4 * 5;
+        TypeParam* data = new TypeParam[nelem];
+        for(size_t i = 0; i < nelem; ++i) {
+            data[i] = static_cast<TypeParam>(i);
+        }
+
+        {
+            ndarray<TypeParam> x(reinterpret_cast<byte_t*>(data), shape);
+
+            ASSERT_EQ(x.base(), nullptr);
+            ASSERT_EQ(x.data(), data);
+            ASSERT_EQ(x.shape(), shape);
+            using stride_tt = stride_t::value_type;
+            auto expected_strides = stride_t({
+                                      static_cast<stride_tt>(20 * sizeof(TypeParam)),
+                                      static_cast<stride_tt>(5  * sizeof(TypeParam)),
+                                      static_cast<stride_tt>(sizeof(TypeParam))});
+            ASSERT_EQ(x.strides(), expected_strides);
+        }
+
+        for(size_t i = 0; i < nelem; ++i) {
+            ASSERT_EQ(data[i], static_cast<TypeParam>(i));
+        }
+    }
+
+    TYPED_TEST_P(TestNdArrayConstructor, TestPointerAndShapeAndStride) {
+        size_t const nelem = 6 * 8 * 10;
+        TypeParam* data = new TypeParam[nelem];
+        for(size_t i = 0; i < nelem; ++i) {
+            data[i] = static_cast<TypeParam>(i);
+        }
+
+        // if A = np.arange(6*8*10).reshape(6,8,10), then we are constructing
+        // the shape/strides for A[::2, ::2, ::2].
+        shape_t const shape({3, 4, 5});
+        using stride_tt = stride_t::value_type;
+        auto strides = stride_t({
+                         static_cast<stride_tt>(2 * 80 * sizeof(TypeParam)),
+                         static_cast<stride_tt>(2 * 10  * sizeof(TypeParam)),
+                         static_cast<stride_tt>(2 * sizeof(TypeParam))});
+        ndarray<TypeParam> x(reinterpret_cast<byte_t*>(data), shape, strides);
+
+        ASSERT_EQ(x.base(), nullptr);
+        ASSERT_EQ(x.data(), data);
+        ASSERT_EQ(x.shape(), shape);
+        ASSERT_EQ(x.strides(), strides);
+        ASSERT_FALSE(x.is_contiguous());
+
+        // check that a given cell holds correct element.
+        size_t const offset = ((strides[0] * 1) +
+                               (strides[1] * 2) +
+                               (strides[2] * 3));
+        ASSERT_EQ(reinterpret_cast<TypeParam*>(
+                  reinterpret_cast<byte_t*>(x.data()) + offset)[0],
+                  static_cast<TypeParam>(206));
+    }
+
+    typedef ::testing::Types<bool, int, size_t,
+                             float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdArrayConstructorTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayConstructor,
+                               TestScalar,
+                               TestShape,
+                               TestCopyExplicit,
+                               TestCopy,
+                               TestPointerAndShape,
+                               TestPointerAndShapeAndStride);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayConstructor, MyNdArrayConstructorTypes);
+
+    /* Property ============================================================ */
+    template <typename T>
+    class TestNdArrayProperty : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayProperty);
+
+    TYPED_TEST_P(TestNdArrayProperty, TestSize) {
+        ndarray<TypeParam> x(shape_t({2, 3, 4}));
+
+        ASSERT_EQ(x.size(), 2 * 3 * 4);
+    }
+
+    TYPED_TEST_P(TestNdArrayProperty, TestNDim) {
+        ndarray<TypeParam> x(shape_t({5}));
+        ndarray<TypeParam> y(shape_t({2, 3, 4}));
+
+        ASSERT_EQ(x.ndim(), 1);
+        ASSERT_EQ(y.ndim(), 3);
+    }
+
+    TYPED_TEST_P(TestNdArrayProperty, TestNBytes) {
+        ndarray<TypeParam> x(shape_t({5}));
+        ndarray<TypeParam> y(shape_t({2, 3, 4}));
+
+        ASSERT_EQ(x.nbytes(), 5 * sizeof(TypeParam));
+        ASSERT_EQ(y.nbytes(), 2 * 3 * 4 * sizeof(TypeParam));
+    }
+
+    TYPED_TEST_P(TestNdArrayProperty, TestEquals) {
+        ndarray<TypeParam> w(shape_t({5}));
+        ndarray<TypeParam> x(shape_t({2, 3, 4}));
+        ndarray<TypeParam> y(shape_t({2, 3, 4}));
+        ndarray<TypeParam> z(y);
+
+        ASSERT_FALSE(w.equals(x)); ASSERT_FALSE(x.equals(w));
+        ASSERT_FALSE(w.equals(y)); ASSERT_FALSE(y.equals(w));
+        ASSERT_FALSE(w.equals(z)); ASSERT_FALSE(z.equals(w));
+
+        ASSERT_FALSE(x.equals(y)); ASSERT_FALSE(y.equals(x));
+        ASSERT_FALSE(x.equals(z)); ASSERT_FALSE(z.equals(x));
+
+        ASSERT_TRUE(y.equals(z));  ASSERT_TRUE(z.equals(y));
+    }
+
+    typedef ::testing::Types<bool, int, size_t,
+                             float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdArrayPropertyTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayProperty,
+                               TestSize,
+                               TestNDim,
+                               TestNBytes,
+                               TestEquals);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayProperty, MyNdArrayPropertyTypes);
+
+    /* Index / Filter / Iterate ============================================ */
+    template <typename T>
+    class TestNdArrayIndex : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayIndex);
+
+    TYPED_TEST_P(TestNdArrayIndex, TestOperatorSquareBracket) {
+        // Positive strides
+        ndarray<TypeParam> x({3, 1, 4, 5});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        for(size_t i = 0; i < x.shape()[0]; ++i) {
+            for(size_t j = 0; j < x.shape()[1]; ++j) {
+                for(size_t k = 0; k < x.shape()[2]; ++k) {
+                    for(size_t l = 0; l < x.shape()[3]; ++l) {
+                        TypeParam const tested_elem = x[{i, j, k, l}];
+                        int const offset = ((x.strides()[0] * i) +
+                                            (x.strides()[1] * j) +
+                                            (x.strides()[2] * k) +
+                                            (x.strides()[3] * l));
+                        byte_t* correct_addr = reinterpret_cast<byte_t*>(x.data()) + offset;
+                        TypeParam const correct_elem = reinterpret_cast<TypeParam*>(correct_addr)[0];
+                        ASSERT_EQ(tested_elem, correct_elem);
+                    }
+                }
+            }
+        }
+
+        /* Can update entries. */
+        TypeParam& tested_elem = x[{2, 0, 3, 4}];
+        TypeParam const correct_elem = 500;
+        tested_elem = correct_elem;
+        ASSERT_EQ(tested_elem, correct_elem);
+
+        // Negative strides
+        shape_t shape({5, 3});
+        stride_t strides({-3*static_cast<int>(sizeof(TypeParam)), sizeof(TypeParam)});
+        TypeParam* data = new TypeParam[5 * 3];
+        TypeParam* data_end = data + 15 - 1;
+        for(size_t i = 0; i < 15; ++i) {
+            data[i] = static_cast<TypeParam>(i);
+        }
+        ndarray<TypeParam> y(reinterpret_cast<byte_t*>(data_end), shape, strides);
+        for(size_t i = 0; i < y.shape()[0]; ++i) {
+            for(size_t j = 0; j < y.shape()[1]; ++j) {
+                TypeParam const tested_elem = y[{i, j}];
+                int const offset = ((y.strides()[0] * i) +
+                                    (y.strides()[1] * j));
+                byte_t* correct_addr = reinterpret_cast<byte_t*>(y.data()) + offset;
+                TypeParam const correct_elem = reinterpret_cast<TypeParam*>(correct_addr)[0];
+                ASSERT_EQ(tested_elem, correct_elem);
+            }
+        }
+    }
+
+    TYPED_TEST_P(TestNdArrayIndex, TestOperatorParenthesis1) {
+        namespace ndu = util;
+
+        ndarray<TypeParam> x({2, 6, 7});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+        ASSERT_EQ(x.base().use_count(), 1);
+
+        // Slice into a contiguous array. =====================================
+        std::vector<ndu::slice> spec_1 {ndu::slice(),
+                                        ndu::slice(0, 20, 3)};
+        auto y = x(spec_1);
+
+        ASSERT_EQ(y.base(), x.base());
+        ASSERT_EQ(y.base().use_count(), 2);
+        ASSERT_EQ(y.data(), x.data());
+        ASSERT_EQ(y.shape(), shape_t({2, 2, 7}));
+        using stride_tt = stride_t::value_type;
+        auto expected_strides_y = stride_t({
+                                    1 * 6 * 7 * static_cast<stride_tt>(sizeof(TypeParam)),
+                                    3 *     7 * static_cast<stride_tt>(sizeof(TypeParam)),
+                                    1 *         static_cast<stride_tt>(sizeof(TypeParam))});
+        ASSERT_EQ(y.strides(), expected_strides_y);
+
+        std::vector<TypeParam> correct_y { 0,  1,  2,  3,  4,  5,  6,
+                                          21, 22, 23, 24, 25, 26, 27,
+                                          42, 43, 44, 45, 46, 47, 48,
+                                          63, 64, 65, 66, 67, 68, 69};
+        size_t offset_1 = 0;
+        for(size_t i = 0; i < y.shape()[0]; ++i) {
+            for(size_t j = 0; j < y.shape()[1]; ++j) {
+                for(size_t k = 0; k < y.shape()[2]; ++k) {
+                    TypeParam const tested_elem = y[{i, j, k}];
+                    TypeParam const correct_elem = correct_y[offset_1];
+                    ASSERT_EQ(tested_elem, correct_elem);
+                    ++offset_1;
+                }
+            }
+        }
+
+        // Slice into a non-contiguous array ==================================
+        std::vector<ndu::slice> spec_2 {ndu::slice(1, 2),
+                                        ndu::slice(),
+                                        ndu::slice(2, 6, 3)};
+        auto z = y(spec_2);
+
+        ASSERT_EQ(z.base(), x.base());
+        ASSERT_EQ(z.base().use_count(), 3);
+        ASSERT_EQ(z.data(), x.data() + 44);
+        ASSERT_EQ(z.shape(), shape_t({1, 2, 2}));
+        auto expected_strides_z = stride_t({expected_strides_y[0],
+                                            expected_strides_y[1],
+                                            expected_strides_y[2] * spec_2[2].step()});
+        ASSERT_EQ(z.strides(), expected_strides_z);
+
+        std::vector<TypeParam> correct_z {44, 47,
+                                          65, 68};
+        size_t offset_2 = 0;
+        for(size_t i = 0; i < z.shape()[0]; ++i) {
+            for(size_t j = 0; j < z.shape()[1]; ++j) {
+                for(size_t k = 0; k < z.shape()[2]; ++k) {
+                    TypeParam const tested_elem = z[{i, j, k}];
+                    TypeParam const correct_elem = correct_z[offset_2];
+                    ASSERT_EQ(tested_elem, correct_elem);
+                    ++offset_2;
+                }
+            }
+        }
+    }
+
+    TYPED_TEST_P(TestNdArrayIndex, TestOperatorParenthesis2) {
+        namespace ndu = util;
+
+        ndarray<TypeParam> x({2, 6, 7});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+        ASSERT_EQ(x.base().use_count(), 1);
+
+        // Slice into a contiguous array. =====================================
+        std::vector<ndu::slice> spec_1 {ndu::slice(),
+                                        ndu::slice(10, 0, -2), // try degenerate(0, -1, -2)
+                                        ndu::slice(4, 0, -1)};
+        auto y = x(spec_1);
+
+        ASSERT_EQ(y.base(), x.base());
+        ASSERT_EQ(y.base().use_count(), 2);
+        ASSERT_EQ(y.data(), x.data() + 39);
+        ASSERT_EQ(y.shape(), shape_t({2, 3, 4}));
+        using stride_tt = stride_t::value_type;
+        auto expected_strides_y = stride_t({
+                                    1 * 6 * 7 * static_cast<stride_tt>(sizeof(TypeParam)),
+                                   -2 *     7 * static_cast<stride_tt>(sizeof(TypeParam)),
+                                   -1 *         static_cast<stride_tt>(sizeof(TypeParam))});
+        ASSERT_EQ(y.strides(), expected_strides_y);
+
+        std::vector<TypeParam> correct_y {39, 38, 37, 36,
+                                          25, 24, 23, 22,
+                                          11, 10,  9,  8,
+                                          81, 80, 79, 78,
+                                          67, 66, 65, 64,
+                                          53, 52, 51, 50};
+        size_t offset_1 = 0;
+        for(size_t i = 0; i < y.shape()[0]; ++i) {
+            for(size_t j = 0; j < y.shape()[1]; ++j) {
+                for(size_t k = 0; k < y.shape()[2]; ++k) {
+                    TypeParam const tested_elem = y[{i, j, k}];
+                    TypeParam const correct_elem = correct_y[offset_1];
+                    ASSERT_EQ(tested_elem, correct_elem);
+                    ++offset_1;
+                }
+            }
+        }
+
+        // Slice into a non-contiguous array ==================================
+        std::vector<ndu::slice> spec_2 {ndu::slice(2, -1, -1),
+                                        ndu::slice(1, 2),
+                                        ndu::slice(2, 0, -2)};
+        auto z = y(spec_2);
+
+        ASSERT_EQ(z.base(), x.base());
+        ASSERT_EQ(z.base().use_count(), 3);
+        ASSERT_EQ(z.data(), x.data() + 65);
+        ASSERT_EQ(z.shape(), shape_t({2, 1, 1}));
+        auto expected_strides_z = stride_t({-1 * expected_strides_y[0],
+                                                 expected_strides_y[1],
+                                            -2 * expected_strides_y[2]});
+        ASSERT_EQ(z.strides(), expected_strides_z);
+
+        std::vector<TypeParam> correct_z {65, 23};
+        size_t offset_2 = 0;
+        for(size_t i = 0; i < z.shape()[0]; ++i) {
+            for(size_t j = 0; j < z.shape()[1]; ++j) {
+                for(size_t k = 0; k < z.shape()[2]; ++k) {
+                    TypeParam const tested_elem = z[{i, j, k}];
+                    TypeParam const correct_elem = correct_z[offset_2];
+                    ASSERT_EQ(tested_elem, correct_elem);
+                    ++offset_2;
+                }
+            }
+        }
+    }
+
+    /*
+     * We only test integer types here to keep testing code simple.
+     * Index/subsetting should not be affected by types anyway.
+     */
+    typedef ::testing::Types<int, size_t> MyNdArrayIndexTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayIndex,
+                               TestOperatorSquareBracket,
+                               TestOperatorParenthesis1,
+                               TestOperatorParenthesis2);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIndex, MyNdArrayIndexTypes);
+
+    template <typename T>
+    class TestNdArrayIterate : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayIterate);
+    TYPED_TEST_P(TestNdArrayIterate, TestNdArrayBeginEnd) {
+        ndarray<TypeParam> x(shape_t({5, 3, 4}));
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        size_t i = 0;
+        for(auto it = x.begin(); it != x.end(); ++it, ++i) {
+            TypeParam const& tested_elem = *it;
+            TypeParam const& correct_elem = x.data()[i];
+            ASSERT_EQ(tested_elem, correct_elem);
+        }
+
+        namespace ndu = util;
+        ndarray<TypeParam> y = x({ndu::slice(5, -1, -2)});
+        auto it = y.begin();
+        for(size_t i = 0; i < y.shape()[0]; ++i) {
+            for(size_t j = 0; j < y.shape()[1]; ++j) {
+                for(size_t k = 0; k < y.shape()[2]; ++k, ++it) {
+                    TypeParam const& tested_elem = *it;
+                    TypeParam const& correct_elem = y[{i,j,k}];
+                    ASSERT_EQ(tested_elem, correct_elem);
+                }
+            }
+        }
+    }
+
+    typedef ::testing::Types<bool, int, size_t,
+                             float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdArrayIterateTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayIterate,
+                               TestNdArrayBeginEnd);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIterate, MyNdArrayIterateTypes);
+
+    /* Manipulation ======================================================== */
     template <typename T>
     class TestNdArrayManipulation : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayManipulation);
@@ -438,7 +882,7 @@ namespace nd {
     typedef ::testing::Types<bool, int, size_t,
                              float, double,
                              std::complex<float>,
-                             std::complex<double>> MyTypes;
+                             std::complex<double>> MyNdArrayManipulationTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayManipulation,
                                TestCopy,
                                TestAsContiguousArray,
@@ -446,7 +890,9 @@ namespace nd {
                                TestReshape,
                                TestRavel,
                                TestBroadcastTo);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayManipulation, MyTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayManipulation, MyNdArrayManipulationTypes);
+
+    /* Mathematical Functions ============================================== */
 }
 
-#endif // TEST_NDARRAY_MANIPULATION_CPP
+#endif // TEST_NDARRAY_CPP

@@ -1,11 +1,11 @@
 // ############################################################################
-// test_ndarray_linalg.cpp
+// test_ndlinalg.cpp
 // =======================
 // Author : Sepand KASHANI [kashani.sepand@gmail.com]
 // ############################################################################
 
-#ifndef TEST_NDARRAY_LINALG_CPP
-#define TEST_NDARRAY_LINALG_CPP
+#ifndef TEST_NDLINALG_CPP
+#define TEST_NDLINALG_CPP
 
 #include <gtest/gtest.h>
 
@@ -31,4 +31,4 @@ namespace nd { namespace linalg {
     }
 }}
 
-#endif // TEST_NDARRAY_LINALG_CPP
+#endif // TEST_NDLINALG_CPP

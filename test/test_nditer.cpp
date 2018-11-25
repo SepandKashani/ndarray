@@ -1,11 +1,11 @@
 // ############################################################################
-// test_ndarray_iterator.cpp
-// =========================
+// test_nditer.cpp
+// ===============
 // Author : Sepand KASHANI [kashani.sepand@gmail.com]
 // ############################################################################
 
-#ifndef TEST_NDARRAY_ITERATOR_CPP
-#define TEST_NDARRAY_ITERATOR_CPP
+#ifndef TEST_NDITER_CPP
+#define TEST_NDITER_CPP
 
 #include <vector>
 
@@ -15,10 +15,10 @@
 
 namespace nd {
     template <typename T>
-    class TestNdArrayIterator : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayIterator);
+    class TestNdArrayIter : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayIter);
 
-    TYPED_TEST_P(TestNdArrayIterator, TestOperatorEqualEqual) {
+    TYPED_TEST_P(TestNdArrayIter, TestOperatorEqualEqual) {
         ndarray<TypeParam> x(shape_t({5}));
         ndarray_iterator<TypeParam> x_iter1(&x);
         ndarray_iterator<TypeParam> x_iter2(&x);
@@ -33,7 +33,7 @@ namespace nd {
         ASSERT_FALSE(x_iter1 == y_iter);
     }
 
-    TYPED_TEST_P(TestNdArrayIterator, TestOperatorEqual) {
+    TYPED_TEST_P(TestNdArrayIter, TestOperatorEqual) {
         ndarray<TypeParam> x(shape_t({5}));
         ndarray_iterator<TypeParam> x_iter(&x);
         ndarray<TypeParam> y(shape_t({5, 3, 4}));
@@ -44,7 +44,7 @@ namespace nd {
         ASSERT_TRUE(x_iter == y_iter);
     }
 
-    TYPED_TEST_P(TestNdArrayIterator, TestOperatorDereference) {
+    TYPED_TEST_P(TestNdArrayIter, TestOperatorDereference) {
         ndarray<TypeParam> x(shape_t({5, 3, 4}));
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = static_cast<TypeParam>(i);
@@ -61,7 +61,7 @@ namespace nd {
         }
     }
 
-    TYPED_TEST_P(TestNdArrayIterator, TestOperatorIncrement) {
+    TYPED_TEST_P(TestNdArrayIter, TestOperatorIncrement) {
         ndarray<TypeParam> x(shape_t({50, 25, 30}));
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = static_cast<TypeParam>(i);
@@ -97,34 +97,7 @@ namespace nd {
         ASSERT_TRUE(y_iter == expected_y_iter);
     }
 
-    TYPED_TEST_P(TestNdArrayIterator, TestNdArrayIteration) {
-        ndarray<TypeParam> x(shape_t({5, 3, 4}));
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
-
-        size_t i = 0;
-        for(auto it = x.begin(); it != x.end(); ++it, ++i) {
-            TypeParam const& tested_elem = *it;
-            TypeParam const& correct_elem = x.data()[i];
-            ASSERT_EQ(tested_elem, correct_elem);
-        }
-
-        namespace ndu = util;
-        ndarray<TypeParam> y = x({ndu::slice(5, -1, -2)});
-        auto it = y.begin();
-        for(size_t i = 0; i < y.shape()[0]; ++i) {
-            for(size_t j = 0; j < y.shape()[1]; ++j) {
-                for(size_t k = 0; k < y.shape()[2]; ++k, ++it) {
-                    TypeParam const& tested_elem = *it;
-                    TypeParam const& correct_elem = y[{i,j,k}];
-                    ASSERT_EQ(tested_elem, correct_elem);
-                }
-            }
-        }
-    }
-
-    TYPED_TEST_P(TestNdArrayIterator, TestAssignment) {
+    TYPED_TEST_P(TestNdArrayIter, TestAssignment) {
         ndarray<TypeParam> x(shape_t({5, 3, 4}));
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = static_cast<TypeParam>(i);
@@ -144,15 +117,14 @@ namespace nd {
     typedef ::testing::Types<bool, int, size_t,
                              float, double,
                              std::complex<float>,
-                             std::complex<double>> MyTypes;
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayIterator,
+                             std::complex<double>> MyNdIterTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayIter,
                                TestOperatorEqualEqual,
                                TestOperatorEqual,
                                TestOperatorDereference,
                                TestOperatorIncrement,
-                               TestNdArrayIteration,
                                TestAssignment);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIterator, MyTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIter, MyNdIterTypes);
 }
 
-#endif // TEST_NDARRAY_ITERATOR_CPP
+#endif // TEST_NDITER_CPP
