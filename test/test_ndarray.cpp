@@ -457,7 +457,129 @@ namespace nd {
         }}
     }
 
-    TYPED_TEST_P(TestNdArrayFilter, TestFilter) {}
+    TYPED_TEST_P(TestNdArrayFilter, TestFilter) {
+        // shape(mask) == shape(array), scalar x
+       {ndarray<bool> mask = nd::r_(std::vector<bool>({true, false, true, false})).reshape({2, 2});
+        ndarray<TypeParam> ar(shape_t({2, 2}));
+        for(size_t i = 0; i < ar.size(); ++i) {
+            ar.data()[i] = static_cast<TypeParam>(i);
+        }
+        TypeParam const x = static_cast<TypeParam>(1.0);
+
+        auto const& ar2 = ar.filter(mask, x);
+        ASSERT_TRUE(ar2.equals(ar));
+
+        {TypeParam const& tested_elem = ar2[{0, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{0, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        }
+
+        // shape(mask) == shape(array), vector x
+       {ndarray<bool> mask = nd::r_(std::vector<bool>({true, false, true, false})).reshape({2, 2});
+        ndarray<TypeParam> ar(shape_t({2, 2}));
+        for(size_t i = 0; i < ar.size(); ++i) {
+            ar.data()[i] = static_cast<TypeParam>(i);
+        }
+        ndarray<TypeParam> x(shape_t({2}));
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(2.0 * i + 1);
+        }
+
+        auto const& ar2 = ar.filter(mask, x);
+        ASSERT_TRUE(ar2.equals(ar));
+
+        {TypeParam const& tested_elem = ar2[{0, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{0, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        }
+
+        // shape(mask) broadcasts, scalar x
+       {ndarray<bool> mask = nd::r_(std::vector<bool>({true, false}));
+        ndarray<TypeParam> ar(shape_t({2, 2}));
+        for(size_t i = 0; i < ar.size(); ++i) {
+            ar.data()[i] = static_cast<TypeParam>(i);
+        }
+        TypeParam const x = static_cast<TypeParam>(1.0);
+
+        auto const& ar2 = ar.filter(mask, x);
+        ASSERT_TRUE(ar2.equals(ar));
+
+        {TypeParam const& tested_elem = ar2[{0, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{0, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        }
+
+        // shape(mask) broadcasts, vector x
+       {ndarray<bool> mask = nd::r_(std::vector<bool>({true, false}));
+        ndarray<TypeParam> ar(shape_t({2, 2}));
+        for(size_t i = 0; i < ar.size(); ++i) {
+            ar.data()[i] = static_cast<TypeParam>(i);
+        }
+        ndarray<TypeParam> x(shape_t({2}));
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(2.0 * i + 1);
+        }
+
+        auto const& ar2 = ar.filter(mask, x);
+        ASSERT_TRUE(ar2.equals(ar));
+
+        {TypeParam const& tested_elem = ar2[{0, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{0, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 0}];
+         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        {TypeParam const& tested_elem = ar2[{1, 1}];
+         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
+         ASSERT_EQ(tested_elem, correct_elem);
+         }
+        }
+    }
 
     typedef ::testing::Types<bool, int, size_t,
                              float, double,

@@ -373,7 +373,7 @@ namespace nd {
                  * then perform a second copy into an ndarray<T> object.
                  */
                 ndarray<bool> const mask_bcast = mask.broadcast_to(m_shape);
-                auto it_this = this->begin();
+                auto it_this = begin();
                 std::vector<T> buffer;
                 for(auto it_mask = mask_bcast.begin();
                     it_mask != mask_bcast.end();
@@ -395,9 +395,45 @@ namespace nd {
              * mask : ndarray<bool> const&
              *     Boolean mask. Broadcasting rules apply.
              * x : ndarray<T> const&
-             *     (N,) values to place where `mask` is :cpp:obj:`true`.
+             *     Two possibilities:
+             *     * (1,) value broadcasted to places where `mask` is :cpp:obj:`true`;
+             *     * (N,) values to place where `mask` is :cpp:obj:`true`. (no broadcasting)
              */
-            ndarray<T>& filter(ndarray<bool> const& mask, ndarray<T> const& x) const;
+            ndarray<T>& filter(ndarray<bool> const& mask, ndarray<T> const& x) {
+                util::NDARRAY_ASSERT(x.ndim() == 1, "Parameter[x] must be 1-D.");
+
+                ndarray<bool> const mask_bcast = mask.broadcast_to(m_shape);
+                auto it_mask = mask_bcast.begin();
+                auto it_this = begin();
+
+                bool const broadcast_mode = (x.size() == 1);
+                if(broadcast_mode) {
+                    T const& xx = x[{0}];
+                    for(;
+                        it_mask != mask_bcast.end();
+                        ++it_mask, ++it_this) {
+                        if(*it_mask) {
+                            *it_this = xx;
+                        }
+                    }
+                } else {
+                    size_t N_modified = 0;
+                    for(auto it_x = x.begin();
+                        it_mask != mask_bcast.end();
+                        ++it_mask, ++it_this) {
+                        if(*it_mask) {
+                            *it_this = *it_x;
+                            ++N_modified;
+                            ++it_x;
+                        }
+                    }
+
+                    util::NDARRAY_ASSERT(N_modified == x.size(),
+                                         "Parameter[mask] does not have N true-valued cells.");
+                }
+
+                return *this;
+            }
 
             /* Manipulation ================================================ */
             /*
