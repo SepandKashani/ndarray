@@ -606,23 +606,26 @@ namespace nd {
              * -------
              * casted : ndarray<U>
              *     Copy of :cpp:ptr:`this` with element-wise static_cast<U>() of the input.
+             *
+             * Notes
+             * -----
+             * This method might need to be called as such:
+             *     auto x = nd::zeros<T1>({5, 3, 4});
+             *     auto y = x.template cast<T2>();
              */
             template <typename U>
-            ndarray<U> cast() const;
-            // template <typename T>
-            // template <typename U>
-            // ndarray<U> cast() const {
-            //     ndarray<U> casted(this->shape());
+            ndarray<U> cast() const {
+                ndarray<U> casted(m_shape);
 
-            //     auto it_this = this->begin();
-            //     auto it_cast = casted.begin();
-            //     for(; it_cast != it_cast.end();
-            //           ++it_cast, ++it_this) {
-            //         *it_cast = static_cast<U>(*it_this);
-            //     }
+                auto it_this = begin();
+                for(auto it_cast = casted.begin();
+                    it_cast != casted.end();
+                    ++it_cast, ++it_this) {
+                    *it_cast = static_cast<U>(*it_this);
+                }
 
-            //     return casted;
-            // }
+                return casted;
+            }
 
             /* Operator ==================================================== */
             /*

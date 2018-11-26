@@ -928,20 +928,6 @@ namespace nd {
         ASSERT_TRUE(x.equals(y));}
     }
 
-    TYPED_TEST_P(TestNdArrayManipulation, TestCast) {
-        using T = float;
-
-        ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
-        // ndarray<T> y = x.cast<T>();
-
-        // auto it_x = x.begin();
-        // for(auto it_y = y.begin(); it_y != y.end(); ++it_x, ++it_y) {
-        //     TypeParam const& correct_elem = static_cast<T>(*it_x);
-        //     T         const& tested_elem  = *it_y;
-        //     ASSERT_EQ(tested_elem, correct_elem);
-        // }
-    }
-
     typedef ::testing::Types<int, size_t,
                              float, double,
                              std::complex<float>,
@@ -952,9 +938,32 @@ namespace nd {
                                TestSqueeze,
                                TestReshape,
                                TestRavel,
-                               TestBroadcastTo,
-                               TestCast);
+                               TestBroadcastTo);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayManipulation, MyNdArrayManipulationTypes);
+
+    template <typename T>
+    class TestNdArrayCast : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayCast);
+
+    TYPED_TEST_P(TestNdArrayCast, TestCast) {
+        using T = float;
+
+        ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        ndarray<T> y = x.template cast<T>();
+
+        auto it_x = x.begin();
+        for(auto it_y = y.begin(); it_y != y.end(); ++it_x, ++it_y) {
+            TypeParam const& correct_elem = static_cast<T>(*it_x);
+            T         const& tested_elem  = *it_y;
+            ASSERT_EQ(tested_elem, correct_elem);
+        }
+    }
+
+    typedef ::testing::Types<int, size_t,
+                             float, double> MyNdArrayCastTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayCast,
+                               TestCast);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayCast, MyNdArrayCastTypes);
 
     /* Mathematical Functions ============================================== */
 }
