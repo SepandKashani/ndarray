@@ -8,6 +8,7 @@
 #define TEST_NDFUNC_CPP
 
 #include <cmath>
+#include <complex>
 #include <gtest/gtest.h>
 
 #include "ndarray/ndarray.hpp"
@@ -112,6 +113,52 @@ namespace nd {
                                TestFull,
                                TestEye);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncUtility, MyNdFuncUtilityTypes);
+
+    /* Math Functions ====================================================== */
+    template <typename T>
+    class TestNdFuncMathOther : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncMathOther);
+
+    TYPED_TEST_P(TestNdFuncMathOther, TestAbs) {
+        // No buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(-i);
+        }
+
+        auto y = abs<TypeParam>(x);
+
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(std::abs(*it_x), *it_y);
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(-i);
+        }
+
+        ndarray<TypeParam> buffer = zeros<TypeParam>(x.shape());
+        ndarray<TypeParam> y = abs<TypeParam>(x, &buffer);
+
+        ASSERT_TRUE(y.equals(buffer));
+
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(std::abs(*it_x), *it_y);
+        }}
+    }
+
+    typedef ::testing::Types<int,
+                             float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdFuncMathOtherTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncMathOther,
+                               TestAbs);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncMathOther, MyNdFuncMathOtherTypes);
 }
 
 #endif // TEST_NDFUNC_CPP

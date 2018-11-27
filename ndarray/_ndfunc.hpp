@@ -28,7 +28,7 @@ namespace nd {
      */
     template <typename T>
     T pi() {
-        static constexpr bool is_float = std::is_floating_point<T>::value;
+        constexpr bool is_float = std::is_floating_point<T>::value;
         static_assert(is_float, "Only {float} types allowed.");
 
         return static_cast<T>(M_PI);
@@ -42,7 +42,7 @@ namespace nd {
      */
     template <typename T>
     T e() {
-        static constexpr bool is_float = std::is_floating_point<T>::value;
+        constexpr bool is_float = std::is_floating_point<T>::value;
         static_assert(is_float, "Only {float} types allowed.");
 
         return static_cast<T>(M_E);
@@ -320,8 +320,17 @@ namespace nd {
      * close_enough: ndarray<bool>
      *     |x - y| <= (atol + rtol * |y|)
      */
-    template <typename T>
-    ndarray<bool> isclose(ndarray<T> const& x, ndarray<T> const& y, T const rtol = 1e-5, T const atol = 1e-8, ndarray<bool>* const out = nullptr);
+    // template <typename T>
+    // ndarray<bool> isclose(ndarray<T> const& x, ndarray<T> const& y, T const rtol = 1e-5, T const atol = 1e-8, ndarray<bool>* const out = nullptr) {
+    //     constexpr bool is_float = std::is_floating_point<T>::value;
+    //     constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
+    //                                  std::is_same<T, std::complex<double>>::value ||
+    //                                  std::is_same<T, std::complex<long double>>::value);
+    //     static_assert(is_float || is_complex , "Only {float, complex} types allowed.");
+
+    //     ndarray<bool> const close_enough = (abs(x - y) <= (atol + rtol * abs(y)));
+    //     return close_enough;
+    // }
 
     /*
      * Element-wise closeness check for floating point types.
@@ -346,7 +355,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -388,7 +397,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -428,7 +437,7 @@ namespace nd {
      *     All arrays must have the same shape, except along the dimension specified by `axis`.
      * axis : size_t const
      *     Dimension along which arrays are joined.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      */
@@ -445,7 +454,7 @@ namespace nd {
      *     All arrays must have the same shape.
      * axis : size_t const
      *     Dimension in the output array along which arrays are joined.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      */
@@ -459,7 +468,7 @@ namespace nd {
      * ----------
      * x : ndarray<T> const&
      *     Angle [rad].
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -478,7 +487,7 @@ namespace nd {
      * ----------
      * x : ndarray<T> const&
      *     Angle [rad].
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -497,7 +506,7 @@ namespace nd {
      * ----------
      * x : ndarray<T> const&
      *     Angle [rad].
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -516,7 +525,7 @@ namespace nd {
      * ----------
      * x : ndarray<T> const&
      *     Value in [-1, 1].
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -535,7 +544,7 @@ namespace nd {
      * ----------
      * x : ndarray<T> const&
      *     Value in [-1, 1].
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -553,7 +562,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -572,7 +581,7 @@ namespace nd {
      * ----------
      * x1 : ndarray<T> const&
      * x2 : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -591,7 +600,7 @@ namespace nd {
      * ----------
      * deg : ndarray<T> const&
      *     Angle [deg]
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -610,7 +619,7 @@ namespace nd {
      * ----------
      * rad : ndarray<T> const&
      *     Angle [rad]
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -626,7 +635,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -645,7 +654,7 @@ namespace nd {
      * ----------
      * base : ndarray<T> const&
      * exponent : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -658,12 +667,50 @@ namespace nd {
     ndarray<T> pow(ndarray<T> const& base, ndarray<T> const& exponent, ndarray<T>* const out = nullptr);
 
     /*
+     * Element-wise absolution value.
+     *
+     * Parameters
+     * ----------
+     * x : ndarray<T> const&
+     * out : ndarray<T>* const
+     *     Optional buffer to store result.
+     *     Must have the same dimensions as the input.
+     *
+     * Returns
+     * -------
+     * y : ndarray<T>
+     *     abs(x)
+     */
+    template <typename T>
+    ndarray<T> abs(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        constexpr bool is_signed_int = std::is_signed<T>::value;
+        constexpr bool is_float = std::is_floating_point<T>::value;
+        constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
+                                     std::is_same<T, std::complex<double>>::value ||
+                                     std::is_same<T, std::complex<long double>>::value);
+        static_assert(is_signed_int || is_float || is_complex,
+                      "Only {signed_int, float, complex} types supported.");
+
+        auto ufunc = [](T const& _x) -> T { return std::abs(_x); };
+        if(out == nullptr) {
+            ndarray<T> _out(x.shape());
+            std::transform(x.begin(), x.end(), _out.begin(), ufunc);
+            return _out;
+        } else {
+            util::NDARRAY_ASSERT(x.shape() == out->shape(),
+                                 "Parameter[out] must have same dimensions as Parameter[x].");
+            std::transform(x.begin(), x.end(), out->begin(), ufunc);
+            return *out;
+        }
+    }
+
+    /*
      * Element-wise base-E exponentiation.
      *
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -681,7 +728,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -699,7 +746,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -717,7 +764,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -735,7 +782,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -753,7 +800,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -792,7 +839,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -832,7 +879,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -872,7 +919,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -912,7 +959,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -952,7 +999,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -1021,7 +1068,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      */
@@ -1034,7 +1081,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      */
@@ -1049,7 +1096,7 @@ namespace nd {
      * x : ndarray<T> const&
      * down : T const
      * up : T const
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -1067,7 +1114,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
@@ -1085,7 +1132,7 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<std::complex<T>> const&
-     * out : ndarray<T> * const
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
      *
