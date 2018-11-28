@@ -8,6 +8,7 @@
 #define TEST_NDUTIL_CPP
 
 #include <complex>
+#include <functional>
 #include <limits>
 
 #include <gtest/gtest.h>
@@ -197,7 +198,7 @@ namespace nd { namespace util {
     class TestNdUtilApply : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdUtilApply);
 
-    TYPED_TEST_P(TestNdUtilApply, TestApply) {
+    TYPED_TEST_P(TestNdUtilApply, TestApplyUnary) {
         ndarray<TypeParam> in  = zeros<TypeParam>({5, 3, 4});
         ndarray<TypeParam> out = zeros<TypeParam>({5, 3, 4});
 
@@ -213,11 +214,46 @@ namespace nd { namespace util {
         }
     }
 
+    TYPED_TEST_P(TestNdUtilApply, TestApplyBinary) {
+       // No broadcasting case
+       {ndarray<TypeParam> in_1  = zeros<TypeParam>({5, 3, 4});
+        ndarray<TypeParam> in_2  = ones<TypeParam>({5, 3, 4});
+        ndarray<TypeParam> out = zeros<TypeParam>({5, 3, 4});
+
+        apply(std::plus<TypeParam>(), &in_1, &in_2, &out);
+
+        for(auto it_in_1 = in_1.begin(), it_in_2 = in_2.begin(), it_out = out.begin();
+            it_out != out.end();
+            ++it_in_1, ++it_in_2, ++it_out) {
+            TypeParam const tested_elem = *it_out;
+            TypeParam const correct_elem = (*it_in_1) + (*it_in_2);
+            ASSERT_EQ(correct_elem, tested_elem);
+        }}
+
+       // Broadcasting case
+       {ndarray<TypeParam> in_1  = zeros<TypeParam>({5, 1, 4});
+        ndarray<TypeParam> in_2  = ones<TypeParam>({3, 1});
+        ndarray<TypeParam> out = zeros<TypeParam>({5, 3, 4});
+
+        apply(std::plus<TypeParam>(), &in_1, &in_2, &out);
+
+        ndarray<TypeParam> in_1_bcast = in_1.broadcast_to({5, 3, 4});
+        ndarray<TypeParam> in_2_bcast = in_2.broadcast_to({5, 3, 4});
+        for(auto it_in_1 = in_1_bcast.begin(), it_in_2 = in_2_bcast.begin(), it_out = out.begin();
+            it_out != out.end();
+            ++it_in_1, ++it_in_2, ++it_out) {
+            TypeParam const tested_elem = *it_out;
+            TypeParam const correct_elem = (*it_in_1) + (*it_in_2);
+            ASSERT_EQ(correct_elem, tested_elem);
+        }}
+    }
+
     typedef ::testing::Types<int, size_t,
                              float, double,
                              std::complex<float>, std::complex<double>> MyNdUtilApplyTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdUtilApply,
-                               TestApply);
+                               TestApplyUnary,
+                               TestApplyBinary);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilApply, MyNdUtilApplyTypes);
 
 }}

@@ -183,6 +183,47 @@ namespace nd { namespace util {
             *it_out = ufunc(*it_in);
         }
     }
+
+    /*
+     * Apply binary function to every element of input buffers, then place result in output buffer.
+     *
+     * Parameters
+     * ----------
+     * ufunc : F
+     *     Binary function to apply.
+     *     Must have signature "T f(T const&, T const&)".
+     * in_1 : ndarray<T>* const
+     *     N-D input buffer (first argument).
+     * in_2 : ndarray<T>* const
+     *     N-D input buffer (second argument).
+     * out : ndarray<T>* const
+     *     N-D output buffer.
+     *     Must have same dimensions as input buffers.
+     *
+     * Notes
+     * -----
+     * Input buffers are broadcasted together.
+     */
+    template <typename F, typename T>
+    void apply(F ufunc, ndarray<T>* const in_1, ndarray<T>* const in_2, ndarray<T>* const out) {
+        NDARRAY_ASSERT(in_1 != nullptr, "Parameter[in_1] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(in_2 != nullptr, "Parameter[in_2] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
+
+        shape_t const correct_out_shape = predict_shape(in_1->shape(), in_2->shape());
+        NDARRAY_ASSERT(out->shape() == correct_out_shape,
+                       "Parameter[in_1, in_2] do not broadcast to Parameter[out] dimensions.");
+
+        ndarray<T> in_1_bcast = in_1->broadcast_to(correct_out_shape);
+        ndarray<T> in_2_bcast = in_2->broadcast_to(correct_out_shape);
+        for(auto it_in_1 = in_1_bcast.begin(),
+                 it_in_2 = in_2_bcast.begin(),
+                 it_out  = out->begin();
+            it_out != out->end();
+            ++it_in_1, ++it_in_2, ++it_out) {
+            *it_out = ufunc(*it_in_1, *it_in_2);
+        }
+    }
 }}
 
 #endif // _NDUTIL_HPP
