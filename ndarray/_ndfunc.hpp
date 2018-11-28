@@ -320,16 +320,46 @@ namespace nd {
      * close_enough: ndarray<bool>
      *     |x - y| <= (atol + rtol * |y|)
      */
-    template <typename T>
-    ndarray<bool> isclose(ndarray<T> const& x, ndarray<T> const& y, T const rtol = 1e-5, T const atol = 1e-8, ndarray<bool>* const out = nullptr) {
+    template <typename T, typename BOOL = bool>
+    ndarray<BOOL> isclose(ndarray<T> const& x,
+                          ndarray<T> const& y,
+                          ndarray<bool>* const out = nullptr,
+                          double const rtol = 1e-5,
+                          double const atol = 1e-8) {
+        /*
+         * Why not use `ndarray<bool>` directly as return type?
+         * Doing so for some reason gives the following error message:
+         *     error: return type ‘class nd::ndarray<bool>’ is incomplete
+         *
+         * Don't know how to solve the issue using forward-declaration.
+         */
         constexpr bool is_float = std::is_floating_point<T>::value;
         constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
                                      std::is_same<T, std::complex<double>>::value ||
                                      std::is_same<T, std::complex<long double>>::value);
         static_assert(is_float || is_complex , "Only {float, complex} types allowed.");
 
-        ndarray<bool> const close_enough = (abs(x - y) <= (atol + rtol * abs(y)));
-        return close_enough;
+        auto ufunc = [atol, rtol](T const& _x, T const& _y) -> bool {
+            auto lhs = std::abs(_x - _y);
+            auto rhs = atol + rtol * std::abs(_y);
+            return lhs <= rhs;
+        };
+        if(out == nullptr) {
+            shape_t const& shape_out = util::predict_shape(x.shape(), y.shape());
+            ndarray<bool> close_enough(shape_out);
+
+            util::apply(ufunc,
+                        const_cast<ndarray<T>*>(&x),
+                        const_cast<ndarray<T>*>(&y),
+                        &close_enough);
+            return close_enough;
+        } else {
+            util::apply(ufunc,
+                        const_cast<ndarray<T>*>(&x),
+                        const_cast<ndarray<T>*>(&y),
+                        out);
+            return *out;
+        }
     }
 
     /*
@@ -1141,6 +1171,100 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> angle(ndarray<std::complex<T>> const& x, ndarray<T>* const out = nullptr);
+
+    /*
+     * Element-wise real-part extraction.
+     *
+     * Parameters
+     * ----------
+     * x : ndarray<std::complex<T>> const&
+     *
+     * Returns
+     * -------
+     * out : ndarray<T>
+     *     View on real-part of `x`.
+     */
+    template <typename T>
+    ndarray<T> real(ndarray<std::complex<T>> const& x) {
+        constexpr bool is_float = std::is_floating_point<T>::value;
+        static_assert(is_float, "Only {complex} types are supported.");
+
+        stride_t float_strides(x.ndim() + 1, sizeof(T));
+        std::copy_n(x.strides().begin(), x.ndim(), float_strides.begin());
+
+        shape_t float_shape(x.ndim() + 1, 2);
+        std::copy_n(x.shape().begin(), x.ndim(), float_shape.begin());
+
+        byte_t* const float_data = reinterpret_cast<byte_t*>(x.data());
+        ndarray<T> float_x(x.base(), float_data, float_shape, float_strides);
+
+        std::vector<util::slice> selection(float_x.ndim(), util::slice());
+        selection[float_x.ndim() - 1] = util::slice(0, 1);
+        ndarray<T> out = float_x(selection).squeeze({float_x.ndim() - 1});
+        return out;
+    }
+
+    /*
+     * Element-wise imag-part extraction.
+     *
+     * Parameters
+     * ----------
+     * x : ndarray<std::complex<T>> const&
+     *
+     * Returns
+     * -------
+     * out : ndarray<T>
+     *     View on imag-part of `x`.
+     */
+    template <typename T>
+    ndarray<T> imag(ndarray<std::complex<T>> const& x) {
+        constexpr bool is_float = std::is_floating_point<T>::value;
+        static_assert(is_float, "Only {complex} types are supported.");
+
+        stride_t float_strides(x.ndim() + 1, sizeof(T));
+        std::copy_n(x.strides().begin(), x.ndim(), float_strides.begin());
+
+        shape_t float_shape(x.ndim() + 1, 2);
+        std::copy_n(x.shape().begin(), x.ndim(), float_shape.begin());
+
+        byte_t* const float_data = reinterpret_cast<byte_t*>(x.data());
+        ndarray<T> float_x(x.base(), float_data, float_shape, float_strides);
+
+        std::vector<util::slice> selection(float_x.ndim(), util::slice());
+        selection[float_x.ndim() - 1] = util::slice(1, 2);
+        ndarray<T> out = float_x(selection).squeeze({float_x.ndim() - 1});
+        return out;
+    }
+
+    /*
+     * Element-wise conjugation.
+     *
+     * Parameters
+     * ----------
+     * x : ndarray<T> const&
+     *
+     * Returns
+     * -------
+     * out : ndarray<T>
+     *     conj(x)
+     */
+    template <typename T>
+    ndarray<T> conj(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
+                                     std::is_same<T, std::complex<double>>::value ||
+                                     std::is_same<T, std::complex<long double>>::value);
+        static_assert(is_complex, "Only {complex} types supported.");
+
+        auto ufunc = [](T const& _x) -> T { return std::conj(_x); };
+        if(out == nullptr) {
+            ndarray<T> _out(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &_out);
+            return _out;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 }
 
 #endif // _NDFUNC_HPP

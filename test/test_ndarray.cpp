@@ -1086,8 +1086,6 @@ namespace nd {
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayCast,
                                TestCast);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayCast, MyNdArrayCastTypes);
-
-    /* Mathematical Functions ============================================== */
 }
 
 #endif // TEST_NDARRAY_CPP

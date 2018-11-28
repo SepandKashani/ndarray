@@ -16,29 +16,32 @@
 namespace nd {
     /* Constants =========================================================== */
     template <typename T>
-    class TestNdFuncConstant : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdFuncConstant);
-
-    TYPED_TEST_P(TestNdFuncConstant, TestPi) {
+    class TestNdFuncPi : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncPi);
+    TYPED_TEST_P(TestNdFuncPi, TestPi) {
         TypeParam const tested = pi<TypeParam>();
         TypeParam const correct = static_cast<TypeParam>(M_PI);
 
         ASSERT_EQ(tested, correct);
     }
+    typedef ::testing::Types<float, double> MyNdFuncPiTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncPi,
+                               TestPi);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncPi, MyNdFuncPiTypes);
 
-    TYPED_TEST_P(TestNdFuncConstant, TestEuler) {
+    template <typename T>
+    class TestNdFuncEuler : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncEuler);
+    TYPED_TEST_P(TestNdFuncEuler, TestEuler) {
         TypeParam const tested = e<TypeParam>();
         TypeParam const correct = static_cast<TypeParam>(M_E);
 
         ASSERT_EQ(tested, correct);
     }
-
-    typedef ::testing::Types<float, double> MyNdFuncConstantTypes;
-    REGISTER_TYPED_TEST_CASE_P(TestNdFuncConstant,
-                               TestPi,
+    typedef ::testing::Types<float, double> MyNdFuncEulerTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncEuler,
                                TestEuler);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncConstant, MyNdFuncConstantTypes);
-
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncEuler, MyNdFuncEulerTypes);
 
     /* Utility ============================================================= */
     template <typename T>
@@ -116,10 +119,9 @@ namespace nd {
 
     /* Math Functions ====================================================== */
     template <typename T>
-    class TestNdFuncMathOther : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdFuncMathOther);
-
-    TYPED_TEST_P(TestNdFuncMathOther, TestAbs) {
+    class TestNdFuncAbs : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncAbs);
+    TYPED_TEST_P(TestNdFuncAbs, TestAbs) {
         // No buffer provided
        {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
         for(size_t i = 0; i < x.size(); ++i) {
@@ -151,14 +153,179 @@ namespace nd {
             ASSERT_EQ(std::abs(*it_x), *it_y);
         }}
     }
-
     typedef ::testing::Types<int,
                              float, double,
                              std::complex<float>,
-                             std::complex<double>> MyNdFuncMathOtherTypes;
-    REGISTER_TYPED_TEST_CASE_P(TestNdFuncMathOther,
+                             std::complex<double>> MyNdFuncAbsTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncAbs,
                                TestAbs);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncMathOther, MyNdFuncMathOtherTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncAbs, MyNdFuncAbsTypes);
+
+    template <typename T>
+    class TestNdFuncIsClose : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncIsClose);
+    TYPED_TEST_P(TestNdFuncIsClose, TestIsClose) {
+        // No buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<bool> y = isclose(x, x);
+        for(auto it_y = y.begin(); it_y != y.end(); ++it_y) {
+            ASSERT_TRUE(*it_y);
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<bool> y(x.shape());
+        ndarray<bool> z = isclose(x, x, &y);
+        ASSERT_TRUE(y.equals(z));
+
+        for(auto it_y = y.begin(); it_y != y.end(); ++it_y) {
+            ASSERT_TRUE(*it_y);
+        }}
+    }
+    typedef ::testing::Types<float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdFuncIsCloseTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncIsClose,
+                               TestIsClose);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncIsClose, MyNdFuncIsCloseTypes);
+
+    template <typename T>
+    class TestNdFuncReal : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncReal);
+
+    TYPED_TEST_P(TestNdFuncReal, TestReal) {
+        // Contiguous array
+       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
+                                                 -static_cast<TypeParam>(i + 1.0));
+        }
+
+        ndarray<TypeParam> y = real(x);
+        ASSERT_EQ(y.shape(), x.shape());
+
+        auto it_y = y.begin();
+        for(auto it_x = x.begin(); it_x != x.end(); ++it_x, ++it_y) {
+            ASSERT_EQ((*it_x).real(), *it_y);
+        }}
+
+        // Non-contiguous array
+       {ndarray<std::complex<TypeParam>> _x(shape_t({5, 3, 8}));
+        for(size_t i = 0; i < _x.size(); ++i) {
+            _x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
+                                                  -static_cast<TypeParam>(i + 1.0));
+        }
+        auto x = _x({util::slice(), util::slice(), util::slice(0, 8, 2)});
+
+        ndarray<TypeParam> y = real(x);
+        ASSERT_EQ(y.shape(), x.shape());
+
+        auto it_y = y.begin();
+        for(auto it_x = x.begin(); it_x != x.end(); ++it_x, ++it_y) {
+            ASSERT_EQ((*it_x).real(), *it_y);
+        }}
+    }
+
+    typedef ::testing::Types<float, double> MyNdFuncRealTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncReal,
+                               TestReal);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncReal, MyNdFuncRealTypes);
+
+    template <typename T>
+    class TestNdFuncImag : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncImag);
+
+    TYPED_TEST_P(TestNdFuncImag, TestImag) {
+        // Contiguous array
+       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
+                                                 -static_cast<TypeParam>(i + 1.0));
+        }
+
+        ndarray<TypeParam> y = imag(x);
+        ASSERT_EQ(y.shape(), x.shape());
+
+        auto it_y = y.begin();
+        for(auto it_x = x.begin(); it_x != x.end(); ++it_x, ++it_y) {
+            ASSERT_EQ((*it_x).imag(), *it_y);
+        }}
+
+        // Non-contiguous array
+       {ndarray<std::complex<TypeParam>> _x(shape_t({5, 3, 8}));
+        for(size_t i = 0; i < _x.size(); ++i) {
+            _x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
+                                                  -static_cast<TypeParam>(i + 1.0));
+        }
+        auto x = _x({util::slice(), util::slice(), util::slice(0, 8, 2)});
+
+        ndarray<TypeParam> y = imag(x);
+        ASSERT_EQ(y.shape(), x.shape());
+
+        auto it_y = y.begin();
+        for(auto it_x = x.begin(); it_x != x.end(); ++it_x, ++it_y) {
+            ASSERT_EQ((*it_x).imag(), *it_y);
+        }}
+    }
+
+    typedef ::testing::Types<float, double> MyNdFuncImagTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncImag,
+                               TestImag);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncImag, MyNdFuncImagTypes);
+
+    template <typename T>
+    class TestNdFuncConj : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncConj);
+
+    TYPED_TEST_P(TestNdFuncConj, TestConj) {
+        // No buffer provided
+       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
+                                                 -static_cast<TypeParam>(i + 1.0));
+        }
+
+        ndarray<std::complex<TypeParam>> y = conj(x);
+        ASSERT_EQ(y.shape(), x.shape());
+
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_x != x.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ((*it_x).real(), (*it_y).real());
+            ASSERT_EQ((*it_x).imag(), -(*it_y).imag());
+        }}
+
+        // Buffer provided
+       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
+                                                 -static_cast<TypeParam>(i + 1.0));
+        }
+
+        ndarray<std::complex<TypeParam>> buffer(x.shape());
+        ndarray<std::complex<TypeParam>> y = conj(x, &buffer);
+        ASSERT_TRUE(buffer.equals(y));
+
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_x != x.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ((*it_x).real(), (*it_y).real());
+            ASSERT_EQ((*it_x).imag(), -(*it_y).imag());
+        }}
+    }
+
+    typedef ::testing::Types<float, double> MyNdFuncConjTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncConj,
+                               TestConj);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncConj, MyNdFuncConjTypes);
 }
 
 #endif // TEST_NDFUNC_CPP

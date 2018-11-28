@@ -1056,22 +1056,6 @@ namespace nd {
 
                 return out;
             }
-
-            /* Mathematical Functions ====================================== */
-            /*
-             * Array view on real component of complex-valued arrays.
-             */
-            ndarray<T> real() const;
-
-            /*
-             * Array view on imag component of complex-valued arrays.
-             */
-            ndarray<T> imag() const;
-
-            /*
-             * Element-wise conjugation of complex-valued arrays.
-             */
-            ndarray<T> conj() const;
     };
 }
 
