@@ -16,6 +16,8 @@
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
 
+namespace nd { template <typename T> class ndarray; }
+
 namespace nd { namespace util {
     /*
      * assert()-like statement that does not deactivate in Release mode.
@@ -153,6 +155,34 @@ namespace nd { namespace util {
                 }
             }
     };
+
+    /*
+     * Apply unary function to every element of input buffer, then place result in output buffer.
+     *
+     * Parameters
+     * ----------
+     * ufunc : F
+     *     Unary function to apply.
+     *     Must have signature "T f(T const&)".
+     * in : ndarray<T>* const
+     *     N-D input buffer.
+     * out : ndarray<T>* const
+     *     N-D output buffer.
+     *     Must have same dimensions as input buffer.
+     */
+    template <typename F, typename T>
+    void apply(F ufunc, ndarray<T>* const in, ndarray<T>* const out) {
+        NDARRAY_ASSERT(in != nullptr, "Parameter[in] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(in->shape() == out->shape(),
+                       "Parameter[out] must have same dimensions as Parameter[in].");
+
+        for(auto it_in = in->begin(), it_out = out->begin();
+            it_in != in->end();
+            ++it_in, ++it_out) {
+            *it_out = ufunc(*it_in);
+        }
+    }
 }}
 
 #endif // _NDUTIL_HPP

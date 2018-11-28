@@ -7,6 +7,7 @@
 #ifndef TEST_NDUTIL_CPP
 #define TEST_NDUTIL_CPP
 
+#include <complex>
 #include <limits>
 
 #include <gtest/gtest.h>
@@ -191,6 +192,34 @@ namespace nd { namespace util {
         ASSERT_EQ(out_13.stop(), -1);
         ASSERT_EQ(out_13.step(), -1);
     }
+
+    template <typename T>
+    class TestNdUtilApply : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdUtilApply);
+
+    TYPED_TEST_P(TestNdUtilApply, TestApply) {
+        ndarray<TypeParam> in  = zeros<TypeParam>({5, 3, 4});
+        ndarray<TypeParam> out = zeros<TypeParam>({5, 3, 4});
+
+        auto ufunc = [](TypeParam const& _x) -> TypeParam { return _x + static_cast<TypeParam>(1.0); };
+        apply(ufunc, &in, &out);
+
+        for(auto it_in = in.begin(), it_out = out.begin();
+            it_in != in.end();
+            ++it_in, ++it_out) {
+            TypeParam const tested_elem = *it_out;
+            TypeParam const correct_elem = (*it_in) + static_cast<TypeParam>(1.0);
+            ASSERT_EQ(correct_elem, tested_elem);
+        }
+    }
+
+    typedef ::testing::Types<int, size_t,
+                             float, double,
+                             std::complex<float>, std::complex<double>> MyNdUtilApplyTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdUtilApply,
+                               TestApply);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilApply, MyNdUtilApplyTypes);
+
 }}
 
 #endif // TEST_NDUTIL_CPP
