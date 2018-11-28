@@ -166,7 +166,7 @@ namespace nd {
     template <typename T>
     ndarray<T> zeros(shape_t const& shape) {
         ndarray<T> out(shape);
-        std::fill_n(out.data(), out.size(), T(0.0));
+        std::fill_n(out.data(), out.size(), static_cast<T>(0.0));
 
         return out;
     }
@@ -180,7 +180,7 @@ namespace nd {
     template <typename T>
     ndarray<T> ones(shape_t const& shape) {
         ndarray<T> out(shape);
-        std::fill_n(out.data(), out.size(), T(1.0));
+        std::fill_n(out.data(), out.size(), static_cast<T>(1.0));
 
         return out;
     }
@@ -238,7 +238,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<bool> * const
+     * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -278,7 +278,7 @@ namespace nd {
      * keepdims : bool const
      *     If true, the axes which are reduced are left in the result as
      *     dimensions with size 1.
-     * out : ndarray<bool> * const
+     * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -311,7 +311,7 @@ namespace nd {
      *
      * Parameters
      * ----------
-     * out : ndarray<bool> * const
+     * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
@@ -320,17 +320,17 @@ namespace nd {
      * close_enough: ndarray<bool>
      *     |x - y| <= (atol + rtol * |y|)
      */
-    // template <typename T>
-    // ndarray<bool> isclose(ndarray<T> const& x, ndarray<T> const& y, T const rtol = 1e-5, T const atol = 1e-8, ndarray<bool>* const out = nullptr) {
-    //     constexpr bool is_float = std::is_floating_point<T>::value;
-    //     constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
-    //                                  std::is_same<T, std::complex<double>>::value ||
-    //                                  std::is_same<T, std::complex<long double>>::value);
-    //     static_assert(is_float || is_complex , "Only {float, complex} types allowed.");
+    template <typename T>
+    ndarray<bool> isclose(ndarray<T> const& x, ndarray<T> const& y, T const rtol = 1e-5, T const atol = 1e-8, ndarray<bool>* const out = nullptr) {
+        constexpr bool is_float = std::is_floating_point<T>::value;
+        constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
+                                     std::is_same<T, std::complex<double>>::value ||
+                                     std::is_same<T, std::complex<long double>>::value);
+        static_assert(is_float || is_complex , "Only {float, complex} types allowed.");
 
-    //     ndarray<bool> const close_enough = (abs(x - y) <= (atol + rtol * abs(y)));
-    //     return close_enough;
-    // }
+        ndarray<bool> const close_enough = (abs(x - y) <= (atol + rtol * abs(y)));
+        return close_enough;
+    }
 
     /*
      * Element-wise closeness check for floating point types.
@@ -694,12 +694,10 @@ namespace nd {
         auto ufunc = [](T const& _x) -> T { return std::abs(_x); };
         if(out == nullptr) {
             ndarray<T> _out(x.shape());
-            std::transform(x.begin(), x.end(), _out.begin(), ufunc);
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &_out);
             return _out;
         } else {
-            util::NDARRAY_ASSERT(x.shape() == out->shape(),
-                                 "Parameter[out] must have same dimensions as Parameter[x].");
-            std::transform(x.begin(), x.end(), out->begin(), ufunc);
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
             return *out;
         }
     }

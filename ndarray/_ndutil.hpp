@@ -163,23 +163,22 @@ namespace nd { namespace util {
      * ----------
      * ufunc : F
      *     Unary function to apply.
-     *     Must have signature "T f(T const&)".
-     * in : ndarray<T>* const
+     *     Must have signature "T2 f(T1 const&)".
+     * in : ndarray<T1>* const
      *     N-D input buffer.
-     * out : ndarray<T>* const
+     * out : ndarray<T2>* const
      *     N-D output buffer.
      *     Must have same dimensions as input buffer.
      */
-    template <typename F, typename T>
-    void apply(F ufunc, ndarray<T>* const in, ndarray<T>* const out) {
+    template <typename F, typename T1, typename T2>
+    void apply(F ufunc, ndarray<T1>* const in, ndarray<T2>* const out) {
         NDARRAY_ASSERT(in != nullptr, "Parameter[in] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(in->shape() == out->shape(),
                        "Parameter[out] must have same dimensions as Parameter[in].");
 
-        for(auto it_in = in->begin(), it_out = out->begin();
-            it_in != in->end();
-            ++it_in, ++it_out) {
+        auto it_out = out->begin();
+        for(auto it_in = in->begin(); it_in != in->end(); ++it_in, ++it_out) {
             *it_out = ufunc(*it_in);
         }
     }
@@ -191,12 +190,12 @@ namespace nd { namespace util {
      * ----------
      * ufunc : F
      *     Binary function to apply.
-     *     Must have signature "T f(T const&, T const&)".
-     * in_1 : ndarray<T>* const
+     *     Must have signature "T2 f(T1 const&, T1 const&)".
+     * in_1 : ndarray<T1>* const
      *     N-D input buffer (first argument).
-     * in_2 : ndarray<T>* const
+     * in_2 : ndarray<T1>* const
      *     N-D input buffer (second argument).
-     * out : ndarray<T>* const
+     * out : ndarray<T2>* const
      *     N-D output buffer.
      *     Must have same dimensions as input buffers.
      *
@@ -204,8 +203,8 @@ namespace nd { namespace util {
      * -----
      * Input buffers are broadcasted together.
      */
-    template <typename F, typename T>
-    void apply(F ufunc, ndarray<T>* const in_1, ndarray<T>* const in_2, ndarray<T>* const out) {
+    template <typename F, typename T1, typename T2>
+    void apply(F ufunc, ndarray<T1>* const in_1, ndarray<T1>* const in_2, ndarray<T2>* const out) {
         NDARRAY_ASSERT(in_1 != nullptr, "Parameter[in_1] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(in_2 != nullptr, "Parameter[in_2] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
@@ -214,11 +213,11 @@ namespace nd { namespace util {
         NDARRAY_ASSERT(out->shape() == correct_out_shape,
                        "Parameter[in_1, in_2] do not broadcast to Parameter[out] dimensions.");
 
-        ndarray<T> in_1_bcast = in_1->broadcast_to(correct_out_shape);
-        ndarray<T> in_2_bcast = in_2->broadcast_to(correct_out_shape);
+        ndarray<T1> in_1_bcast = in_1->broadcast_to(correct_out_shape);
+        ndarray<T1> in_2_bcast = in_2->broadcast_to(correct_out_shape);
+        auto it_out = out->begin();
         for(auto it_in_1 = in_1_bcast.begin(),
-                 it_in_2 = in_2_bcast.begin(),
-                 it_out  = out->begin();
+                 it_in_2 = in_2_bcast.begin();
             it_out != out->end();
             ++it_in_1, ++it_in_2, ++it_out) {
             *it_out = ufunc(*it_in_1, *it_in_2);

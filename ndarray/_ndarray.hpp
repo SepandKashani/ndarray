@@ -408,7 +408,7 @@ namespace nd {
 
                 bool const broadcast_mode = (x.size() == 1);
                 if(broadcast_mode) {
-                    T const& xx = x[{0}];
+                    T const& xx = x.data()[0];
                     for(;
                         it_mask != mask_bcast.end();
                         ++it_mask, ++it_this) {
@@ -669,8 +669,6 @@ namespace nd {
              * Broadcasting rules apply.
              */
             ndarray<T>& operator=(ndarray<T> const& other) {
-                // Implemented here due to C++ restrictions.
-
                 ndarray<T> const other_bcast = other.broadcast_to(m_shape);
                 for(auto it = begin(), it_other = other_bcast.begin();
                     it != end();
@@ -685,12 +683,7 @@ namespace nd {
                 static_assert(is_int || is_float || is_complex,
                               "Only {int, float, complex} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it += *it_other;
-                }
+                util::apply(std::plus<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -699,12 +692,7 @@ namespace nd {
                 static_assert(is_int || is_float || is_complex,
                               "Only {int, float, complex} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it -= *it_other;
-                }
+                util::apply(std::minus<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -713,12 +701,7 @@ namespace nd {
                 static_assert(is_int || is_float || is_complex,
                               "Only {int, float, complex} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it *= *it_other;
-                }
+                util::apply(std::multiplies<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -727,12 +710,7 @@ namespace nd {
                 static_assert(is_int || is_float || is_complex,
                               "Only {int, float, complex} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it /= *it_other;
-                }
+                util::apply(std::divides<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -740,12 +718,7 @@ namespace nd {
             ndarray<T>& operator%=(ndarray<T> const& other) {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it %= *it_other;
-                }
+                util::apply(std::modulus<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -753,12 +726,7 @@ namespace nd {
             ndarray<T>& operator&=(ndarray<T> const& other) {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it &= *it_other;
-                }
+                util::apply(std::bit_and<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -766,12 +734,7 @@ namespace nd {
             ndarray<T>& operator|=(ndarray<T> const& other) {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it |= *it_other;
-                }
+                util::apply(std::bit_or<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -779,12 +742,7 @@ namespace nd {
             ndarray<T>& operator^=(ndarray<T> const& other) {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it ^= *it_other;
-                }
+                util::apply(std::bit_xor<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -792,12 +750,8 @@ namespace nd {
             ndarray<T>& operator<<=(ndarray<T> const& other) {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it <<= *it_other;
-                }
+                auto ufunc = [](T const& _x, T const& _y) -> T { return _x << _y; };
+                util::apply(ufunc, this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -805,12 +759,8 @@ namespace nd {
             ndarray<T>& operator>>=(ndarray<T> const& other) {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it >>= *it_other;
-                }
+                auto ufunc = [](T const& _x, T const& _y) -> T { return _x >> _y; };
+                util::apply(ufunc, this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
             }
@@ -818,9 +768,8 @@ namespace nd {
             ndarray<T>& operator++() {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                for(auto it = begin(); it != end(); ++it) {
-                    ++(*it);
-                }
+                auto ufunc = [](T const& _x) -> T { return _x + 1; };
+                util::apply(ufunc, this, this);
 
                 return *this;
             }
@@ -828,9 +777,8 @@ namespace nd {
             ndarray<T>& operator--() {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                for(auto it = begin(); it != end(); ++it) {
-                    --(*it);
-                }
+                auto ufunc = [](T const& _x) -> T { return _x - 1; };
+                util::apply(ufunc, this, this);
 
                 return *this;
             }
@@ -839,11 +787,8 @@ namespace nd {
                 static_assert(is_int || is_float || is_complex,
                               "Only {int, float, complex} types allowed.");
 
-                ndarray<T> y = copy();
-                T* it = y.data();
-                for(size_t i = 0; i < y.size(); ++i, ++it) {
-                    (*it) = -(*it);
-                }
+                ndarray<T> y(m_shape);
+                util::apply(std::negate<T>(), const_cast<ndarray<T>*>(this), &y);
 
                 return y;
             }
@@ -851,11 +796,8 @@ namespace nd {
             ndarray<T> operator~() const {
                 static_assert(is_int, "Only {int} types allowed.");
 
-                ndarray<T> y = copy();
-                T* it = y.data();
-                for(size_t i = 0; i < y.size(); ++i, ++it) {
-                    (*it) = ~(*it);
-                }
+                ndarray<T> y(m_shape);
+                util::apply(std::bit_not<T>(), const_cast<ndarray<T>*>(this), &y);
 
                 return y;
             }
@@ -863,11 +805,8 @@ namespace nd {
             ndarray<bool> operator!() const {
                 static_assert(is_bool, "Only {bool} type allowed.");
 
-                ndarray<bool> y = copy();
-                bool* it = y.data();
-                for(size_t i = 0; i < y.size(); ++i, ++it) {
-                    (*it) = !(*it);
-                }
+                ndarray<bool> y(m_shape);
+                util::apply(std::logical_not<bool>(), const_cast<ndarray<bool>*>(this), &y);
 
                 return y;
             }
@@ -877,15 +816,11 @@ namespace nd {
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) + (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::plus<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -895,15 +830,11 @@ namespace nd {
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) - (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::minus<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -913,15 +844,11 @@ namespace nd {
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) * (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::multiplies<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -931,15 +858,11 @@ namespace nd {
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) / (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::divides<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -948,15 +871,11 @@ namespace nd {
                 static_assert(is_int, "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) % (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::modulus<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -965,15 +884,11 @@ namespace nd {
                 static_assert(is_int, "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) & (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::bit_and<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -982,15 +897,11 @@ namespace nd {
                 static_assert(is_int, "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) | (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::bit_or<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -999,15 +910,11 @@ namespace nd {
                 static_assert(is_int, "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) ^ (*it_other);
-                }
+                ndarray<T> out(shape_out);
+                util::apply(std::bit_xor<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1016,15 +923,13 @@ namespace nd {
                 static_assert(is_int, "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
+                ndarray<T> out(shape_out);
 
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) << (*it_other);
-                }
+                auto ufunc = [](T const& _x, T const& _y) -> T { return _x << _y; };
+                util::apply(ufunc,
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1033,15 +938,13 @@ namespace nd {
                 static_assert(is_int, "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
+                ndarray<T> out(shape_out);
 
-                ndarray<T> out = ndarray<T>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) >> (*it_other);
-                }
+                auto ufunc = [](T const& _x, T const& _y) -> T { return _x >> _y; };
+                util::apply(ufunc,
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1050,15 +953,11 @@ namespace nd {
                 static_assert(is_bool, "Only {bool} type allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<bool> const this_bcast = broadcast_to(shape_out);
-                ndarray<bool> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) && (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::logical_and<bool>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1067,15 +966,11 @@ namespace nd {
                 static_assert(is_bool, "Only {bool} type allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<bool> const this_bcast = broadcast_to(shape_out);
-                ndarray<bool> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) || (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::logical_or<bool>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1084,15 +979,11 @@ namespace nd {
                 static_assert(is_bool || is_int, "Only {bool, int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) == (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::equal_to<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1101,15 +992,11 @@ namespace nd {
                 static_assert(is_bool || is_int, "Only {bool, int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) != (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::not_equal_to<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1119,15 +1006,11 @@ namespace nd {
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) < (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::less<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1137,15 +1020,11 @@ namespace nd {
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) <= (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::less_equal<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1155,15 +1034,11 @@ namespace nd {
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) > (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::greater<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
@@ -1173,15 +1048,11 @@ namespace nd {
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
-                ndarray<T> const this_bcast = broadcast_to(shape_out);
-                ndarray<T> const other_bcast = other.broadcast_to(shape_out);
-
-                ndarray<bool> out = ndarray<bool>(shape_out);
-                for(auto it_this = this_bcast.begin(), it_other = other_bcast.begin(), it_out = out.begin();
-                    it_out != out.end();
-                    ++it_this, ++it_other, ++it_out) {
-                    (*it_out) = (*it_this) >= (*it_other);
-                }
+                ndarray<bool> out(shape_out);
+                util::apply(std::greater_equal<T>(),
+                            const_cast<ndarray<T>*>(this),
+                            const_cast<ndarray<T>*>(&other),
+                            &out);
 
                 return out;
             }
