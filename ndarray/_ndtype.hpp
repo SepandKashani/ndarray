@@ -36,6 +36,11 @@ namespace nd {
     }
 
     template <typename T>
+    constexpr bool is_signed_int() {
+        return std::is_signed<T>::value;
+    }
+
+    template <typename T>
     constexpr bool is_float() {
         return std::is_floating_point<T>::value;
     }

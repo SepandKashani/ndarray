@@ -109,7 +109,22 @@ namespace nd {
      *     element being greater than `stop`.
      */
     template <typename T>
-    ndarray<T> arange(T const start, T const stop, T const step);
+    ndarray<T> arange(T const start, T const stop, T const step) {
+        static_assert(is_signed_int<T>() || is_float<T>(), "Only {int, float} types allowed." );
+        util::NDARRAY_ASSERT(std::abs(step) > 0, "Parameter[step] cannot be 0.");
+        util::NDARRAY_ASSERT(((start <= stop) && (step > 0)) || ((start >= stop) && (step < 0)),
+                             "Impossible start/stop/step combination provided.");
+
+        size_t N = std::ceil((stop - start) / step);
+        ndarray<T> y(shape_t({N}));
+
+        y.data()[0] = start;
+        for(size_t i = 1; i < N; ++i) {
+            y.data()[i] = y.data()[i - 1] + step;
+        }
+
+        return y;
+    }
 
     /*
      * Evenly spaced numbers over a specified interval.
@@ -743,8 +758,7 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> abs(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
-        constexpr bool is_signed_int = std::is_signed<T>::value;
-        static_assert(is_signed_int || is_float<T>() || is_complex<T>(),
+        static_assert(is_signed_int<T>() || is_float<T>() || is_complex<T>(),
                       "Only {signed_int, float, complex} types supported.");
 
         auto ufunc = [](T const& _x) -> T { return std::abs(_x); };

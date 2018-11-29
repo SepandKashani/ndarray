@@ -7,6 +7,7 @@
 #ifndef TEST_NDFUNC_CPP
 #define TEST_NDFUNC_CPP
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <gtest/gtest.h>
@@ -116,6 +117,45 @@ namespace nd {
                                TestFull,
                                TestEye);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncUtility, MyNdFuncUtilityTypes);
+
+    template <typename T>
+    class TestNdFuncArange : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncArange);
+    TYPED_TEST_P(TestNdFuncArange, TestArange) {
+        // start < stop, positive step
+       {TypeParam const start = static_cast<TypeParam>(5.0);
+        TypeParam const stop = static_cast<TypeParam>(40.0);
+        TypeParam const step = static_cast<TypeParam>(1.25);
+        ndarray<TypeParam> x = arange<TypeParam>(start, stop, step);
+
+        auto min_el = std::min_element(x.begin(), x.end());
+        auto max_el = std::max_element(x.begin(), x.end());
+        ASSERT_EQ(*min_el, start);
+        ASSERT_TRUE((*max_el) < stop);
+        for(size_t i = 1; i < x.size(); ++i) {
+            TypeParam const tested_step = x[{i}] - x[{i - 1}];
+            ASSERT_EQ(tested_step, step);
+        }}
+
+        // start > stop, negative step
+       {TypeParam const start = static_cast<TypeParam>(40.0);
+        TypeParam const stop = static_cast<TypeParam>(5.0);
+        TypeParam const step = static_cast<TypeParam>(-1.25);
+        ndarray<TypeParam> x = arange<TypeParam>(start, stop, step);
+
+        auto min_el = std::min_element(x.begin(), x.end());
+        auto max_el = std::max_element(x.begin(), x.end());
+        ASSERT_EQ(*max_el, start);
+        ASSERT_TRUE((*min_el) > stop);
+        for(size_t i = 1; i < x.size(); ++i) {
+            TypeParam const tested_step = x[{i}] - x[{i - 1}];
+            ASSERT_EQ(tested_step, step);
+        }}
+    }
+    typedef ::testing::Types<int, float, double> MyNdFuncArangeTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncArange,
+                               TestArange);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncArange, MyNdFuncArangeTypes);
 
     /* Math Functions ====================================================== */
     template <typename T>
