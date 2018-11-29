@@ -33,15 +33,7 @@ namespace nd {
     class ndarray {
         static_assert(byte_alignment >= sizeof(T),
                       "nd::byte_alignment too small to represent Type[T].");
-
-        static constexpr bool is_bool = std::is_same<T, bool>::value;
-        static constexpr bool is_int = std::is_integral<T>::value && (!is_bool);
-        static constexpr bool is_float = std::is_floating_point<T>::value;
-        static constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
-                                            std::is_same<T, std::complex<double>>::value ||
-                                            std::is_same<T, std::complex<long double>>::value);
-        static constexpr bool is_arithmetic = is_bool || is_int || is_float || is_complex;
-        static_assert(is_arithmetic, "Only arithmetic types are supported.");
+        static_assert(is_arithmetic<T>(), "Only arithmetic types are supported.");
 
         private:
             std::shared_ptr<ndcontainer> m_base = nullptr;
@@ -680,7 +672,7 @@ namespace nd {
             }
 
             ndarray<T>& operator+=(ndarray<T> const& other) {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 util::apply(std::plus<T>(), this, const_cast<ndarray<T>*>(&other), this);
@@ -689,7 +681,7 @@ namespace nd {
             }
 
             ndarray<T>& operator-=(ndarray<T> const& other) {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 util::apply(std::minus<T>(), this, const_cast<ndarray<T>*>(&other), this);
@@ -698,7 +690,7 @@ namespace nd {
             }
 
             ndarray<T>& operator*=(ndarray<T> const& other) {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 util::apply(std::multiplies<T>(), this, const_cast<ndarray<T>*>(&other), this);
@@ -707,7 +699,7 @@ namespace nd {
             }
 
             ndarray<T>& operator/=(ndarray<T> const& other) {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 util::apply(std::divides<T>(), this, const_cast<ndarray<T>*>(&other), this);
@@ -716,7 +708,7 @@ namespace nd {
             }
 
             ndarray<T>& operator%=(ndarray<T> const& other) {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 util::apply(std::modulus<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
@@ -724,7 +716,7 @@ namespace nd {
             }
 
             ndarray<T>& operator&=(ndarray<T> const& other) {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 util::apply(std::bit_and<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
@@ -732,7 +724,7 @@ namespace nd {
             }
 
             ndarray<T>& operator|=(ndarray<T> const& other) {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 util::apply(std::bit_or<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
@@ -740,7 +732,7 @@ namespace nd {
             }
 
             ndarray<T>& operator^=(ndarray<T> const& other) {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 util::apply(std::bit_xor<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
@@ -748,7 +740,7 @@ namespace nd {
             }
 
             ndarray<T>& operator<<=(ndarray<T> const& other) {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 auto ufunc = [](T const& _x, T const& _y) -> T { return _x << _y; };
                 util::apply(ufunc, this, const_cast<ndarray<T>*>(&other), this);
@@ -757,7 +749,7 @@ namespace nd {
             }
 
             ndarray<T>& operator>>=(ndarray<T> const& other) {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 auto ufunc = [](T const& _x, T const& _y) -> T { return _x >> _y; };
                 util::apply(ufunc, this, const_cast<ndarray<T>*>(&other), this);
@@ -766,7 +758,7 @@ namespace nd {
             }
 
             ndarray<T>& operator++() {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 auto ufunc = [](T const& _x) -> T { return _x + 1; };
                 util::apply(ufunc, this, this);
@@ -775,7 +767,7 @@ namespace nd {
             }
 
             ndarray<T>& operator--() {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 auto ufunc = [](T const& _x) -> T { return _x - 1; };
                 util::apply(ufunc, this, this);
@@ -784,7 +776,7 @@ namespace nd {
             }
 
             ndarray<T> operator-() const {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 ndarray<T> y(m_shape);
@@ -794,7 +786,7 @@ namespace nd {
             }
 
             ndarray<T> operator~() const {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 ndarray<T> y(m_shape);
                 util::apply(std::bit_not<T>(), const_cast<ndarray<T>*>(this), &y);
@@ -803,7 +795,7 @@ namespace nd {
             }
 
             ndarray<bool> operator!() const {
-                static_assert(is_bool, "Only {bool} type allowed.");
+                static_assert(is_bool<T>(), "Only {bool} type allowed.");
 
                 ndarray<bool> y(m_shape);
                 util::apply(std::logical_not<bool>(), const_cast<ndarray<bool>*>(this), &y);
@@ -812,7 +804,7 @@ namespace nd {
             }
 
             ndarray<T> operator+(ndarray<T> const& other) const {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
@@ -826,7 +818,7 @@ namespace nd {
             }
 
             ndarray<T> operator-(ndarray<T> const& other) const {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
@@ -840,7 +832,7 @@ namespace nd {
             }
 
             ndarray<T> operator*(ndarray<T> const& other) const {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
@@ -854,7 +846,7 @@ namespace nd {
             }
 
             ndarray<T> operator/(ndarray<T> const& other) const {
-                static_assert(is_int || is_float || is_complex,
+                static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
@@ -868,7 +860,7 @@ namespace nd {
             }
 
             ndarray<T> operator%(ndarray<T> const& other) const {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<T> out(shape_out);
@@ -881,7 +873,7 @@ namespace nd {
             }
 
             ndarray<T> operator&(ndarray<T> const& other) const {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<T> out(shape_out);
@@ -894,7 +886,7 @@ namespace nd {
             }
 
             ndarray<T> operator|(ndarray<T> const& other) const {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<T> out(shape_out);
@@ -907,7 +899,7 @@ namespace nd {
             }
 
             ndarray<T> operator^(ndarray<T> const& other) const {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<T> out(shape_out);
@@ -920,7 +912,7 @@ namespace nd {
             }
 
             ndarray<T> operator<<(ndarray<T> const& other) const {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<T> out(shape_out);
@@ -935,7 +927,7 @@ namespace nd {
             }
 
             ndarray<T> operator>>(ndarray<T> const& other) const {
-                static_assert(is_int, "Only {int} types allowed.");
+                static_assert(is_int<T>(), "Only {int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<T> out(shape_out);
@@ -950,7 +942,7 @@ namespace nd {
             }
 
             ndarray<bool> operator&&(ndarray<bool> const& other) const {
-                static_assert(is_bool, "Only {bool} type allowed.");
+                static_assert(is_bool<T>(), "Only {bool} type allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<bool> out(shape_out);
@@ -963,7 +955,7 @@ namespace nd {
             }
 
             ndarray<bool> operator||(ndarray<bool> const& other) const {
-                static_assert(is_bool, "Only {bool} type allowed.");
+                static_assert(is_bool<T>(), "Only {bool} type allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<bool> out(shape_out);
@@ -976,7 +968,7 @@ namespace nd {
             }
 
             ndarray<bool> operator==(ndarray<T> const& other) const {
-                static_assert(is_bool || is_int, "Only {bool, int} types allowed.");
+                static_assert(is_bool<T>() || is_int<T>(), "Only {bool, int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<bool> out(shape_out);
@@ -989,7 +981,7 @@ namespace nd {
             }
 
             ndarray<bool> operator!=(ndarray<T> const& other) const {
-                static_assert(is_bool || is_int, "Only {bool, int} types allowed.");
+                static_assert(is_bool<T>() || is_int<T>(), "Only {bool, int} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
                 ndarray<bool> out(shape_out);
@@ -1002,7 +994,7 @@ namespace nd {
             }
 
             ndarray<bool> operator<(ndarray<T> const& other) const {
-                static_assert(is_int || is_float,
+                static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
@@ -1016,7 +1008,7 @@ namespace nd {
             }
 
             ndarray<bool> operator<=(ndarray<T> const& other) const {
-                static_assert(is_int || is_float,
+                static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
@@ -1030,7 +1022,7 @@ namespace nd {
             }
 
             ndarray<bool> operator>(ndarray<T> const& other) const {
-                static_assert(is_int || is_float,
+                static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);
@@ -1044,7 +1036,7 @@ namespace nd {
             }
 
             ndarray<bool> operator>=(ndarray<T> const& other) const {
-                static_assert(is_int || is_float,
+                static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
                 shape_t const& shape_out = util::predict_shape(m_shape, other.m_shape);

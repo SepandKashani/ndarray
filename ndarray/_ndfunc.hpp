@@ -28,8 +28,7 @@ namespace nd {
      */
     template <typename T>
     T pi() {
-        constexpr bool is_float = std::is_floating_point<T>::value;
-        static_assert(is_float, "Only {float} types allowed.");
+        static_assert(is_float<T>(), "Only {float} types allowed.");
 
         return static_cast<T>(M_PI);
     }
@@ -42,8 +41,7 @@ namespace nd {
      */
     template <typename T>
     T e() {
-        constexpr bool is_float = std::is_floating_point<T>::value;
-        static_assert(is_float, "Only {float} types allowed.");
+        static_assert(is_float<T>(), "Only {float} types allowed.");
 
         return static_cast<T>(M_E);
     }
@@ -333,11 +331,7 @@ namespace nd {
          *
          * Don't know how to solve the issue using forward-declaration.
          */
-        constexpr bool is_float = std::is_floating_point<T>::value;
-        constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
-                                     std::is_same<T, std::complex<double>>::value ||
-                                     std::is_same<T, std::complex<long double>>::value);
-        static_assert(is_float || is_complex , "Only {float, complex} types allowed.");
+        static_assert(is_float<T>() || is_complex<T>() , "Only {float, complex} types allowed.");
 
         auto ufunc = [atol, rtol](T const& _x, T const& _y) -> bool {
             auto lhs = std::abs(_x - _y);
@@ -714,11 +708,7 @@ namespace nd {
     template <typename T>
     ndarray<T> abs(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
         constexpr bool is_signed_int = std::is_signed<T>::value;
-        constexpr bool is_float = std::is_floating_point<T>::value;
-        constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
-                                     std::is_same<T, std::complex<double>>::value ||
-                                     std::is_same<T, std::complex<long double>>::value);
-        static_assert(is_signed_int || is_float || is_complex,
+        static_assert(is_signed_int || is_float<T>() || is_complex<T>(),
                       "Only {signed_int, float, complex} types supported.");
 
         auto ufunc = [](T const& _x) -> T { return std::abs(_x); };
@@ -1186,8 +1176,7 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> real(ndarray<std::complex<T>> const& x) {
-        constexpr bool is_float = std::is_floating_point<T>::value;
-        static_assert(is_float, "Only {complex} types are supported.");
+        static_assert(is_float<T>(), "Only {complex} types are supported.");
 
         stride_t float_strides(x.ndim() + 1, sizeof(T));
         std::copy_n(x.strides().begin(), x.ndim(), float_strides.begin());
@@ -1218,8 +1207,7 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> imag(ndarray<std::complex<T>> const& x) {
-        constexpr bool is_float = std::is_floating_point<T>::value;
-        static_assert(is_float, "Only {complex} types are supported.");
+        static_assert(is_float<T>(), "Only {complex} types are supported.");
 
         stride_t float_strides(x.ndim() + 1, sizeof(T));
         std::copy_n(x.strides().begin(), x.ndim(), float_strides.begin());
@@ -1250,10 +1238,7 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> conj(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
-        constexpr bool is_complex = (std::is_same<T, std::complex<float>>::value ||
-                                     std::is_same<T, std::complex<double>>::value ||
-                                     std::is_same<T, std::complex<long double>>::value);
-        static_assert(is_complex, "Only {complex} types supported.");
+        static_assert(is_complex<T>(), "Only {complex} types supported.");
 
         auto ufunc = [](T const& _x) -> T { return std::conj(_x); };
         if(out == nullptr) {
