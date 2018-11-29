@@ -157,6 +157,37 @@ namespace nd {
                                TestArange);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncArange, MyNdFuncArangeTypes);
 
+    template <typename T>
+    class TestNdFuncLinSpace : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncLinSpace);
+    TYPED_TEST_P(TestNdFuncLinSpace, TestLinSpace) {
+        size_t const N = 20;
+
+        // start < stop
+       {TypeParam const start = static_cast<TypeParam>(5.0);
+        TypeParam const stop = static_cast<TypeParam>(40.0);
+        ndarray<TypeParam> x = linspace<TypeParam>(start, stop, N);
+
+        auto min_el = std::min_element(x.begin(), x.end());
+        auto max_el = std::max_element(x.begin(), x.end());
+        ASSERT_TRUE(std::abs(start - (*min_el)) < 1e-5);
+        ASSERT_TRUE(std::abs(stop - (*max_el)) < 1e-5);}
+
+        // start > stop
+       {TypeParam const start = static_cast<TypeParam>(40.0);
+        TypeParam const stop = static_cast<TypeParam>(5.0);
+        ndarray<TypeParam> x = linspace<TypeParam>(start, stop, N);
+
+        auto min_el = std::min_element(x.begin(), x.end());
+        auto max_el = std::max_element(x.begin(), x.end());
+        ASSERT_TRUE(std::abs(start - (*max_el)) < 1e-5);
+        ASSERT_TRUE(std::abs(stop - (*min_el)) < 1e-5);}
+    }
+    typedef ::testing::Types<float, double> MyNdFuncLinSpaceTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncLinSpace,
+                               TestLinSpace);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncLinSpace, MyNdFuncLinSpaceTypes);
+
     /* Math Functions ====================================================== */
     template <typename T>
     class TestNdFuncAbs : public ::testing::Test {};

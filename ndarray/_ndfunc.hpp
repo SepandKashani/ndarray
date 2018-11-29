@@ -149,7 +149,20 @@ namespace nd {
      *     If `endpoint` is false, samples[i] = start + i * ((stop - start) / N).
      */
     template <typename T>
-    ndarray<T> linspace(T const start, T const stop, size_t const num, bool const endpoint = true);
+    ndarray<T> linspace(T const start, T const stop, size_t const N, bool const endpoint = true) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+        util::NDARRAY_ASSERT(N > 1, "Parameter[N] must be at least 2.");
+
+        ndarray<T> y(shape_t({N}));
+        T step = (stop - start) / static_cast<T>(endpoint ? (N - 1) : N);
+
+        y.data()[0] = start;
+        for(size_t i = 1; i < N; ++i) {
+            y.data()[i] = y.data()[i - 1] + step;
+        }
+
+        return y;
+    }
 
     /*
      * Coordinate arrays from coordinate vectors.
