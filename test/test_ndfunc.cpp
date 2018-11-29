@@ -198,6 +198,120 @@ namespace nd {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncIsClose, MyNdFuncIsCloseTypes);
 
     template <typename T>
+    class TestNdFuncSin : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncSin);
+    TYPED_TEST_P(TestNdFuncSin, TestSin) {
+        // No buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y = sin(x);
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(*it_y, std::sin(*it_x));
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> z = sin(x, &y);
+        ASSERT_TRUE(y.equals(z));
+
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(*it_y, std::sin(*it_x));
+        }}
+    }
+    typedef ::testing::Types<float, double> MyNdFuncSinTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncSin,
+                               TestSin);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncSin, MyNdFuncSinTypes);
+
+    template <typename T>
+    class TestNdFuncCos : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncCos);
+    TYPED_TEST_P(TestNdFuncCos, TestCos) {
+        // No buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y = cos(x);
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(*it_y, std::cos(*it_x));
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> z = cos(x, &y);
+        ASSERT_TRUE(y.equals(z));
+
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(*it_y, std::cos(*it_x));
+        }}
+    }
+    typedef ::testing::Types<float, double> MyNdFuncCosTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncCos,
+                               TestCos);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncCos, MyNdFuncCosTypes);
+
+    template <typename T>
+    class TestNdFuncTan : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncTan);
+    TYPED_TEST_P(TestNdFuncTan, TestTan) {
+        // No buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y = tan(x);
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(*it_y, std::tan(*it_x));
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> z = tan(x, &y);
+        ASSERT_TRUE(y.equals(z));
+
+        for(auto it_x = x.begin(), it_y = y.begin();
+            it_y != y.end();
+            ++it_x, ++it_y) {
+            ASSERT_EQ(*it_y, std::tan(*it_x));
+        }}
+    }
+    typedef ::testing::Types<float, double> MyNdFuncTanTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncTan,
+                               TestTan);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncTan, MyNdFuncTanTypes);
+
+    template <typename T>
     class TestNdFuncReal : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncReal);
 

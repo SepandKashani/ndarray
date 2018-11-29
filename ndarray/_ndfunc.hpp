@@ -502,7 +502,19 @@ namespace nd {
      *     sin(x)
      */
     template <typename T>
-    ndarray<T> sin(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> sin(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::sin(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise trigonometric cosine.
@@ -521,7 +533,19 @@ namespace nd {
      *     cos(x)
      */
     template <typename T>
-    ndarray<T> cos(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> cos(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::cos(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise trigonometric tangent.
@@ -540,7 +564,19 @@ namespace nd {
      *     tan(x)
      */
     template <typename T>
-    ndarray<T> tan(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> tan(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::tan(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise trigonometric inverse sine.
