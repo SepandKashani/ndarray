@@ -9,9 +9,11 @@
 
 #include <algorithm>
 #include <limits>
+#include <numeric>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
@@ -221,6 +223,100 @@ namespace nd { namespace util {
             it_out != out->end();
             ++it_in_1, ++it_in_2, ++it_out) {
             *it_out = ufunc(*it_in_1, *it_in_2);
+        }
+    }
+
+    /*
+     * Apply reduction function along input buffer, then place result in output buffer.
+     *
+     * Parameters
+     * ----------
+     * ufunc : F
+     *     Reduction function to apply.
+     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed commutative/associative.
+     * in : ndarray<T>* const
+     *     (in_1, in_2, in_3) contiguous input buffer.
+     * out : ndarray<T>* const
+     *     (out_1, out_2, out_3) contiguous output buffer.
+     *     Must have (out_[k] == in_[k]), except along `axis` where (out_[axis] == 1).
+     * axis : size_t const
+     *     Dimension along which to apply the reduction.
+     * init : T const
+     *     Initial reduction output.
+     */
+    template <typename F, typename T>
+    void reduce3D(F ufunc,
+                  ndarray<T>* const in,
+                  ndarray<T>* const out,
+                  size_t const axis,
+                  T const init) {
+        NDARRAY_ASSERT(axis <= 2, "Parameter[axis] must be one of {0, 1, 2}.");
+
+        NDARRAY_ASSERT(in != nullptr, "Parameter[in] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(in->ndim() == 3, "Parameter[in] must be 3D.");
+
+        NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(out->ndim() == 3, "Parameter[out] must be 3D.");
+        for(size_t i = 0; i < in->ndim(); ++i) {
+            if(i != axis) {
+                NDARRAY_ASSERT(out->shape()[i] == in->shape()[i],
+                               "Parameters[in, out] have incompatible dimensions.");
+            } else {
+                NDARRAY_ASSERT(out->shape()[i] == 1,
+                               "Parameter[out] mush have length 1 along axis.");
+            }
+        }
+
+        // For later optimizations.
+        NDARRAY_ASSERT(in->is_contiguous(), "Parameter[in] must be contiguous.");
+        NDARRAY_ASSERT(out->is_contiguous(), "Parameter[out] must be contiguous.");
+
+        std::vector<size_t> idx_out(3);  /* How to index the output. */
+        std::vector<slice> selection(3); /* How to subsample the input. */
+        std::vector<size_t> fix_axes;    /* Axes that are not reduced. */
+        for(size_t i = 0; i < in->ndim(); ++i) {
+            if(i != axis) {
+                fix_axes.push_back(i);
+            }
+        }
+        size_t const& size_lhs = in->shape()[fix_axes[0]];
+        size_t const& size_rhs = in->shape()[fix_axes[1]];
+
+        for(size_t i = 0; i < size_lhs; ++i) {
+            for(size_t j = 0; j < size_rhs; ++j) {
+                switch(axis) {
+                    case 0:
+                        selection[0] = slice();
+                        selection[1] = slice(i, i + 1);
+                        selection[2] = slice(j, j + 1);
+                        idx_out[0] = 0;
+                        idx_out[1] = i;
+                        idx_out[2] = j;
+                        break;
+
+                    case 1:
+                        selection[0] = slice(i, i + 1);
+                        selection[1] = slice();
+                        selection[2] = slice(j, j + 1);
+                        idx_out[0] = i;
+                        idx_out[1] = 0;
+                        idx_out[2] = j;
+                        break;
+
+                    case 2:
+                        selection[0] = slice(i, i + 1);
+                        selection[1] = slice(j, j + 1);
+                        selection[2] = slice();
+                        idx_out[0] = i;
+                        idx_out[1] = j;
+                        idx_out[2] = 0;
+                        break;
+                }
+
+                ndarray<T> sub_in = in->operator()(selection);
+                out->operator[](idx_out) =
+                    std::accumulate(sub_in.begin(), sub_in.end(), init, ufunc);
+            }
         }
     }
 }}

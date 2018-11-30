@@ -256,6 +256,57 @@ namespace nd { namespace util {
                                TestApplyBinary);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilApply, MyNdUtilApplyTypes);
 
+    template <typename T>
+    class TestNdUtilReduce3D : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdUtilReduce3D);
+    TYPED_TEST_P(TestNdUtilReduce3D, TestReduce3D) {
+        // axis = 0
+       {auto x = nd::arange<TypeParam>(0, 3 * 4 * 5, 1).reshape({3, 4, 5});
+        auto y = nd::zeros<TypeParam>({1, 4, 5});
+
+        reduce3D(std::plus<TypeParam>(), &x, &y, 0, static_cast<TypeParam>(0));
+
+        TypeParam correct_elem = 60;
+        for(size_t i = 0; i < y.shape()[1]; ++i, correct_elem += 0) {
+            for(size_t j = 0; j < y.shape()[2]; ++j, correct_elem += 3) {
+                TypeParam const& tested_elem = y[{0, i, j}];
+                ASSERT_EQ(tested_elem, correct_elem);
+            }
+        }}
+
+        // axis = 1
+       {auto x = nd::arange<TypeParam>(0, 3 * 4 * 5, 1).reshape({3, 4, 5});
+        auto y = nd::zeros<TypeParam>({3, 1, 5});
+
+        reduce3D(std::plus<TypeParam>(), &x, &y, 1, static_cast<TypeParam>(0));
+
+        TypeParam correct_elem = 30;
+        for(size_t i = 0; i < y.shape()[0]; ++i, correct_elem += 60) {
+            for(size_t j = 0; j < y.shape()[2]; ++j, correct_elem += 4) {
+                TypeParam const& tested_elem = y[{i, 0, j}];
+                ASSERT_EQ(tested_elem, correct_elem);
+            }
+        }}
+
+        // axis = 2
+       {auto x = nd::arange<TypeParam>(0, 3 * 4 * 5, 1).reshape({3, 4, 5});
+        auto y = nd::zeros<TypeParam>({3, 4, 1});
+
+        reduce3D(std::plus<TypeParam>(), &x, &y, 2, static_cast<TypeParam>(0));
+
+        TypeParam correct_elem = 10;
+        for(size_t i = 0; i < y.shape()[0]; ++i, correct_elem += 0) {
+            for(size_t j = 0; j < y.shape()[1]; ++j, correct_elem += 25) {
+                TypeParam const& tested_elem = y[{i, j, 0}];
+                ASSERT_EQ(tested_elem, correct_elem);
+            }
+        }}
+    }
+
+    typedef ::testing::Types<int, float, double> MyNdUtilReduce3DTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdUtilReduce3D,
+                               TestReduce3D);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilReduce3D, MyNdUtilReduce3DTypes);
 }}
 
 #endif // TEST_NDUTIL_CPP
