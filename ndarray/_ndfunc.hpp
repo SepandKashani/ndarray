@@ -253,17 +253,17 @@ namespace nd {
     }
 
     /*
-     * Logical OR along specified axes.
+     * Logical OR along specified axis.
      *
      * Parameters
      * ----------
      * x : ndarray<bool> const&
      *     N-D input array.
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to reduce.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -272,38 +272,26 @@ namespace nd {
      * -------
      * y : ndarray<bool>
      *     OR-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
-    ndarray<bool> any(ndarray<bool> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<bool>* const out = nullptr);
+    ndarray<bool> any(ndarray<bool> const& x,
+                      size_t const axis,
+                      bool const keepdims = false,
+                      ndarray<bool>* const out = nullptr);
 
     /*
-     * Logical OR along all axes.
+     * Logical AND along specified axis.
      *
      * Parameters
      * ----------
      * x : ndarray<bool> const&
      *     N-D input array.
-     *
-     * Returns
-     * -------
-     * y : ndarray<bool>
-     *     (1,) OR-reduced array.
-     */
-    ndarray<bool> any(ndarray<bool> const& x);
-
-    /*
-     * Logical AND along specified axes.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<bool> const&
-     *     N-D input array.
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to reduce.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -312,25 +300,13 @@ namespace nd {
      * -------
      * y : ndarray<bool>
      *     AND-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
-    ndarray<bool> all(ndarray<bool> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<bool>* const out = nullptr);
-
-    /*
-     * Logical AND along all axes.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<bool> const&
-     *     N-D input array.
-     *
-     * Returns
-     * -------
-     * y : ndarray<bool>
-     *     (1,) AND-reduced array.
-     */
-    ndarray<bool> all(ndarray<bool> const& x);
+    ndarray<bool> all(ndarray<bool> const& x,
+                      size_t const axis,
+                      bool const keepdims = false,
+                      ndarray<bool>* const out = nullptr);
 
     /*
      * Element-wise closeness check for floating point types.
@@ -396,17 +372,17 @@ namespace nd {
     bool allclose(ndarray<T> const& x, ndarray<T> const& y, T const rtol = 1e-5, T const atol = 1e-8);
 
     /*
-     * Sum of array elements over given axes.
+     * Sum of array elements over given axis.
      *
      * Parameters
      * ----------
      * x : ndarray<T> const&
      *     Elements to sum.
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to reduce.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -415,40 +391,27 @@ namespace nd {
      * -------
      * y : ndarray<T>
      *     ADD-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
     template <typename T>
-    ndarray<T> sum(ndarray<T> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<T>* const out = nullptr);
+    ndarray<T> sum(ndarray<T> const& x,
+                   size_t const axis,
+                   bool const keepdims = false,
+                   ndarray<T>* const out = nullptr);
 
     /*
-     * Sum of array elements.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     *     Elements to sum.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (1,) ADD-reduced array.
-     */
-    template <typename T>
-    ndarray<T> sum(ndarray<T> const& x);
-
-    /*
-     * Product of array elements over given axes.
+     * Product of array elements over given axis.
      *
      * Parameters
      * ----------
      * x : ndarray<T> const&
      *     Elements to multiply.
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to reduce.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -457,27 +420,14 @@ namespace nd {
      * -------
      * y : ndarray<T>
      *     TIMES-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
     template <typename T>
-    ndarray<T> prod(ndarray<T> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<T>* const out = nullptr);
-
-    /*
-     * Product of array elements.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     *     Elements to multiply.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (1,) TIMES-reduced array.
-     */
-    template <typename T>
-    ndarray<T> prod(ndarray<T> const& x);
+    ndarray<T> prod(ndarray<T> const& x,
+                    size_t const axis,
+                    bool const keepdims = false,
+                    ndarray<T>* const out = nullptr);
 
     /*
      * Join a sequence of arrays along an existing axis.
@@ -910,7 +860,7 @@ namespace nd {
     ndarray<T> unique(ndarray<T> const& x);
 
     /*
-     * Standard deviation over given axes.
+     * Standard deviation over given axis.
      *
      * Parameters
      * ----------
@@ -918,8 +868,8 @@ namespace nd {
      * axes : std::vector<size_t> const&
      *     Subset of dimensions along which to compute the statistic.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -928,29 +878,17 @@ namespace nd {
      * -------
      * y : ndarray<T>
      *     STD-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
     template <typename T>
-    ndarray<T> std(ndarray<T> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<T>* const out = nullptr);
+    ndarray<T> std(ndarray<T> const& x,
+                   size_t const axis,
+                   bool const keepdims = false,
+                   ndarray<T>* const out = nullptr);
 
     /*
-     * Standard deviation of array elements.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (1,) STD-reduced array.
-     */
-    template <typename T>
-    ndarray<T> std(ndarray<T> const& x);
-
-    /*
-     * Average over given axes.
+     * Average over given axis.
      *
      * Parameters
      * ----------
@@ -958,8 +896,8 @@ namespace nd {
      * axes : std::vector<size_t> const&
      *     Subset of dimensions along which to compute the statistic.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -968,29 +906,17 @@ namespace nd {
      * -------
      * y : ndarray<T>
      *     MEAN-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
     template <typename T>
-    ndarray<T> mean(ndarray<T> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<T>* const out = nullptr);
+    ndarray<T> mean(ndarray<T> const& x,
+                    size_t const axis,
+                    bool const keepdims = false,
+                    ndarray<T>* const out = nullptr);
 
     /*
-     * Average of array elements.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (1,) MEAN-reduced array.
-     */
-    template <typename T>
-    ndarray<T> mean(ndarray<T> const& x);
-
-    /*
-     * Range of values over given axes.
+     * Range of values over given axis.
      *
      * Parameters
      * ----------
@@ -998,8 +924,8 @@ namespace nd {
      * axes : std::vector<size_t> const&
      *     Subset of dimensions along which to compute the statistic.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -1008,38 +934,26 @@ namespace nd {
      * -------
      * y : ndarray<T>
      *     (MAX - MIN)-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
     template <typename T>
-    ndarray<T> ptp(ndarray<T> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<T>* const out = nullptr);
+    ndarray<T> ptp(ndarray<T> const& x,
+                   size_t const axis,
+                   bool const keepdims = false,
+                   ndarray<T>* const out = nullptr);
 
     /*
-     * Range of array elements.
+     * Minimum of array elements over given axis.
      *
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (1,) (MAX - MIN)-reduced array.
-     */
-    template <typename T>
-    ndarray<T> ptp(ndarray<T> const& x);
-
-    /*
-     * Minimum of array elements over given axes.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to reduce.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -1048,38 +962,26 @@ namespace nd {
      * -------
      * y : ndarray<T>
      *     MIN-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
     template <typename T>
-    ndarray<T> min(ndarray<T> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<T>* const out = nullptr);
+    ndarray<T> min(ndarray<T> const& x,
+                   size_t const axis,
+                   bool const keepdims = false,
+                   ndarray<T>* const out = nullptr);
 
     /*
-     * Minimum of array elements.
+     * Maximum of array elements over given axis.
      *
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (1,) MIN-reduced array.
-     */
-    template <typename T>
-    ndarray<T> min(ndarray<T> const& x);
-
-    /*
-     * Maximum of array elements over given axes.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to reduce.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axes which are reduced are left in the result as
-     *     dimensions with size 1.
+     *     If true, the axis which is reduced is left in the result as
+     *     dimension of size 1.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -1088,26 +990,14 @@ namespace nd {
      * -------
      * y : ndarray<T>
      *     MAX-reduced array with
-     *     * (x.ndim() - axes.size()) dimensions if `keepdims` is false;
+     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
     template <typename T>
-    ndarray<T> max(ndarray<T> const& x, std::vector<size_t> const& axes, bool const keepdims = false, ndarray<T>* const out = nullptr);
-
-    /*
-     * Maximum of array elements.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (1,) MAX-reduced array.
-     */
-    template <typename T>
-    ndarray<T> max(ndarray<T> const& x);
+    ndarray<T> max(ndarray<T> const& x,
+                   size_t const axis,
+                   bool const keepdims = false,
+                   ndarray<T>* const out = nullptr);
 
     /*
      * Sort an array.
