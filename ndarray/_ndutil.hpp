@@ -319,6 +319,91 @@ namespace nd { namespace util {
             }
         }
     }
+
+    /*
+     * Apply reduction function along input buffer, then place result in output buffer.
+     *
+     * Parameters
+     * ----------
+     * ufunc : F
+     *     Reduction function to apply.
+     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed commutative/associative.
+     * in : ndarray<T>* const
+     *     N-D input buffer.
+     * out : ndarray<T>* const
+     *     N-D contiguous output buffer.
+     *     Must have (out->shape()[k] == in->shape()[k]), except along `axis` where (out->shape()[axis] == 1).
+     * axis : size_t const
+     *     Dimension along which to apply the reduction.
+     * init : T const
+     *     Initial reduction output.
+     */
+    template <typename F, typename T>
+    void reduce(F ufunc,
+                ndarray<T>* const in,
+                ndarray<T>* const out,
+                size_t const axis,
+                T const init) {
+        NDARRAY_ASSERT(in != nullptr, "Parameter[in] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
+        NDARRAY_ASSERT(in->ndim() == out->ndim(), "Parameters[in, out] must have same rank.");
+        NDARRAY_ASSERT(axis < in->ndim(), "Parameter[axis] must be one of {0, ..., in->ndim() - 1}.");
+        NDARRAY_ASSERT(out->is_contiguous(), "Parameter[out] must be contiguous.");
+        for(size_t i = 0; i < in->ndim(); ++i) {
+            if(i != axis) {
+                NDARRAY_ASSERT(out->shape()[i] == in->shape()[i],
+                               "Parameters[in, out] have incompatible dimensions.");
+            } else {
+                NDARRAY_ASSERT(out->shape()[i] == 1,
+                               "Parameter[out] mush have length 1 along axis.");
+            }
+        }
+
+        // 3D-equivalent axis/shape parameterization
+        size_t axis3D;
+        shape_t shape_in3D(3);
+        shape_t shape_out3D(3);
+        if(axis == 0) {
+            // in(a, b, c) -> in3D(a, 1, b*c)
+            // out(1, b, c) -> out3D(1, 1, b*c)
+            axis3D = 0;
+            shape_in3D[0] = in->shape()[0];
+            shape_in3D[1] = 1;
+            shape_in3D[2] = std::accumulate(in->shape().begin() + 1, in->shape().end(),
+                                            static_cast<T>(1.0), std::multiplies<T>());
+            shape_out3D[0] = 1;
+            shape_out3D[1] = 1;
+            shape_out3D[2] = shape_in3D[2];
+        } else if(axis == in->ndim() - 1) {
+            // in(a, b, c) -> in3D(a*b, 1, c)
+            // out(a, b, 1) -> out3D(a*b, 1, 1)
+            axis3D = 2;
+            shape_in3D[0] = std::accumulate(in->shape().begin(), in->shape().end() - 1,
+                                            static_cast<T>(1.0), std::multiplies<T>());
+            shape_in3D[1] = 1;
+            shape_in3D[2] = in->shape()[in->ndim() - 1];
+            shape_out3D[0] = shape_in3D[0];
+            shape_out3D[1] = 1;
+            shape_out3D[2] = 1;
+        } else {
+            // in(a, b, c, d, e) -> in3D(a*b, c, d*e)
+            // out(a, b, 1, d, e) -> out3D(a*b, 1, d*e)
+            axis3D = 1;
+            shape_in3D[0] = std::accumulate(in->shape().begin(), in->shape().begin() + axis,
+                                            static_cast<T>(1.0), std::multiplies<T>());;
+            shape_in3D[1] = in->shape()[axis];
+            shape_in3D[2] = std::accumulate(in->shape().end() - (in->ndim() - 1 - axis), in->shape().end(),
+                                            static_cast<T>(1.0), std::multiplies<T>());;
+            shape_out3D[0] = shape_in3D[0];
+            shape_out3D[1] = 1;
+            shape_out3D[2] = shape_in3D[2];
+        }
+
+        ndarray<T> in3D  = in->reshape(shape_in3D);
+        ndarray<T> out3D = out->reshape(shape_out3D);
+        reduce3D(ufunc, &in3D, &out3D, axis3D, init);
+        // At this point `out` contains the result.
+    }
 }}
 
 #endif // _NDUTIL_HPP

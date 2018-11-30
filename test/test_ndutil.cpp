@@ -257,9 +257,9 @@ namespace nd { namespace util {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilApply, MyNdUtilApplyTypes);
 
     template <typename T>
-    class TestNdUtilReduce3D : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdUtilReduce3D);
-    TYPED_TEST_P(TestNdUtilReduce3D, TestReduce3D) {
+    class TestNdUtilReduce : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdUtilReduce);
+    TYPED_TEST_P(TestNdUtilReduce, TestReduce3D) {
         // axis = 0
        {auto x = nd::arange<TypeParam>(0, 3 * 4 * 5, 1).reshape({3, 4, 5});
         auto y = nd::zeros<TypeParam>({1, 4, 5});
@@ -303,10 +303,94 @@ namespace nd { namespace util {
         }}
     }
 
-    typedef ::testing::Types<int, float, double> MyNdUtilReduce3DTypes;
-    REGISTER_TYPED_TEST_CASE_P(TestNdUtilReduce3D,
-                               TestReduce3D);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilReduce3D, MyNdUtilReduce3DTypes);
+    TYPED_TEST_P(TestNdUtilReduce, TestReduce) {
+        shape_t const shape({2, 2, 2, 2});
+        auto const x = arange<TypeParam>(0, 16, 1).reshape(shape);
+
+       {ndarray<TypeParam> y_axis0(shape_t({1, 2, 2, 2}));
+        reduce(std::plus<TypeParam>(),
+               const_cast<ndarray<TypeParam>*>(&x),
+               &y_axis0,
+               0,
+               static_cast<TypeParam>(0));
+        auto y_correct_axis0 = (r_<TypeParam>({8, 10, 12, 14, 16, 18, 20, 22})
+                                .reshape({1, 2, 2, 2}));
+        ASSERT_EQ(y_axis0.shape(), y_correct_axis0.shape());
+        ndarray<bool> closeness = isclose(y_axis0.template cast<float>(),
+                                          y_correct_axis0.template cast<float>());
+        for(auto it_cl = closeness.begin(); it_cl != closeness.end(); ++it_cl) {
+            ASSERT_TRUE(*it_cl);
+        }}
+
+       {ndarray<TypeParam> y_axis1(shape_t({2, 1, 2, 2}));
+        reduce(std::plus<TypeParam>(),
+               const_cast<ndarray<TypeParam>*>(&x),
+               &y_axis1,
+               1,
+               static_cast<TypeParam>(0));
+        auto y_correct_axis1 = (r_<TypeParam>({4, 6, 8, 10, 20, 22, 24, 26})
+                                .reshape({2, 1, 2, 2}));
+        ASSERT_EQ(y_axis1.shape(), y_correct_axis1.shape());
+        ndarray<bool> closeness = isclose(y_axis1.template cast<float>(),
+                                          y_correct_axis1.template cast<float>());
+        for(auto it_cl = closeness.begin(); it_cl != closeness.end(); ++it_cl) {
+            ASSERT_TRUE(*it_cl);
+        }}
+
+       {ndarray<TypeParam> y_axis2(shape_t({2, 2, 1, 2}));
+        reduce(std::plus<TypeParam>(),
+               const_cast<ndarray<TypeParam>*>(&x),
+               &y_axis2,
+               2,
+               static_cast<TypeParam>(0));
+        auto y_correct_axis2 = (r_<TypeParam>({2, 4, 10, 12, 18, 20, 26, 28})
+                                .reshape({2, 2, 1, 2}));
+        ASSERT_EQ(y_axis2.shape(), y_correct_axis2.shape());
+        ndarray<bool> closeness = isclose(y_axis2.template cast<float>(),
+                                          y_correct_axis2.template cast<float>());
+        for(auto it_cl = closeness.begin(); it_cl != closeness.end(); ++it_cl) {
+            ASSERT_TRUE(*it_cl);
+        }}
+
+       {ndarray<TypeParam> y_axis3(shape_t({2, 2, 2, 1}));
+        reduce(std::plus<TypeParam>(),
+               const_cast<ndarray<TypeParam>*>(&x),
+               &y_axis3,
+               3,
+               static_cast<TypeParam>(0));
+        auto y_correct_axis3 = (r_<TypeParam>({1, 5, 9, 13, 17, 21, 25, 29})
+                                .reshape({2, 2, 2, 1}));
+        ASSERT_EQ(y_axis3.shape(), y_correct_axis3.shape());
+        ndarray<bool> closeness = isclose(y_axis3.template cast<float>(),
+                                          y_correct_axis3.template cast<float>());
+        for(auto it_cl = closeness.begin(); it_cl != closeness.end(); ++it_cl) {
+            ASSERT_TRUE(*it_cl);
+        }}
+    }
+
+    TYPED_TEST_P(TestNdUtilReduce, TestReduce1D) {
+        auto const x = arange<TypeParam>(0, 10, 1);
+
+       {ndarray<TypeParam> y_axis0(shape_t({1}));
+        reduce(std::plus<TypeParam>(),
+               const_cast<ndarray<TypeParam>*>(&x),
+               &y_axis0,
+               0,
+               static_cast<TypeParam>(0));
+        auto y_correct_axis0 = r_<TypeParam>({45});
+        ASSERT_EQ(y_axis0.shape(), y_correct_axis0.shape());
+        ndarray<bool> closeness = isclose(y_axis0.template cast<float>(),
+                                          y_correct_axis0.template cast<float>());
+        for(auto it_cl = closeness.begin(); it_cl != closeness.end(); ++it_cl) {
+            ASSERT_TRUE(*it_cl);
+        }}
+    }
+    typedef ::testing::Types<int, float, double> MyNdUtilReduceTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdUtilReduce,
+                               TestReduce3D,
+                               TestReduce,
+                               TestReduce1D);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilReduce, MyNdUtilReduceTypes);
 }}
 
 #endif // TEST_NDUTIL_CPP
