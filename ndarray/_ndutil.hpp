@@ -64,7 +64,7 @@ namespace nd { namespace util {
      * out : shape_t
      *     Shape of result.
      */
-    inline shape_t predict_shape(shape_t const& lhs, shape_t const& rhs) {
+    inline shape_t predict_shape_broadcast(shape_t const& lhs, shape_t const& rhs) {
         std::stringstream error_msg;
         error_msg << "Operands could not be broadcast together with shapes "
                   << "(" << lhs << ", " << rhs << ").\n";
@@ -85,6 +85,30 @@ namespace nd { namespace util {
                            error_msg.str());
             _out = std::max<size_t>(_lhs, _rhs);
         }
+
+        return out;
+    }
+
+    /*
+     * Determine output dimensions based on reduction specification.
+     *
+     * Parameters
+     * ----------
+     * shape : shape_t const&
+     *     Shape of input.
+     * axis : size_t const
+     *     Dimension along which a reduction is made.
+     *
+     * Returns
+     * -------
+     * out : shape_t
+     *     Shape of result.
+     */
+    inline shape_t predict_shape_reduction(shape_t const& shape, size_t const axis) {
+        NDARRAY_ASSERT(axis < shape.size(), "Parameter[axis] is out of bounds.");
+
+        shape_t out = shape;
+        out[axis] = 1;
 
         return out;
     }
@@ -211,7 +235,7 @@ namespace nd { namespace util {
         NDARRAY_ASSERT(in_2 != nullptr, "Parameter[in_2] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
 
-        shape_t const correct_out_shape = predict_shape(in_1->shape(), in_2->shape());
+        shape_t const correct_out_shape = predict_shape_broadcast(in_1->shape(), in_2->shape());
         NDARRAY_ASSERT(out->shape() == correct_out_shape,
                        "Parameter[in_1, in_2] do not broadcast to Parameter[out] dimensions.");
 
@@ -370,7 +394,7 @@ namespace nd { namespace util {
             shape_in3D[0] = in->shape()[0];
             shape_in3D[1] = 1;
             shape_in3D[2] = std::accumulate(in->shape().begin() + 1, in->shape().end(),
-                                            static_cast<T>(1.0), std::multiplies<T>());
+                                            1, std::multiplies<size_t>());
             shape_out3D[0] = 1;
             shape_out3D[1] = 1;
             shape_out3D[2] = shape_in3D[2];
@@ -379,7 +403,7 @@ namespace nd { namespace util {
             // out(a, b, 1) -> out3D(a*b, 1, 1)
             axis3D = 2;
             shape_in3D[0] = std::accumulate(in->shape().begin(), in->shape().end() - 1,
-                                            static_cast<T>(1.0), std::multiplies<T>());
+                                            1, std::multiplies<size_t>());
             shape_in3D[1] = 1;
             shape_in3D[2] = in->shape()[in->ndim() - 1];
             shape_out3D[0] = shape_in3D[0];
@@ -390,10 +414,10 @@ namespace nd { namespace util {
             // out(a, b, 1, d, e) -> out3D(a*b, 1, d*e)
             axis3D = 1;
             shape_in3D[0] = std::accumulate(in->shape().begin(), in->shape().begin() + axis,
-                                            static_cast<T>(1.0), std::multiplies<T>());;
+                                            1, std::multiplies<size_t>());;
             shape_in3D[1] = in->shape()[axis];
             shape_in3D[2] = std::accumulate(in->shape().end() - (in->ndim() - 1 - axis), in->shape().end(),
-                                            static_cast<T>(1.0), std::multiplies<T>());;
+                                            1, std::multiplies<size_t>());;
             shape_out3D[0] = shape_in3D[0];
             shape_out3D[1] = 1;
             shape_out3D[2] = shape_in3D[2];

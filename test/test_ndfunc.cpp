@@ -269,6 +269,168 @@ namespace nd {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncIsClose, MyNdFuncIsCloseTypes);
 
     template <typename T>
+    class TestNdFuncAllClose : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncAllClose);
+    TYPED_TEST_P(TestNdFuncAllClose, TestAllClose) {
+        ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        bool y = allclose(x, x);
+        ASSERT_TRUE(y);
+    }
+    typedef ::testing::Types<float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdFuncAllCloseTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncAllClose,
+                               TestAllClose);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncAllClose, MyNdFuncAllCloseTypes);
+
+    template <typename T>
+    class TestNdFuncSum : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncSum);
+    TYPED_TEST_P(TestNdFuncSum, TestSum) {
+        // No buffer provided, keepdims
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y = sum(x, 0);
+        ASSERT_EQ(y.shape(), shape_t({3, 4}));
+        TypeParam correct_elem = static_cast<TypeParam>(120.0);
+        for(auto it_y = y.begin(); it_y != y.end();
+            ++it_y, correct_elem += static_cast<TypeParam>(5.0)) {
+            ASSERT_EQ(*it_y, correct_elem);
+        }}
+
+        // Buffer provided, dropdims
+       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y(shape_t({1, 3, 4}));
+        ndarray<TypeParam> z = sum(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+
+        TypeParam correct_elem = static_cast<TypeParam>(120.0);
+        for(auto it_y = y.begin(); it_y != y.end();
+            ++it_y, correct_elem += static_cast<TypeParam>(5.0)) {
+            ASSERT_EQ(*it_y, correct_elem);
+        }}
+    }
+    typedef ::testing::Types<int, size_t,
+                             float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdFuncSumTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncSum,
+                               TestSum);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncSum, MyNdFuncSumTypes);
+
+    template <typename T>
+    class TestNdFuncProd : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncProd);
+    TYPED_TEST_P(TestNdFuncProd, TestProd) {
+        // No buffer provided, keepdims
+       {ndarray<TypeParam> x = zeros<TypeParam>({2, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y = prod(x, 0);
+        ASSERT_EQ(y.shape(), shape_t({3, 4}));
+        ASSERT_EQ(y.data()[0],  static_cast<TypeParam>(0.0));
+        ASSERT_EQ(y.data()[1],  static_cast<TypeParam>(13.0));
+        ASSERT_EQ(y.data()[2],  static_cast<TypeParam>(28.0));
+        ASSERT_EQ(y.data()[3],  static_cast<TypeParam>(45.0));
+        ASSERT_EQ(y.data()[4],  static_cast<TypeParam>(64.0));
+        ASSERT_EQ(y.data()[5],  static_cast<TypeParam>(85.0));
+        ASSERT_EQ(y.data()[6],  static_cast<TypeParam>(108.0));
+        ASSERT_EQ(y.data()[7],  static_cast<TypeParam>(133.0));
+        ASSERT_EQ(y.data()[8],  static_cast<TypeParam>(160.0));
+        ASSERT_EQ(y.data()[9],  static_cast<TypeParam>(189.0));
+        ASSERT_EQ(y.data()[10], static_cast<TypeParam>(220.0));
+        ASSERT_EQ(y.data()[11], static_cast<TypeParam>(253.0));}
+
+        // Buffer provided, dropdims
+       {ndarray<TypeParam> x = zeros<TypeParam>({2, 3, 4});
+        for(size_t i = 0; i < x.size(); ++i) {
+            x.data()[i] = static_cast<TypeParam>(i);
+        }
+
+        ndarray<TypeParam> y(shape_t({1, 3, 4}));
+        ndarray<TypeParam> z = prod(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_EQ(y.data()[0],  static_cast<TypeParam>(0.0));
+        ASSERT_EQ(y.data()[1],  static_cast<TypeParam>(13.0));
+        ASSERT_EQ(y.data()[2],  static_cast<TypeParam>(28.0));
+        ASSERT_EQ(y.data()[3],  static_cast<TypeParam>(45.0));
+        ASSERT_EQ(y.data()[4],  static_cast<TypeParam>(64.0));
+        ASSERT_EQ(y.data()[5],  static_cast<TypeParam>(85.0));
+        ASSERT_EQ(y.data()[6],  static_cast<TypeParam>(108.0));
+        ASSERT_EQ(y.data()[7],  static_cast<TypeParam>(133.0));
+        ASSERT_EQ(y.data()[8],  static_cast<TypeParam>(160.0));
+        ASSERT_EQ(y.data()[9],  static_cast<TypeParam>(189.0));
+        ASSERT_EQ(y.data()[10], static_cast<TypeParam>(220.0));
+        ASSERT_EQ(y.data()[11], static_cast<TypeParam>(253.0));}
+    }
+    typedef ::testing::Types<int, size_t,
+                             float, double,
+                             std::complex<float>,
+                             std::complex<double>> MyNdFuncProdTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncProd,
+                               TestProd);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncProd, MyNdFuncProdTypes);
+
+    TEST(TestNdFunc, TestAny) {
+        // No buffer provided, keepdims
+       {ndarray<bool> x = zeros<bool>({2, 3});
+        x[{1, 1}] = true;
+
+        ndarray<bool> y = any(x, 0);
+        ASSERT_EQ(y.shape(), shape_t({3}));
+        ASSERT_EQ(y.data()[0],  false);
+        ASSERT_EQ(y.data()[1],  true);
+        ASSERT_EQ(y.data()[2],  false);}
+
+       {ndarray<bool> x = zeros<bool>({2, 3});
+        x[{1, 1}] = true;
+
+        ndarray<bool> y(shape_t({1, 3}));
+        ndarray<bool> z = any(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_EQ(y.shape(), shape_t({1, 3}));
+        ASSERT_EQ(y.data()[0],  false);
+        ASSERT_EQ(y.data()[1],  true);
+        ASSERT_EQ(y.data()[2],  false);}
+    }
+
+    TEST(TestNdFunc, TestAll) {
+        // No buffer provided, keepdims
+       {ndarray<bool> x = zeros<bool>({2, 3});
+        x[{1, 1}] = true;
+
+        ndarray<bool> y = all(x, 0);
+        ASSERT_EQ(y.shape(), shape_t({3}));
+        ASSERT_EQ(y.data()[0],  false);
+        ASSERT_EQ(y.data()[1],  false);
+        ASSERT_EQ(y.data()[2],  false);}
+
+       {ndarray<bool> x = zeros<bool>({2, 3});
+        x[{1, 1}] = true;
+
+        ndarray<bool> y(shape_t({1, 3}));
+        ndarray<bool> z = all(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_EQ(y.shape(), shape_t({1, 3}));
+        ASSERT_EQ(y.data()[0],  false);
+        ASSERT_EQ(y.data()[1],  false);
+        ASSERT_EQ(y.data()[2],  false);}
+    }
+
+    template <typename T>
     class TestNdFuncSin : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncSin);
     TYPED_TEST_P(TestNdFuncSin, TestSin) {

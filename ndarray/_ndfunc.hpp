@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <functional>
 #include <type_traits>
 #include <vector>
 
@@ -275,10 +276,30 @@ namespace nd {
      *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
-    ndarray<bool> any(ndarray<bool> const& x,
+    template <typename T, typename BOOL = bool>
+    ndarray<BOOL> any(ndarray<T> const& x,
                       size_t const axis,
                       bool const keepdims = false,
-                      ndarray<bool>* const out = nullptr);
+                      ndarray<T>* const out = nullptr) {
+        /*
+         * Why not use `ndarray<bool>` directly as return type?
+         * Doing so for some reason gives the following error message:
+         *     error: return type ‘class nd::ndarray<bool>’ is incomplete
+         *
+         * Don't know how to solve the issue using forward-declaration.
+         */
+        static_assert(is_bool<T>(), "Only {bool} types allowed.");
+
+        if(out == nullptr) {
+            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(shape_y);
+            util::reduce(std::logical_or<T>(), const_cast<ndarray<T>*>(&x), &y, axis, false);
+            return (keepdims ? y : y.squeeze({axis}));
+        } else {
+            util::reduce(std::logical_or<T>(), const_cast<ndarray<T>*>(&x), out, axis, false);
+            return (keepdims ? *out : out->squeeze({axis}));
+        }
+    }
 
     /*
      * Logical AND along specified axis.
@@ -303,10 +324,30 @@ namespace nd {
      *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
      */
-    ndarray<bool> all(ndarray<bool> const& x,
+    template <typename T, typename BOOL = bool>
+    ndarray<BOOL> all(ndarray<T> const& x,
                       size_t const axis,
                       bool const keepdims = false,
-                      ndarray<bool>* const out = nullptr);
+                      ndarray<T>* const out = nullptr) {
+        /*
+         * Why not use `ndarray<bool>` directly as return type?
+         * Doing so for some reason gives the following error message:
+         *     error: return type ‘class nd::ndarray<bool>’ is incomplete
+         *
+         * Don't know how to solve the issue using forward-declaration.
+         */
+        static_assert(is_bool<T>(), "Only {bool} types allowed.");
+
+        if(out == nullptr) {
+            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(shape_y);
+            util::reduce(std::logical_and<T>(), const_cast<ndarray<T>*>(&x), &y, axis, true);
+            return (keepdims ? y : y.squeeze({axis}));
+        } else {
+            util::reduce(std::logical_and<T>(), const_cast<ndarray<T>*>(&x), out, axis, true);
+            return (keepdims ? *out : out->squeeze({axis}));
+        }
+    }
 
     /*
      * Element-wise closeness check for floating point types.
@@ -343,7 +384,7 @@ namespace nd {
             return lhs <= rhs;
         };
         if(out == nullptr) {
-            shape_t const& shape_out = util::predict_shape(x.shape(), y.shape());
+            shape_t const& shape_out = util::predict_shape_broadcast(x.shape(), y.shape());
             ndarray<bool> close_enough(shape_out);
 
             util::apply(ufunc,
@@ -368,8 +409,23 @@ namespace nd {
      * all_close_enough: bool
      *     all(|x - y| <= (atol + rtol * |y|))
      */
-    template <typename T>
-    bool allclose(ndarray<T> const& x, ndarray<T> const& y, T const rtol = 1e-5, T const atol = 1e-8);
+    template <typename T, typename BOOL = bool>
+    BOOL allclose(ndarray<T> const& x,
+                  ndarray<T> const& y,
+                  double const rtol = 1e-5,
+                  double const atol = 1e-8) {
+        /*
+         * Why not use `bool` directly as return type?
+         * Doing so for some reason gives the following error message:
+         *     error: return type ‘class nd::ndarray<bool>’ is incomplete
+         *
+         * Don't know how to solve the issue using forward-declaration.
+         */
+        static_assert(is_float<T>() || is_complex<T>() , "Only {float, complex} types allowed.");
+
+        ndarray<BOOL> closeness = isclose(x, y, nullptr, rtol, atol).ravel();
+        return all(closeness, 0, true).data()[0];
+    }
 
     /*
      * Sum of array elements over given axis.
@@ -398,7 +454,20 @@ namespace nd {
     ndarray<T> sum(ndarray<T> const& x,
                    size_t const axis,
                    bool const keepdims = false,
-                   ndarray<T>* const out = nullptr);
+                   ndarray<T>* const out = nullptr) {
+        static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
+                      "Only {int, float, complex} types allowed.");
+
+        if(out == nullptr) {
+            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(shape_y);
+            util::reduce(std::plus<T>(), const_cast<ndarray<T>*>(&x), &y, axis, static_cast<T>(0.0));
+            return (keepdims ? y : y.squeeze({axis}));
+        } else {
+            util::reduce(std::plus<T>(), const_cast<ndarray<T>*>(&x), out, axis, static_cast<T>(0.0));
+            return (keepdims ? *out : out->squeeze({axis}));
+        }
+    }
 
     /*
      * Product of array elements over given axis.
@@ -425,9 +494,22 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> prod(ndarray<T> const& x,
-                    size_t const axis,
-                    bool const keepdims = false,
-                    ndarray<T>* const out = nullptr);
+                   size_t const axis,
+                   bool const keepdims = false,
+                   ndarray<T>* const out = nullptr) {
+        static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
+                      "Only {int, float, complex} types allowed.");
+
+        if(out == nullptr) {
+            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(shape_y);
+            util::reduce(std::multiplies<T>(), const_cast<ndarray<T>*>(&x), &y, axis, static_cast<T>(1.0));
+            return (keepdims ? y : y.squeeze({axis}));
+        } else {
+            util::reduce(std::multiplies<T>(), const_cast<ndarray<T>*>(&x), out, axis, static_cast<T>(1.0));
+            return (keepdims ? *out : out->squeeze({axis}));
+        }
+    }
 
     /*
      * Join a sequence of arrays along an existing axis.

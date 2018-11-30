@@ -16,21 +16,30 @@
 #include "ndarray/ndarray.hpp"
 
 namespace nd { namespace util {
-    TEST(TestNdUtil, TestPredictShape) {
+    TEST(TestNdUtil, TestPredictShapeBroadcast) {
         shape_t const A1({2, 3});
         shape_t const B1({3});
-        shape_t const C1 = predict_shape(A1, B1);
+        shape_t const C1 = predict_shape_broadcast(A1, B1);
         ASSERT_EQ(C1, shape_t({2, 3}));
 
         shape_t const A2({2, 1});
         shape_t const B2({3});
-        shape_t const C2 = predict_shape(A2, B2);
+        shape_t const C2 = predict_shape_broadcast(A2, B2);
         ASSERT_EQ(C2, shape_t({2, 3}));
 
         shape_t const A3({2, 3, 5, 7});
         shape_t const B3({2, 3, 5, 7});
-        shape_t const C3 = predict_shape(A3, B3);
+        shape_t const C3 = predict_shape_broadcast(A3, B3);
         ASSERT_EQ(C3, shape_t({2, 3, 5, 7}));
+    }
+
+    TEST(TestNdUtil, TestPredictShapeReduction) {
+        shape_t const A({3, 5});
+        ASSERT_EQ(predict_shape_reduction(A, 0), shape_t({1, 5}));
+        ASSERT_EQ(predict_shape_reduction(A, 1), shape_t({3, 1}));
+
+        shape_t const B({5});
+        ASSERT_EQ(predict_shape_reduction(B, 0), shape_t({1}));
     }
 
     TEST(TestNdUtil, TestSliceConstructor) {
