@@ -529,7 +529,7 @@ namespace nd {
                                                         1, std::multiplies<size_t>());
                 std::stringstream error_msg;
                 error_msg << "Cannot reshape array of size "
-                          << std::to_string(new_size) << " into shape ";
+                          << std::to_string(size()) << " into shape ";
                 util::operator<<(error_msg, shape);
                 error_msg << ".\n";
                 util::NDARRAY_ASSERT(new_size == size(), error_msg.str());
