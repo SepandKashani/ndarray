@@ -8,9 +8,8 @@
 Ndarray documentation
 #####################
 
-*Ndarray* is a `GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>`_
-NumPy-like equivalent for C++.
-It's primary objective is to simplify the specification of algorithms in *Pypeline*, the signal processing toolkit to design and deploy holistic imaging pipelines.
+*Ndarray* is a `GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>`_ NumPy-like equivalent for
+C++.
 
 .. toctree::
    :caption: Contents

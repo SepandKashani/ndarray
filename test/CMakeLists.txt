@@ -4,8 +4,6 @@
 # Author : Sepand KASHANI [kashani.sepand@gmail.com]
 # #############################################################################
 
-find_package(GTest 1.8 REQUIRED)
-
 set(NDARRAY_TESTS
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndarray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndarray_operator.cpp
@@ -18,4 +16,4 @@ set(NDARRAY_TESTS
 set(NDARRAY_TARGET test_ndarray)
 
 add_executable(${NDARRAY_TARGET} ${NDARRAY_TESTS})
-target_link_libraries(${NDARRAY_TARGET} gtest gtest_main Ndarray)
+target_link_libraries(${NDARRAY_TARGET} ${CONAN_LIBS} Ndarray)

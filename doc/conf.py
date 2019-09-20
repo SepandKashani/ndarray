@@ -7,11 +7,8 @@
 import datetime
 
 project = 'ndarray'
-copyright = (f'{datetime.date.today().year}, '
-             'Imaging of Things Team (ImoT), IBM Research Zurich')
-author = ('Paul HURLEY [pah@zurich.ibm.com], '
-          'Sepand KASHANI [kashani.sepand@gmail.com], '
-          'Matthieu SIMEONI [meo@zurich.ibm.com]')
+copyright = f'{datetime.date.today().year}, Imaging of Things (ImoT)'
+author = 'Sepand KASHANI [kashani.sepand@gmail.com]'
 
 templates_path = ['_templates']
 master_doc = 'index'

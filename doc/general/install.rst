@@ -7,43 +7,32 @@
 Installation
 ============
 
-*Ndarray* is a header-only C++14 library tested on x86_64 systems running Linux.
+*Ndarray* is a header-only C++17 library tested on x86_64 systems running Linux. Dependencies are
+installed via the `Conan <https://docs.conan.io/en/latest/index.html>`_ package manager.
 
-The following libraries must be available on the system before installing *Ndarray*:
-
-+-------------+------------+
-| Library     |    Version |
-+=============+============+
-| Eigen       |      3.3.5 |
-+-------------+------------+
-| FFTW        |      3.3.8 |
-+-------------+------------+
-| GTEST       |      1.8.1 |
-+-------------+------------+
-| Intel MKL   |   2018.0.3 |
-+-------------+------------+
 
 Headers
 -------
 ::
 
-    $ cd <root_dir>/
-    $ mkdir -p build/ndarray
-    $ cd build/ndarray
-    $ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON ../..
-    $ make install
-    $ ./test/test_ndarray
+    $ BUILD_DIR="<root_dir>/build/ndarray"
+    $ mkdir -p "${BUILD_DIR}" && cd "${BUILD_DIR}"
+    $ conan install --build=missing ../..
+    $ cmake -DCMAKE_BUILD_TYPE=[Debug, Release] ../..
+    $ [sudo] make install
+    $ "${BUILD_DIR}/bin/test_ndarray"
 
 
 Documentation
 -------------
 ::
 
-    $ cd <root_dir>/
-    $ mkdir -p build/doc
-    $ sphinx-build -b html doc build/doc
+    $ BUILD_DIR="<root_dir>/build/doc"
+    $ mkdir -p "${BUILD_DIR}"
+    $ sphinx-build -b html doc "${BUILD_DIR}"
+
 
 Remarks
 -------
 
-* *Ndarray* is tested internally with GCC 8.2.1.
+* *Ndarray* is tested internally with GCC 9.1.0.
