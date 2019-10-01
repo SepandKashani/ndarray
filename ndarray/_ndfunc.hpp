@@ -1189,7 +1189,7 @@ namespace nd {
     ndarray<T> clip(ndarray<T> const& x, T const down, T const up, ndarray<T>* const out = nullptr);
 
     /*
-     * Element-wise indication number's sign.
+     * Element-wise indication of number's sign.
      *
      * Parameters
      * ----------
@@ -1204,7 +1204,31 @@ namespace nd {
      *     -1 if x < 0, 0 if x==0, 1 if x > 0.
      */
     template <typename T>
-    ndarray<T> sign(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> sign(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_signed_int<T>() || is_float<T>(),
+                      "Only {signed_int, float} types allowed.");
+
+        T constexpr p = static_cast<T>(1.0);
+        T constexpr m = static_cast<T>(-1.0);
+        T constexpr z = static_cast<T>(0.0);
+        auto ufunc = [p, m, z](T const& _x) -> T {
+            if(_x > z) {
+                return p;
+            } else if(_x < z) {
+                return m;
+            } else {
+                return z;
+            }
+        };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Angle of complex argument.

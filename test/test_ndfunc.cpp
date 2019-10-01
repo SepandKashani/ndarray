@@ -234,6 +234,37 @@ namespace nd {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncAbs, MyNdFuncAbsTypes);
 
     template <typename T>
+    class TestNdFuncSign : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncSign);
+    TYPED_TEST_P(TestNdFuncSign, TestSign) {
+        ndarray<TypeParam> x = arange<TypeParam>(-3, 3, 1).reshape(shape_t {2, 3});
+        ndarray<TypeParam> truth = r_(std::vector<TypeParam> {-1, -1, -1, 0, 1, 1}).reshape(shape_t {2, 3});
+
+        // No buffer provided
+       {ndarray<TypeParam> y = sign<TypeParam>(x);
+        for(size_t i = 0; i < x.size(); ++i) {
+            TypeParam const& correct = truth.data()[i];
+            TypeParam const& tested = y.data()[i];
+            ASSERT_EQ(correct, tested);
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> _y = sign<TypeParam>(x, &y);
+        ASSERT_TRUE(_y.equals(y));
+        for(size_t i = 0; i < x.size(); ++i) {
+            TypeParam const& correct = truth.data()[i];
+            TypeParam const& tested = y.data()[i];
+            ASSERT_EQ(correct, tested);
+        }}
+    }
+    typedef ::testing::Types<int, ssize_t,
+                             float, double> MyNdFuncSignTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncSign,
+                               TestSign);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncSign, MyNdFuncSignTypes);
+
+    template <typename T>
     class TestNdFuncIsClose : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncIsClose);
     TYPED_TEST_P(TestNdFuncIsClose, TestIsClose) {
