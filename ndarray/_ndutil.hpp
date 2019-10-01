@@ -125,16 +125,41 @@ namespace nd { namespace util {
         public:
             slice() {};
 
+            /*
+             * Parameters
+             * ----------
+             * stop : int const
+             *     Termination index (exclusive).
+             */
             slice(int const stop):
                 m_start(0),
                 m_stop(stop),
                 m_step(1) {}
 
+            /*
+             * Parameters
+             * ----------
+             * start : int const
+             *     Initialisation index (inclusive).
+             * stop : int const
+             *     Termination index (exclusive).
+             */
             slice(int const start, int const stop):
                 m_start(start),
                 m_stop(stop),
                 m_step(1) {}
 
+            /*
+             * Parameters
+             * ----------
+             * start : int const
+             *     Initialisation index (inclusive).
+             * stop : int const
+             *     Termination index (exclusive). `-1` is a valid termination index to include the
+             *     first element of an array.
+             * step : int const
+             *     Step size (non-zero).
+             */
             slice(int const start, int const stop, int const step):
                 m_start(start),
                 m_stop(stop),
