@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <vector>
 #include <gtest/gtest.h>
 
 #include "ndarray/ndarray.hpp"
@@ -545,6 +546,27 @@ namespace nd {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncTan, MyNdFuncTanTypes);
 
     template <typename T>
+    class TestNdFuncDeg2Rad : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncDeg2Rad);
+    TYPED_TEST_P(TestNdFuncDeg2Rad, TestDeg2Rad) {
+        ndarray<TypeParam> ratio = r_(std::vector<TypeParam> {0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75});
+        ndarray<TypeParam> deg = ratio * ndarray<TypeParam>(180.0);
+        ndarray<TypeParam> rad_gt = ratio * ndarray<TypeParam>(M_PI);
+
+        // No buffer provided
+       {ndarray<TypeParam> rad = deg2rad<TypeParam>(deg);
+        ASSERT_TRUE(allclose(rad, rad_gt));}
+
+        // Buffer provided
+       {ndarray<TypeParam> rad(deg.shape());
+        ndarray<TypeParam> _rad = deg2rad<TypeParam>(deg, &rad);
+        ASSERT_TRUE(_rad.equals(rad));
+        ASSERT_TRUE(allclose(rad, rad_gt));}
+    }
+    typedef ::testing::Types<float, double> MyNdFuncDeg2RadTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncDeg2Rad,
+                               TestDeg2Rad);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncDeg2Rad, MyNdFuncDeg2RadTypes);    template <typename T>
     class TestNdFuncReal : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncReal);
 
