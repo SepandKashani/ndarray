@@ -234,11 +234,48 @@ namespace nd {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncAbs, MyNdFuncAbsTypes);
 
     template <typename T>
+    class TestNdFuncClip : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncClip);
+    TYPED_TEST_P(TestNdFuncClip, TestClip) {
+        ndarray<TypeParam> x = (arange<int>(3, 9, 1)
+                                .reshape(shape_t {2, 3})
+                                .template cast<TypeParam>());
+        TypeParam const down = static_cast<TypeParam>(5);
+        TypeParam const up = static_cast<TypeParam>(7);
+        ndarray<TypeParam> truth = (r_(std::vector<TypeParam> {5, 5, 5, 6, 7, 7})
+                                    .reshape(shape_t {2, 3}));
+
+        // No buffer provided
+       {ndarray<TypeParam> y = clip<TypeParam>(x, down, up);
+        for(size_t i = 0; i < x.size(); ++i) {
+            TypeParam const& correct = truth.data()[i];
+            TypeParam const& tested = y.data()[i];
+            ASSERT_EQ(correct, tested);
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> _y = clip<TypeParam>(x, down, up, &y);
+        ASSERT_TRUE(_y.equals(y));
+        for(size_t i = 0; i < x.size(); ++i) {
+            TypeParam const& correct = truth.data()[i];
+            TypeParam const& tested = y.data()[i];
+            ASSERT_EQ(correct, tested);
+        }}
+    }
+    typedef ::testing::Types<int, size_t,
+                             float, double> MyNdFuncClipTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncClip,
+                               TestClip);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncClip, MyNdFuncClipTypes);
+
+    template <typename T>
     class TestNdFuncSign : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncSign);
     TYPED_TEST_P(TestNdFuncSign, TestSign) {
         ndarray<TypeParam> x = arange<TypeParam>(-3, 3, 1).reshape(shape_t {2, 3});
-        ndarray<TypeParam> truth = r_(std::vector<TypeParam> {-1, -1, -1, 0, 1, 1}).reshape(shape_t {2, 3});
+        ndarray<TypeParam> truth = (r_(std::vector<TypeParam> {-1, -1, -1, 0, 1, 1})
+                                    .reshape(shape_t {2, 3}));
 
         // No buffer provided
        {ndarray<TypeParam> y = sign<TypeParam>(x);

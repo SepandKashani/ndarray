@@ -1186,7 +1186,20 @@ namespace nd {
      *     Saturate `x` to lie in [down, up].
      */
     template <typename T>
-    ndarray<T> clip(ndarray<T> const& x, T const down, T const up, ndarray<T>* const out = nullptr);
+    ndarray<T> clip(ndarray<T> const& x, T const down, T const up, ndarray<T>* const out = nullptr) {
+        static_assert(is_int<T>() || is_float<T>(), "Only {int, float} types allowed.");
+        util::NDARRAY_ASSERT(down <= up, "Parameter[down] must be \\le Parameter[up].");
+
+        auto ufunc = [down, up](T const& _x) -> T { return std::clamp<T>(_x, down, up); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise indication of number's sign.
