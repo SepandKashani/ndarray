@@ -259,10 +259,40 @@ namespace nd {
             ASSERT_EQ(correct, tested);
         }}
     }
+    template <typename T>
+    class TestNdFuncFloor : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncFloor);
+    TYPED_TEST_P(TestNdFuncFloor, TestFloor) {
+        ndarray<TypeParam> x = arange<TypeParam>(-3.1, 3.9, 0.5).reshape(shape_t {2, 7});
+        ndarray<TypeParam> truth = (r_(std::vector<TypeParam> {-4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3})
+                                    .reshape(shape_t {2, 7}));
+
+        // No buffer provided
+       {ndarray<TypeParam> y = floor<TypeParam>(x);
+        for(size_t i = 0; i < x.size(); ++i) {
+            TypeParam const& correct = truth.data()[i];
+            TypeParam const& tested = y.data()[i];
+            ASSERT_EQ(correct, tested);
+        }}
+
+        // Buffer provided
+       {ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> _y = floor<TypeParam>(x, &y);
+        ASSERT_TRUE(_y.equals(y));
+        for(size_t i = 0; i < x.size(); ++i) {
+            TypeParam const& correct = truth.data()[i];
+            TypeParam const& tested = y.data()[i];
+            ASSERT_EQ(correct, tested);
+        }}
+    }
     typedef ::testing::Types<float, double> MyNdFuncCeilFloorTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncCeil,
                                TestCeil);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncCeil, MyNdFuncCeilFloorTypes);
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncFloor,
+                               TestFloor);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncFloor, MyNdFuncCeilFloorTypes);
+
     template <typename T>
     class TestNdFuncClip : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncClip);

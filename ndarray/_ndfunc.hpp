@@ -1172,7 +1172,7 @@ namespace nd {
     }
 
     /*
-     * Element-wise round-down.
+     * Element-wise floor.
      *
      * Parameters
      * ----------
@@ -1180,9 +1180,25 @@ namespace nd {
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
+     *
+     * Returns
+     * -------
+     * y : ndarray<T>
      */
     template <typename T>
-    ndarray<T> floor(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> floor(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::floor(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise clip.
