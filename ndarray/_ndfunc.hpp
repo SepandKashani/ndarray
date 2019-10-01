@@ -1143,7 +1143,7 @@ namespace nd {
     ndarray<size_t> argsort(ndarray<T> const& x, size_t const axis);
 
     /*
-     * Element-wise round-up.
+     * Element-wise ceiling.
      *
      * Parameters
      * ----------
@@ -1151,9 +1151,25 @@ namespace nd {
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
+     *
+     * Returns
+     * -------
+     * y : ndarray<T>
      */
     template <typename T>
-    ndarray<T> ceil(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> ceil(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::ceil(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise round-down.
