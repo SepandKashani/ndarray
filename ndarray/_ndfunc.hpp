@@ -111,7 +111,8 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> arange(T const start, T const stop, T const step) {
-        static_assert(is_signed_int<T>() || is_float<T>(), "Only {int, float} types allowed." );
+        static_assert(is_signed_int<T>() || is_float<T>(),
+                      "Only {signed_int, float} types allowed." );
         util::NDARRAY_ASSERT(std::abs(step) > 0, "Parameter[step] cannot be 0.");
         util::NDARRAY_ASSERT(((start <= stop) && (step > 0)) || ((start >= stop) && (step < 0)),
                              "Impossible start/stop/step combination provided.");
