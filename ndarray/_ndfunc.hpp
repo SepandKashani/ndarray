@@ -762,7 +762,20 @@ namespace nd {
      *     Angle [deg]
      */
     template <typename T>
-    ndarray<T> rad2deg(ndarray<T> const& rad, ndarray<T>* const out = nullptr);
+    ndarray<T> rad2deg(ndarray<T> const& rad, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        T constexpr ratio = static_cast<T>(180.0 / M_PI);
+        auto ufunc = [ratio](T const& _rad) -> T { return _rad * ratio; };
+        if(out == nullptr) {
+            ndarray<T> deg(rad.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&rad), &deg);
+            return deg;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&rad), out);
+            return *out;
+        }
+    }
 
     /*
      * Parameters

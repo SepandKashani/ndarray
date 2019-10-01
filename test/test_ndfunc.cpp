@@ -566,7 +566,32 @@ namespace nd {
     typedef ::testing::Types<float, double> MyNdFuncDeg2RadTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncDeg2Rad,
                                TestDeg2Rad);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncDeg2Rad, MyNdFuncDeg2RadTypes);    template <typename T>
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncDeg2Rad, MyNdFuncDeg2RadTypes);
+
+    template <typename T>
+    class TestNdFuncRad2Deg : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdFuncRad2Deg);
+    TYPED_TEST_P(TestNdFuncRad2Deg, TestRad2Deg) {
+        ndarray<TypeParam> ratio = r_(std::vector<TypeParam> {0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75});
+        ndarray<TypeParam> rad = ratio * ndarray<TypeParam>(M_PI);
+        ndarray<TypeParam> deg_gt = ratio * ndarray<TypeParam>(180.0);
+
+        // No buffer provided
+       {ndarray<TypeParam> deg = rad2deg<TypeParam>(rad);
+        ASSERT_TRUE(allclose(deg, deg_gt));}
+
+        // Buffer provided
+       {ndarray<TypeParam> deg(rad.shape());
+        ndarray<TypeParam> _deg = rad2deg<TypeParam>(rad, &deg);
+        ASSERT_TRUE(_deg.equals(deg));
+        ASSERT_TRUE(allclose(deg, deg_gt));}
+    }
+    typedef ::testing::Types<float, double> MyNdFuncRad2DegTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncRad2Deg,
+                               TestRad2Deg);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncRad2Deg, MyNdFuncRad2DegTypes);
+
+    template <typename T>
     class TestNdFuncReal : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncReal);
 
