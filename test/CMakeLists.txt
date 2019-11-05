@@ -16,4 +16,4 @@ set(NDARRAY_TESTS
 set(NDARRAY_TARGET test_ndarray)
 
 add_executable(${NDARRAY_TARGET} ${NDARRAY_TESTS})
-target_link_libraries(${NDARRAY_TARGET} ${CONAN_LIBS} Ndarray)
+target_link_libraries(${NDARRAY_TARGET} Ndarray)
