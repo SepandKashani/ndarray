@@ -20,7 +20,7 @@
 
 namespace nd { template <typename T> class ndarray; }
 
-namespace nd { namespace util {
+namespace nd::util {
     /*
      * assert()-like statement that does not deactivate in Release mode.
      *
@@ -453,6 +453,6 @@ namespace nd { namespace util {
         reduce3D(ufunc, &in3D, &out3D, axis3D, init);
         // At this point `out` contains the result.
     }
-}}
+}
 
 #endif // _NDUTIL_HPP

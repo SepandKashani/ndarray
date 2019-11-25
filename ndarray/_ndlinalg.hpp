@@ -9,7 +9,7 @@
 
 namespace nd { template <typename T> class ndarray; }
 
-namespace nd { namespace linalg {
+namespace nd::linalg {
     /*
      * Matrix-Multiplication extended to ND-arrays.
      *
@@ -64,6 +64,6 @@ namespace nd { namespace linalg {
      */
     template <typename T>
     ndarray<T> bmm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr);
-}}
+}
 
 #endif // _NDLINALG_HPP
