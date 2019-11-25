@@ -35,4 +35,4 @@ Documentation
 Remarks
 -------
 
-* *Ndarray* is tested internally with GCC 9.1.0.
+* *Ndarray* is tested internally with GCC 9.2.0.
