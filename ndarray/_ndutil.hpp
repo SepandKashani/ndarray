@@ -26,7 +26,7 @@ namespace nd { namespace util {
      *
      * Parameters
      * ----------
-     * cond : bool
+     * cond : bool const
      * msg : T const&
      */
     template <typename T>

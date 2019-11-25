@@ -113,7 +113,7 @@ namespace nd {
                 m_contiguous(other.m_contiguous) {}
 
             /*
-             * Interpret pre-existing continuous memory block as an array.
+             * Interpret pre-existing contiguous memory block as an array.
              *
              * Parameters
              * ----------

@@ -73,6 +73,10 @@ namespace nd {
     /*
      * Create 1-D array from elements.
      *
+     * Parameters
+     * ----------
+     * x : std::vector<T> const&
+     *
      * Returns
      * -------
      * y : ndarray<T>
@@ -238,8 +242,7 @@ namespace nd {
      * Returns
      * -------
      * I : ndarray<T>
-     *     (N, N) array where all elements are 0, except on the main diagonal
-     *     where they are 1.
+     *     (N, N) array where all elements are 0, except on the main diagonal where they are 1.
      */
     template <typename T>
     ndarray<T> eye(size_t const N) {
@@ -264,8 +267,7 @@ namespace nd {
      * axis : size_t const
      *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axis which is reduced is left in the result as
-     *     dimension of size 1.
+     *     If true, the axis which is reduced is left in the result as dimension of size 1.
      * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -1361,7 +1363,10 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     *
+     * out : ndarray<T>* const
+     *     Optional buffer to store result.
+     *     Must have the same dimensions as the input.
+     * 
      * Returns
      * -------
      * out : ndarray<T>
