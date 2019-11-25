@@ -12,12 +12,6 @@ Ndarray
 C++.
 
 
-Warning
--------
-
-This is alpha code with zero support offered at this stage.
-
-
 Installation
 ------------
 See ``doc/general/install.rst``
