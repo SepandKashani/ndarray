@@ -45,10 +45,9 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdArrayIter, TestOperatorDereference) {
-        ndarray<TypeParam> x(shape_t({5, 3, 4}));
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
+                                .reshape(shape_t({5, 3, 4}))
+                                .template cast<TypeParam>());
 
         for(size_t i = 0; i < x.shape()[0]; ++i) {
             for(size_t j = 0; j < x.shape()[1]; ++j) {
@@ -62,10 +61,9 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdArrayIter, TestOperatorIncrement) {
-        ndarray<TypeParam> x(shape_t({50, 25, 30}));
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 50 * 25 * 30, 1)
+                                .reshape(shape_t({50, 25, 30}))
+                                .template cast<TypeParam>());
 
         ndarray_iterator<TypeParam> x_iter(&x);
         for(size_t i = 0; i < x.size(); ++i, ++x_iter) {
@@ -77,10 +75,9 @@ namespace nd {
         ndarray_iterator<TypeParam> expected_x_iter(&x, x.shape());
         ASSERT_TRUE(x_iter == expected_x_iter);
 
-        namespace ndu = util;
-        ndarray<TypeParam> y = x({ndu::slice(),
-                                  ndu::slice(0, 30, 2),
-                                  ndu::slice(20, 13, -3)});
+        ndarray<TypeParam> y = x({util::slice(),
+                                  util::slice(0, 30, 2),
+                                  util::slice(20, 13, -3)});
         ndarray_iterator<TypeParam> y_iter(&y);
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {
@@ -98,10 +95,9 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdArrayIter, TestAssignment) {
-        ndarray<TypeParam> x(shape_t({5, 3, 4}));
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
+                                .reshape(shape_t({5, 3, 4}))
+                                .template cast<TypeParam>());
 
         for(auto it = x.begin(); it != x.end(); ++it) {
             *it += TypeParam(2.0);
