@@ -7,6 +7,8 @@
 #ifndef TEST_NDCONTAINER_HPP
 #define TEST_NDCONTAINER_HPP
 
+#include <numeric>
+
 #include <gtest/gtest.h>
 
 #include "ndarray/ndarray.hpp"
@@ -24,9 +26,7 @@ namespace nd {
     TEST(TestNdContainer, TestConstructorPreExisting) {
         size_t const nbytes = 3;
         byte_t* data = new byte_t[nbytes];
-        for(size_t i = 0; i < nbytes; ++i) {
-            data[i] = static_cast<byte_t>(i);
-        }
+        std::iota(data, data + nbytes, byte_t(0));
 
         {
             ndcontainer x(data, nbytes);
@@ -48,7 +48,7 @@ namespace nd {
 
         uintptr_t mask = reinterpret_cast<uintptr_t>(byte_alignment - 1);
         uintptr_t data = reinterpret_cast<uintptr_t>(x.data());
-        ASSERT_EQ(0, mask & data);
+        ASSERT_EQ(uintptr_t(0), mask & data);
     }
 }
 
