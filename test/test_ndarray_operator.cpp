@@ -38,10 +38,9 @@ namespace nd {
     TYPED_TEST_P(TestNdArrayOperatorEqual, TestEqual) {
         // shape(LHS) == shape(RHS)
        {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         lhs = rhs;
         for(auto it_lhs = lhs.begin(), it_rhs = rhs.begin();
@@ -61,10 +60,9 @@ namespace nd {
 
         // RHS broadcasts
        {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         lhs = rhs;
 
@@ -87,10 +85,9 @@ namespace nd {
     TYPED_TEST_P(TestNdArrayOperatorPlusEqual, TestPlusEqual) {
         // shape(LHS) == shape(RHS)
        {ndarray<TypeParam> lhs = ones<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         lhs += rhs;
         for(auto it_lhs = lhs.begin(), it_rhs = rhs.begin();
@@ -110,10 +107,9 @@ namespace nd {
 
         // RHS broadcasts
        {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         lhs += rhs;
 
@@ -136,10 +132,9 @@ namespace nd {
     TYPED_TEST_P(TestNdArrayOperatorMinusEqual, TestMinusEqual) {
         // shape(LHS) == shape(RHS)
        {ndarray<TypeParam> lhs = ones<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         lhs -= rhs;
         for(auto it_lhs = lhs.begin(), it_rhs = rhs.begin();
@@ -159,10 +154,9 @@ namespace nd {
 
         // RHS broadcasts
        {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         lhs -= rhs;
 
@@ -185,10 +179,9 @@ namespace nd {
     TYPED_TEST_P(TestNdArrayOperatorTimesEqual, TestTimesEqual) {
         // shape(LHS) == shape(RHS)
        {ndarray<TypeParam> lhs = ones<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         lhs *= rhs;
         for(auto it_lhs = lhs.begin(), it_rhs = rhs.begin();
@@ -208,10 +201,9 @@ namespace nd {
 
         // RHS broadcasts
        {ndarray<TypeParam> lhs = ones<TypeParam>({20, 30, 40});
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         lhs *= rhs;
 
@@ -233,10 +225,9 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorDivideEqual);
     TYPED_TEST_P(TestNdArrayOperatorDivideEqual, TestDivideEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 2.0);
 
         lhs /= rhs;
@@ -245,10 +236,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(3.0 * i);
-        }
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(3))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(3.0);
 
         lhs /= rhs;
@@ -257,10 +247,9 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(4.0 * i);
-        }
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(4))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 4.0);
 
         lhs /= rhs;
@@ -281,10 +270,9 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorModEqual);
     TYPED_TEST_P(TestNdArrayOperatorModEqual, TestModEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 5.0);
 
         lhs %= rhs;
@@ -293,10 +281,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(7.0 * i);
-        }
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(7))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         lhs %= rhs;
@@ -305,10 +292,9 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 7.0);
 
         lhs %= rhs;
@@ -329,10 +315,9 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorAndEqual);
     TYPED_TEST_P(TestNdArrayOperatorAndEqual, TestAndEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 5.0);
 
         lhs &= rhs;
@@ -341,10 +326,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         lhs &= rhs;
@@ -353,10 +337,9 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 7.0);
 
         lhs &= rhs;
@@ -377,10 +360,9 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorOrEqual);
     TYPED_TEST_P(TestNdArrayOperatorOrEqual, TestOrEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 5.0);
 
         lhs |= rhs;
@@ -389,10 +371,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         lhs |= rhs;
@@ -401,10 +382,9 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 7.0);
 
         lhs |= rhs;
@@ -425,10 +405,9 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorXorEqual);
     TYPED_TEST_P(TestNdArrayOperatorXorEqual, TestXorEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 5.0);
 
         lhs ^= rhs;
@@ -437,10 +416,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         lhs ^= rhs;
@@ -449,10 +427,9 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 7.0);
 
         lhs ^= rhs;
@@ -473,10 +450,9 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorShiftLeftEqual);
     TYPED_TEST_P(TestNdArrayOperatorShiftLeftEqual, TestShiftLeftEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 5.0);
 
         lhs <<= rhs;
@@ -485,10 +461,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         lhs <<= rhs;
@@ -497,10 +472,9 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 7.0);
 
         lhs <<= rhs;
@@ -521,10 +495,9 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorShiftRightEqual);
     TYPED_TEST_P(TestNdArrayOperatorShiftRightEqual, TestShiftRightEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 5.0);
 
         lhs >>= rhs;
@@ -533,10 +506,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         lhs >>= rhs;
@@ -545,10 +517,9 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 7.0);
 
         lhs >>= rhs;
@@ -568,10 +539,9 @@ namespace nd {
     class TestNdArrayOperatorPlusPlus : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayOperatorPlusPlus);
     TYPED_TEST_P(TestNdArrayOperatorPlusPlus, TestPlusPlus) {
-        ndarray<TypeParam> x = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 20 * 30 * 40, 1)
+                                .reshape(shape_t({20, 30, 40}))
+                                .template cast<TypeParam>());
         ndarray<TypeParam> y = x.copy();
 
         ++x;
@@ -589,10 +559,9 @@ namespace nd {
     class TestNdArrayOperatorMinusMinus : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayOperatorMinusMinus);
     TYPED_TEST_P(TestNdArrayOperatorMinusMinus, TestMinusMinus) {
-        ndarray<TypeParam> x = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 20 * 30 * 40, 1)
+                                .reshape(shape_t({20, 30, 40}))
+                                .template cast<TypeParam>());
         ndarray<TypeParam> y = x.copy();
 
         --x;
@@ -610,10 +579,9 @@ namespace nd {
     class TestNdArrayOperatorUnaryMinus : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayOperatorUnaryMinus);
     TYPED_TEST_P(TestNdArrayOperatorUnaryMinus, TestUnaryMinus) {
-        ndarray<TypeParam> x = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 20 * 30 * 40, 1)
+                                .reshape(shape_t({20, 30, 40}))
+                                .template cast<TypeParam>());
 
         ndarray<TypeParam> y = -x;
 
@@ -631,10 +599,9 @@ namespace nd {
     class TestNdArrayOperatorUnaryBitFlip : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayOperatorUnaryBitFlip);
     TYPED_TEST_P(TestNdArrayOperatorUnaryBitFlip, TestUnaryBitFlip) {
-        ndarray<TypeParam> x = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 20 * 30 * 40, 1)
+                                .reshape(shape_t({20, 30, 40}))
+                                .template cast<TypeParam>());
 
         ndarray<TypeParam> y = ~x;
 
@@ -652,10 +619,9 @@ namespace nd {
     class TestNdArrayOperatorNot : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayOperatorNot);
     TYPED_TEST_P(TestNdArrayOperatorNot, TestNot) {
-        ndarray<TypeParam> x = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < x.size(); ++i) {
-            x.data()[i] = static_cast<TypeParam>(i);
-        }
+        ndarray<TypeParam> x = (arange<int>(0, 20 * 30 * 40, 1)
+                                .reshape(shape_t({20, 30, 40}))
+                                .template cast<TypeParam>());
 
         ndarray<TypeParam> y = !x;
 
@@ -674,14 +640,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorPlus);
     TYPED_TEST_P(TestNdArrayOperatorPlus, TestPlus) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs + rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -691,10 +655,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs + rhs;
@@ -705,14 +668,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs + rhs;
@@ -739,14 +700,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorMinus);
     TYPED_TEST_P(TestNdArrayOperatorMinus, TestMinus) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs - rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -756,10 +715,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs - rhs;
@@ -770,14 +728,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs - rhs;
@@ -804,14 +760,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorTimes);
     TYPED_TEST_P(TestNdArrayOperatorTimes, TestTimes) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs * rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -821,10 +775,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs * rhs;
@@ -835,14 +788,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs * rhs;
@@ -869,14 +820,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorDivide);
     TYPED_TEST_P(TestNdArrayOperatorDivide, TestDivide) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((ndarray<int>(2) * arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs / rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -886,10 +835,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs / rhs;
@@ -900,14 +848,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 1 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs / rhs;
@@ -934,14 +880,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorMod);
     TYPED_TEST_P(TestNdArrayOperatorMod, TestMod) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((ndarray<int>(2) * arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs % rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -951,10 +895,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs % rhs;
@@ -965,14 +908,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 1 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs % rhs;
@@ -999,14 +940,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorAnd);
     TYPED_TEST_P(TestNdArrayOperatorAnd, TestAnd) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs & rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1016,10 +955,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs & rhs;
@@ -1030,14 +968,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs & rhs;
@@ -1064,14 +1000,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorOr);
     TYPED_TEST_P(TestNdArrayOperatorOr, TestOr) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs | rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1081,10 +1015,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs | rhs;
@@ -1095,14 +1028,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs | rhs;
@@ -1129,14 +1060,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorXor);
     TYPED_TEST_P(TestNdArrayOperatorXor, TestXor) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs ^ rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1146,10 +1075,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs ^ rhs;
@@ -1160,14 +1088,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs ^ rhs;
@@ -1194,14 +1120,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorShiftLeft);
     TYPED_TEST_P(TestNdArrayOperatorShiftLeft, TestShiftLeft) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs << rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1211,10 +1135,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs << rhs;
@@ -1225,14 +1148,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs << rhs;
@@ -1259,14 +1180,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorShiftRight);
     TYPED_TEST_P(TestNdArrayOperatorShiftRight, TestShiftRight) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(2.0 * i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs >> rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1276,10 +1195,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs >> rhs;
@@ -1290,14 +1208,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs >> rhs;
@@ -1324,14 +1240,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorAndAnd);
     TYPED_TEST_P(TestNdArrayOperatorAndAnd, TestAndAnd) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs && rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1341,10 +1255,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs && rhs;
@@ -1355,14 +1268,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs && rhs;
@@ -1389,14 +1300,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorOrOr);
     TYPED_TEST_P(TestNdArrayOperatorOrOr, TestOrOr) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<TypeParam> out = lhs || rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1406,10 +1315,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<TypeParam> out = lhs || rhs;
@@ -1420,14 +1328,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<TypeParam> out = lhs || rhs;
@@ -1454,14 +1360,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorEqualEqual);
     TYPED_TEST_P(TestNdArrayOperatorEqualEqual, TestEqualEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<bool> out = lhs == rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1471,10 +1375,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<bool> out = lhs == rhs;
@@ -1485,14 +1388,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<bool> out = lhs == rhs;
@@ -1519,14 +1420,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorNotEqual);
     TYPED_TEST_P(TestNdArrayOperatorNotEqual, TestNotEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<bool> out = lhs != rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1536,10 +1435,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<bool> out = lhs != rhs;
@@ -1550,14 +1448,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<bool> out = lhs != rhs;
@@ -1584,14 +1480,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorLess);
     TYPED_TEST_P(TestNdArrayOperatorLess, TestLess) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<bool> out = lhs < rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1601,10 +1495,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<bool> out = lhs < rhs;
@@ -1615,14 +1508,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<bool> out = lhs < rhs;
@@ -1649,14 +1540,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorLessEqual);
     TYPED_TEST_P(TestNdArrayOperatorLessEqual, TestLessEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<bool> out = lhs <= rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1666,10 +1555,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<bool> out = lhs <= rhs;
@@ -1680,14 +1568,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<bool> out = lhs <= rhs;
@@ -1714,14 +1600,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorGreater);
     TYPED_TEST_P(TestNdArrayOperatorGreater, TestGreater) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<bool> out = lhs > rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1731,10 +1615,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<bool> out = lhs > rhs;
@@ -1745,14 +1628,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<bool> out = lhs > rhs;
@@ -1779,14 +1660,12 @@ namespace nd {
     TYPED_TEST_CASE_P(TestNdArrayOperatorGreaterEqual);
     TYPED_TEST_P(TestNdArrayOperatorGreaterEqual, TestGreaterEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i + 1.0);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
 
         ndarray<bool> out = lhs >= rhs;
         ASSERT_TRUE(out.is_contiguous());
@@ -1796,10 +1675,9 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 40});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
+                                  .reshape(shape_t({20, 30, 40}))
+                                  .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
 
         ndarray<bool> out = lhs >= rhs;
@@ -1810,14 +1688,12 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = zeros<TypeParam>({20, 30, 1});
-        for(size_t i = 0; i < lhs.size(); ++i) {
-            lhs.data()[i] = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> rhs = zeros<TypeParam>({20, 1, 40});
-        for(size_t i = 0; i < rhs.size(); ++i) {
-            rhs.data()[i] = static_cast<TypeParam>(i);
-        }
+       {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
+                                  .reshape(shape_t({20, 30, 1}))
+                                  .template cast<TypeParam>());
+        ndarray<TypeParam> rhs = (arange<int>(0, 20 * 1 * 40, 1)
+                                  .reshape(shape_t({20, 1, 40}))
+                                  .template cast<TypeParam>());
 
         shape_t const shape_out = shape_t({20, 30, 40});
         ndarray<bool> out = lhs >= rhs;
