@@ -17,3 +17,9 @@ set(NDARRAY_TARGET test_ndarray)
 
 add_executable(${NDARRAY_TARGET} ${NDARRAY_TESTS})
 target_link_libraries(${NDARRAY_TARGET} Ndarray)
+
+# Playground for small tests.
+set(PLAYGROUND_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/playground.cpp)
+set(PLAYGROUND_TARGET playground)
+add_executable(${PLAYGROUND_TARGET} ${PLAYGROUND_TESTS})
+target_link_libraries(${PLAYGROUND_TARGET} Ndarray)
