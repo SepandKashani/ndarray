@@ -18,6 +18,22 @@
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
 
+namespace {
+    /*
+     * Send a (numeric) vector to output stream.
+     */
+    template <typename T>
+    std::ostream& operator<<(std::ostream& os, std::vector<T> const& v) {
+        os << "{";
+        for(size_t i = 0; i < v.size() - 1; ++i) {
+            os << v[i] << ", ";
+        }
+        os << v[v.size() - 1] << "}";
+
+        return os;
+    }
+}
+
 namespace nd { template <typename T> class ndarray; }
 
 namespace nd::util {
@@ -34,19 +50,6 @@ namespace nd::util {
         if(!cond) {
             throw std::runtime_error(msg);
         }
-    }
-
-    /*
-     * Send shape information to output stream.
-     */
-    inline std::ostream& operator<<(std::ostream& os, shape_t const& shape) {
-        os << "{";
-        for(size_t i = 0; i < shape.size() - 1; ++i) {
-            os << shape[i] << ", ";
-        }
-        os << shape[shape.size() - 1] << "}";
-
-        return os;
     }
 
     /*

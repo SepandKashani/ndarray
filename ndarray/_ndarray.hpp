@@ -528,10 +528,8 @@ namespace nd {
                 size_t const new_size = std::accumulate(shape.begin(), shape.end(),
                                                         1, std::multiplies<size_t>());
                 std::stringstream error_msg;
-                error_msg << "Cannot reshape array of size "
-                          << std::to_string(size()) << " into shape ";
-                util::operator<<(error_msg, shape);
-                error_msg << ".\n";
+                error_msg << "Cannot reshape array of size " << std::to_string(size()) 
+                          << " into shape " << shape << ".\n";
                 util::NDARRAY_ASSERT(new_size == size(), error_msg.str());
 
                 // Compute new strides
@@ -575,11 +573,8 @@ namespace nd {
              */
             ndarray<T> broadcast_to(shape_t const& shape) const {
                 std::stringstream error_msg;
-                error_msg << "Cannot broadcast array of shape ";
-                util::operator<<(error_msg, m_shape);
-                error_msg << " to ";
-                util::operator<<(error_msg, shape);
-                error_msg << ".\n";
+                error_msg << "Cannot broadcast array of shape " << m_shape
+                          << " to " << shape << ".\n";
 
                 shape_t out_shape = util::predict_shape_broadcast(m_shape, shape);
                 util::NDARRAY_ASSERT(out_shape == shape, error_msg.str());
