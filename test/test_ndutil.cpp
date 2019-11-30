@@ -10,6 +10,7 @@
 #include <complex>
 #include <functional>
 #include <limits>
+#include <sstream>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -580,6 +581,38 @@ namespace nd::util::interop {
                                TestAsEigenArray,
                                TestAsNdarray);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilInterop, MyEigenTypes);
+
+    TEST(TestNdUtil, TestOperatorPrint) {
+        // soft tests to make sure printed outputs look ok.
+        size_t const N(3), M(2);
+
+       {auto x = (nd::arange<int>(0, N * M, 1)
+                  .reshape({N, M})
+                  .template cast<int>());
+        std::stringstream res;
+        res << x;
+
+        ASSERT_EQ(res.str(), "[[0, 1]\n [2, 3]\n [4, 5]]");}
+
+       {auto x = (nd::arange<int>(0, N * M, 1)
+                  .reshape({N, M})
+                  .template cast<float>()) + nd::ndarray<float>(0.5);
+        std::stringstream res;
+        res << x;
+        ASSERT_EQ(res.str(), "[[0.5, 1.5]\n [2.5, 3.5]\n [4.5, 5.5]]");}
+
+       {auto x = (nd::arange<int>(0, N * M, 1)
+                  .template cast<int>());
+        std::stringstream res;
+        res << x;
+        ASSERT_EQ(res.str(), "[0, 1, 2, 3, 4, 5]");}
+
+       {auto x = (nd::arange<int>(0, N * M, 1)
+                  .template cast<std::complex<double>>()) + nd::ndarray<std::complex<double>>(0.5);
+        std::stringstream res;
+        res << x;
+        ASSERT_EQ(res.str(), "[(0.5,0), (1.5,0), (2.5,0), (3.5,0), (4.5,0), (5.5,0)]");}
+    }
 }
 
 #endif // TEST_NDUTIL_CPP

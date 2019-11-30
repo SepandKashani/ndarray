@@ -21,25 +21,13 @@
 #include "Eigen/Eigen"
 
 #include "_ndtype.hpp"
-#include "_ndutil.hpp"
-
-namespace {
-    /*
-     * Send a (numeric) vector to output stream.
-     */
-    template <typename T>
-    std::ostream& operator<<(std::ostream& os, std::vector<T> const& v) {
-        os << "{";
-        for(size_t i = 0; i < v.size() - 1; ++i) {
-            os << v[i] << ", ";
-        }
-        os << v[v.size() - 1] << "}";
-
-        return os;
-    }
-}
 
 namespace nd { template <typename T> class ndarray; }
+
+namespace {
+    template <typename T> std::ostream& operator<<(std::ostream& os, std::vector<T> const& v);
+    template <typename T> std::ostream& operator<<(std::ostream& os, nd::ndarray<T> const& x);
+}
 
 namespace nd::util {
     /*
@@ -592,6 +580,48 @@ namespace nd::util::interop {
         (*ey) = x;
 
         return y;
+    }
+}
+
+namespace {
+    /*
+     * Send a (numeric) vector to output stream.
+     */
+    template <typename T>
+    std::ostream& operator<<(std::ostream& os, std::vector<T> const& v) {
+        os << "{";
+        for(size_t i = 0; i < v.size() - 1; ++i) {
+            os << v[i] << ", ";
+        }
+        os << v[v.size() - 1] << "}";
+
+        return os;
+    }
+
+    /*
+     * Send ndarray to output stream.
+     *
+     * Only 1d/2d arrays can be printed.
+     */
+    template <typename T>
+    std::ostream& operator<<(std::ostream& os, nd::ndarray<T> const& x) {
+        namespace ndu = nd::util;
+        namespace ndui = nd::util::interop;
+
+        auto x_ptr = const_cast<nd::ndarray<T>*>(&x);
+        ndu::NDARRAY_ASSERT(ndui::is_eigen_mappable(x_ptr),
+                            "Only 1d/2d arrays can be plotted.");
+        auto ex = ndui::aseigenarray<T, nd::mapA_t<T>>(x_ptr, false);
+
+        if(x.ndim() == 1) {
+            Eigen::IOFormat fmt(Eigen::StreamPrecision, 0, ", ", "\n", "[", "]", "", "");
+            os << ex->format(fmt);
+        } else if (x.ndim() == 2) {
+            Eigen::IOFormat fmt(Eigen::StreamPrecision, 0, ", ", "\n", "[", "]", "[", "]");
+            os << ex->format(fmt);
+        }
+
+        return os;
     }
 }
 
