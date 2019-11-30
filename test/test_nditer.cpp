@@ -110,6 +110,21 @@ namespace nd {
         }
     }
 
+    TYPED_TEST_P(TestNdArrayIter, TestSTL) {
+        // check if ndarray_iterator<T> is compatible with STL libraries.
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape(shape_t({5, 3, 4}))
+                  .template cast<TypeParam>());
+        auto y = ndarray<TypeParam>(shape_t{x.size()});
+        std::copy(x.begin(), x.end(), y.begin());
+
+        for(auto it_x = x.begin(), it_y = y.begin(); it_x != x.end(); ++it_x, ++it_y) {
+            TypeParam const& gt = *it_x;
+            TypeParam const& res = *it_y;
+            ASSERT_EQ(gt, res);
+        }}
+    }
+
     typedef ::testing::Types<bool, int, size_t,
                              float, double,
                              std::complex<float>,
@@ -119,7 +134,8 @@ namespace nd {
                                TestOperatorEqual,
                                TestOperatorDereference,
                                TestOperatorIncrement,
-                               TestAssignment);
+                               TestAssignment,
+                               TestSTL);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIter, MyNdIterTypes);
 }
 

@@ -7,6 +7,8 @@
 #ifndef _NDITER_HPP
 #define _NDITER_HPP
 
+#include <cstddef>
+#include <iterator>
 #include <numeric>
 #include <vector>
 
@@ -19,6 +21,13 @@ namespace nd {
 
     template <typename T>
     class ndarray_iterator {
+        public:
+            typedef std::forward_iterator_tag   iterator_category;
+            typedef T                                  value_type;
+            typedef std::ptrdiff_t                difference_type;
+            typedef T*                                    pointer;
+            typedef T&                                  reference;
+
         private:
             ndarray<T>*         m_iterable = nullptr;
             std::vector<size_t> m_index;
