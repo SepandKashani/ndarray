@@ -14,6 +14,8 @@
 #include <complex>
 #include <type_traits>
 
+#include "Eigen/Eigen"
+
 namespace nd {
     using byte_t = uint8_t;
     /*
@@ -56,6 +58,17 @@ namespace nd {
     constexpr bool is_arithmetic() {
         return is_bool<T>() || is_int<T>() || is_float<T>() || is_complex<T>();
     }
+
+    /* 
+     * Interoperability types.
+     *
+     * These are used to interface with the Eigen3 library.
+     */
+    using mapS_t = Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>;
+    template <typename T> using A_t = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    template <typename T> using M_t = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    template <typename T> using mapA_t = Eigen::Map<A_t<T>, Eigen::Unaligned, mapS_t>;
+    template <typename T> using mapM_t = Eigen::Map<M_t<T>, Eigen::Unaligned, mapS_t>;
 }
 
 #endif // _NDTYPE_HPP

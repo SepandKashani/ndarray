@@ -8,12 +8,17 @@
 #define _NDUTIL_HPP
 
 #include <algorithm>
+#include <functional>
 #include <limits>
+#include <memory>
 #include <numeric>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
+
+#include "Eigen/Eigen"
 
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
@@ -455,6 +460,138 @@ namespace nd::util {
         ndarray<T> out3D = out->reshape(shape_out3D);
         reduce3D(ufunc, &in3D, &out3D, axis3D, init);
         // At this point `out` contains the result.
+    }
+}
+
+namespace nd::util::interop {
+    /*
+     * Check if array can be mapped to an Eigen structure.
+     *
+     * Parameters
+     * ----------
+     * x : ndarray<T>* const
+     *
+     * Returns
+     * -------
+     * is_mappable : bool
+     *
+     * Notes
+     * -----
+     * `x` is mappable if the conditions below hold:
+     *
+     *     * `x` is 1d or 2d;
+     *     * No two elements in `x` could overlap in any way.
+     *       Overlaps may arise when using striding tricks (i.e. sliding windows, ...)
+     *     * No negative strides(). (Eigen Bug 747. Should be fixed in Eigen v3.4)
+     */
+    template <typename T>
+    bool is_eigen_mappable(ndarray<T>* const x) {
+        NDARRAY_ASSERT(x != nullptr, "Parameter[x] must point to a valid ndarray instance.");
+
+        auto overlap_check = [](stride_t::value_type const& stride) -> bool { return stride % sizeof(T) == 0; };
+        bool const no_overlaps = std::all_of(x->strides().begin(), x->strides().end(), overlap_check);
+
+        auto domain_check = [](stride_t::value_type const& stride) -> bool { return stride > 0; };
+        bool const positive_strides = std::all_of(x->strides().begin(), x->strides().end(), domain_check);
+
+        bool const is_1d = (x->ndim() == 1);
+        bool const is_2d = (x->ndim() == 2);
+
+        bool const is_mappable = (is_1d || is_2d) && no_overlaps && positive_strides;
+        return is_mappable;
+    }
+
+    /*
+     * Eigen view on the data of an ndarray.
+     *
+     * Parameters
+     * ----------
+     * x : ndarray<T>* const
+     *    (N,) or (N, M) array.
+     * check_mappability : bool const
+     *     If `true`, an exception is raised if mapping is impossible.
+     * EigenFormat (template type)
+     *     Must be one of {nd::mapA_t<T>, nd::mapM_t<T>}.
+     *
+     * Returns
+     * -------
+     * map : std::unique_ptr<EigenFormat>
+     *     Eigen view on the array.
+     *     (A pointer is returned to avoid instantiation of implicit EigenFormat copy-constructors.)
+     *
+     * Notes
+     * -----
+     * * The shape of the output depends on the shape of the input::
+     *
+     *     +==================+
+     *     +    x    |  map   +
+     *     +------------------+
+     *     + (N,)    | (1, N) +
+     *     + (N, M)  | (N, M) +
+     *     +==================+
+     *
+     * * `check_mappability` may be set to `false` for performance reasons if certain a correct
+     *   mapping is achievable. (i.e. if nd::util::interop::is_eigen_mappable() was called
+     *   manually beforehand.)
+     */
+    template <typename T, typename EigenFormat>
+    std::unique_ptr<EigenFormat> aseigenarray(ndarray<T>* const x,
+                                              bool const check_mappability = true) {
+        constexpr bool ok_format = (std::is_same<EigenFormat, mapA_t<T>>::value ||
+                                    std::is_same<EigenFormat, mapM_t<T>>::value);
+        static_assert(ok_format, "Only {nd::mapA_t<T>, nd::mapM_t<T>} types are supported.");
+
+        NDARRAY_ASSERT(x != nullptr, "Parameter[x] must point to a valid ndarray instance.");
+
+        if(check_mappability) {
+            NDARRAY_ASSERT(is_eigen_mappable(x), "Parameter[x] is not Eigen-mappable.");
+        }
+
+        size_t N_dim0(0), N_dim1(0);
+        int N_stride_0(0), N_stride_1(0);
+        if(x->ndim() == 1) {
+            N_dim0 = 1;
+            N_dim1 = x->shape()[0];
+            N_stride_0 = 0;
+            N_stride_1 = x->strides()[0] / sizeof(T);
+        } else {
+            N_dim0 = x->shape()[0];
+            N_dim1 = x->shape()[1];
+            N_stride_0 = x->strides()[0] / sizeof(T);
+            N_stride_1 = x->strides()[1] / sizeof(T);
+        }
+
+        nd::mapS_t strides(N_stride_0, N_stride_1);
+        auto map = std::make_unique<EigenFormat>(x->data(), N_dim0, N_dim1, strides);
+        return map;
+    }
+
+    /*
+     * Map Eigen result into an ndarray.
+     *
+     * Parameters
+     * ----------
+     * x : Eigen::DenseBase<Derived> const&
+     *    (N, M) Eigen expression to evaluate.
+     *
+     * Returns
+     * -------
+     * y : ndarray<Derived::Scalar>
+     *     (N, M) Ndarray containing the evaluation of `x`.
+     *     `y` owns its own memory and can be used without restriction.
+     */
+    template <typename Derived>
+    ndarray<typename Derived::Scalar> asndarray(Eigen::ArrayBase<Derived> const& x) {
+        size_t const N_rows = x.rows();
+        size_t const N_cols = x.cols();
+        shape_t const shape({N_rows, N_cols});
+
+        using T = typename Derived::Scalar;
+        ndarray<T> y(shape);
+        auto ey = aseigenarray<T, mapA_t<T>>(&y, false);
+        (*ey) = x;
+
+        return y;
     }
 }
 

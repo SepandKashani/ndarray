@@ -10,6 +10,7 @@
 #include <complex>
 #include <functional>
 #include <limits>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -393,6 +394,192 @@ namespace nd::util {
                                TestReduce,
                                TestReduce1D);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilReduce, MyNdUtilReduceTypes);
+}
+
+namespace nd::util::interop {
+    template <typename T>
+    class TestNdUtilInterop : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdUtilInterop);
+
+    TYPED_TEST_P(TestNdUtilInterop, TestIsEigenMappable) {
+        // 1d
+       {auto x = (arange<int>(0, 5 * 3, 1)
+                  .template cast<TypeParam>());
+        ASSERT_TRUE(is_eigen_mappable(&x));}
+
+        // 2d
+       {auto x = (arange<int>(0, 5 * 3, 1)
+                  .reshape(shape_t({5, 3}))
+                  .template cast<TypeParam>());
+        ASSERT_TRUE(is_eigen_mappable(&x));}
+
+        // 3d
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape(shape_t({5, 3, 4}))
+                  .template cast<TypeParam>());
+        ASSERT_FALSE(is_eigen_mappable(&x));}
+
+        // Strided
+       {auto x = (arange<int>(0, 10 * 10, 1)
+                  .reshape(shape_t({10, 10}))
+                  .template cast<TypeParam>());
+        auto y = x({slice(1, 6, 2), slice(2, 10, 3)});
+        ASSERT_TRUE(is_eigen_mappable(&y));}
+
+        // Strided, overlapping
+       {auto x = (arange<int>(0, 100, 1)
+                  .template cast<TypeParam>());
+        auto y = ndarray<TypeParam>(reinterpret_cast<byte_t*>(x.data()),
+                                    shape_t({200}),
+                                    stride_t({sizeof(TypeParam)/2}));
+        ASSERT_FALSE(is_eigen_mappable(&y));}
+
+        // Negative strides
+       {auto x = (arange<int>(0, 10 * 10, 1)
+                  .reshape(shape_t({10, 10}))
+                  .template cast<TypeParam>());
+        auto y = x({slice(10, -1, -1), slice(2, 10, 3)});
+
+        ASSERT_TRUE(y.size() > 0);
+        ASSERT_FALSE(is_eigen_mappable(&y));}
+    }
+
+    TYPED_TEST_P(TestNdUtilInterop, TestAsEigenArray) {
+        // 1d
+       {size_t const N = 5;
+        auto x = (arange<int>(0, N, 1)
+                  .template cast<TypeParam>());
+        auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
+
+        ASSERT_EQ(size_t(y->rows()), size_t(1));
+        ASSERT_EQ(size_t(y->cols()), size_t(N));
+
+        for(size_t i = 0; i < N; ++i) {
+            TypeParam const& gt = x[{i}];
+            TypeParam const& res = (*y)(0, i);
+            ASSERT_EQ(gt, res);
+        }}
+
+        // 2d
+       {size_t const N(5), M(3);
+        auto x = (arange<int>(0, N * M, 1)
+                  .reshape(shape_t({N, M}))
+                  .template cast<TypeParam>());
+        auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
+
+        ASSERT_EQ(size_t(y->rows()), N);
+        ASSERT_EQ(size_t(y->cols()), M);
+
+        for(size_t i = 0; i < N; ++i) {
+            for(size_t j = 0; j < M; ++j) {
+                TypeParam const& gt = x[{i, j}];
+                TypeParam const& res = (*y)(i, j);
+                ASSERT_EQ(gt, res);
+            }
+        }}
+
+        // 2d
+       {size_t const N(5), M(3);
+        auto x = (arange<int>(0, N * M, 1)
+                  .reshape(shape_t({N, M}))
+                  .template cast<TypeParam>());
+        auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
+
+        ASSERT_EQ(size_t(y->rows()), N);
+        ASSERT_EQ(size_t(y->cols()), M);
+
+        for(size_t i = 0; i < N; ++i) {
+            for(size_t j = 0; j < M; ++j) {
+                TypeParam const& gt = x[{i, j}];
+                TypeParam const& res = (*y)(i, j);
+                ASSERT_EQ(gt, res);
+            }
+        }}
+
+        // Strided
+       {size_t const N(10), M(10);
+        auto x = (arange<int>(0, N * M, 1)
+                  .reshape(shape_t({N, M}))
+                  .template cast<TypeParam>()
+                  .operator()({slice(1, 6, 2), slice(2, 10, 3)}));
+        auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
+
+        ASSERT_EQ(size_t(y->rows()), size_t(x.shape()[0]));
+        ASSERT_EQ(size_t(y->cols()), size_t(x.shape()[1]));
+
+        for(size_t i = 0; i < x.shape()[0]; ++i) {
+            for(size_t j = 0; j < x.shape()[1]; ++j) {
+                TypeParam const& gt = x[{i, j}];
+                TypeParam const& res = (*y)(i, j);
+                ASSERT_EQ(gt, res);
+            }
+        }}
+    }
+
+    TYPED_TEST_P(TestNdUtilInterop, TestAsNdarray) {
+        // 1d: output ndarray is independent of input ndarray.
+       {size_t const N = 5;
+        auto x = (arange<int>(0, N, 1)
+                  .template cast<TypeParam>());
+        auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
+        auto z = asndarray(*y);
+
+        ASSERT_FALSE(z.equals(x));
+        ASSERT_EQ(z.base().use_count(), 1);
+        ASSERT_EQ(z.shape(), shape_t({1, N}));
+
+        for(auto it_x = x.begin(), it_z = z.begin(); it_x != x.end(); ++it_x, ++it_z) {
+            TypeParam const& gt = (*it_x);
+            TypeParam const& res = (*it_z);
+            ASSERT_EQ(gt, res);
+        }}
+
+        // 2d: output ndarray is independent of input ndarray.
+       {size_t const N(5), M(3);
+        auto x = (arange<int>(0, N * M, 1)
+                  .reshape(shape_t({N, M}))
+                  .template cast<TypeParam>());
+        auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
+        auto z = asndarray(*y);
+
+        ASSERT_FALSE(z.equals(x));
+        ASSERT_EQ(z.base().use_count(), 1);
+        ASSERT_EQ(z.shape(), shape_t({N, M}));
+
+        for(auto it_x = x.begin(), it_z = z.begin(); it_x != x.end(); ++it_x, ++it_z) {
+            TypeParam const& gt = (*it_x);
+            TypeParam const& res = (*it_z);
+            ASSERT_EQ(gt, res);
+        }}
+
+        // Transforms possible with expressions.
+       {size_t const N(5), M(3);
+        auto x = (arange<int>(0, N * M, 1)
+                  .reshape(shape_t({N, M}))
+                  .template cast<TypeParam>());
+        auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
+        auto z = asndarray(((*y) + TypeParam(2.0)).template cast<TypeParam>());
+
+        ASSERT_FALSE(z.equals(x));
+        ASSERT_EQ(z.base().use_count(), 1);
+        ASSERT_EQ(z.shape(), shape_t({N, M}));
+
+        for(auto it_x = x.begin(), it_z = z.begin(); it_x != x.end(); ++it_x, ++it_z) {
+            TypeParam const& gt = (*it_x) + TypeParam(2.0);
+            TypeParam const& res = (*it_z);
+            ASSERT_EQ(gt, res);
+        }}
+    }
+
+    typedef ::testing::Types<bool,
+                             int, size_t,
+                             float, double,
+                             std::complex<float>, std::complex<double>> MyEigenTypes;
+    REGISTER_TYPED_TEST_CASE_P(TestNdUtilInterop,
+                               TestIsEigenMappable,
+                               TestAsEigenArray,
+                               TestAsNdarray);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilInterop, MyEigenTypes);
 }
 
 #endif // TEST_NDUTIL_CPP
