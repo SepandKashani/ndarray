@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "test_type.hpp"
 
 #include "ndarray/ndarray.hpp"
 
@@ -259,13 +260,10 @@ namespace nd::util {
         }}
     }
 
-    typedef ::testing::Types<int, size_t,
-                             float, double,
-                             std::complex<float>, std::complex<double>> MyNdUtilApplyTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdUtilApply,
                                TestApplyUnary,
                                TestApplyBinary);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilApply, MyNdUtilApplyTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilApply, MyIntFloatComplexTypes);
 
     template <typename T>
     class TestNdUtilReduce : public ::testing::Test {};
@@ -394,7 +392,7 @@ namespace nd::util {
                                TestReduce3D,
                                TestReduce,
                                TestReduce1D);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilReduce, MyNdUtilReduceTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilReduce, MySignedIntFloatTypes);
 }
 
 namespace nd::util::interop {
@@ -572,15 +570,11 @@ namespace nd::util::interop {
         }}
     }
 
-    typedef ::testing::Types<bool,
-                             int, size_t,
-                             float, double,
-                             std::complex<float>, std::complex<double>> MyEigenTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdUtilInterop,
                                TestIsEigenMappable,
                                TestAsEigenArray,
                                TestAsNdarray);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilInterop, MyEigenTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdUtilInterop, MyArithmeticTypes);
 
     TEST(TestNdUtil, TestOperatorPrint) {
         // soft tests to make sure printed outputs look ok.

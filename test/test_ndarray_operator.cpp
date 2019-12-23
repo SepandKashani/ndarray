@@ -10,28 +10,11 @@
 #include <complex>
 
 #include <gtest/gtest.h>
+#include "test_type.hpp"
 
 #include "ndarray/ndarray.hpp"
 
 namespace nd {
-    // Elementary Types
-    typedef ::testing::Types<bool> MyBoolTypes;
-    typedef ::testing::Types<int, size_t> MyIntTypes;
-    typedef ::testing::Types<float, double> MyFloatTypes;
-    typedef ::testing::Types<std::complex<float>, std::complex<double>> MyComplexTypes;
-    // Combination Types
-    typedef ::testing::Types<bool, int, size_t> MyBoolIntTypes;
-    typedef ::testing::Types<int, size_t, float, double> MyIntFloatTypes;
-    typedef ::testing::Types<int, size_t,
-                             float, double,
-                             std::complex<float>, std::complex<double>> MyIntFloatComplexTypes;
-    typedef ::testing::Types<float, double,
-                             std::complex<float>, std::complex<double>> MyFloatComplexTypes;
-    typedef ::testing::Types<bool, int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyArithmeticTypes;
-
     template <typename T>
     class TestNdArrayOperatorEqual : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdArrayOperatorEqual);

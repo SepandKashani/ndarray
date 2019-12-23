@@ -8,6 +8,7 @@
 #define TEST_NDLINALG_CPP
 
 #include <gtest/gtest.h>
+#include "test_type.hpp"
 
 #include "ndarray/ndarray.hpp"
 

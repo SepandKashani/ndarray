@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "test_type.hpp"
 
 #include "ndarray/ndarray.hpp"
 
@@ -142,10 +143,6 @@ namespace nd {
                   static_cast<TypeParam>(206));
     }
 
-    typedef ::testing::Types<bool, int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyNdArrayConstructorTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayConstructor,
                                TestScalar,
                                TestShape,
@@ -153,7 +150,7 @@ namespace nd {
                                TestCopy,
                                TestPointerAndShape,
                                TestPointerAndShapeAndStride);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayConstructor, MyNdArrayConstructorTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayConstructor, MyArithmeticTypes);
 
 
 
@@ -203,16 +200,12 @@ namespace nd {
         ASSERT_TRUE(t.equals(y)); ASSERT_TRUE(y.equals(t));
     }
 
-    typedef ::testing::Types<bool, int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyNdArrayPropertyTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayProperty,
                                TestSize,
                                TestNDim,
                                TestNBytes,
                                TestEquals);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayProperty, MyNdArrayPropertyTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayProperty, MyArithmeticTypes);
 
 
 
@@ -406,12 +399,11 @@ namespace nd {
      * We only test integer types here to keep testing code simple.
      * Index/subsetting should not be affected by types anyway.
      */
-    typedef ::testing::Types<int, size_t> MyNdArrayIndexTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayIndex,
                                TestOperatorSquareBracket,
                                TestOperatorParenthesis1,
                                TestOperatorParenthesis2);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIndex, MyNdArrayIndexTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIndex, MyIntTypes);
 
     template <typename T>
     class TestNdArrayFilter : public ::testing::Test {};
@@ -568,14 +560,10 @@ namespace nd {
         }
     }
 
-    typedef ::testing::Types<bool, int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyNdArrayFilterTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayFilter,
                                TestWhere,
                                TestFilter);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayFilter, MyNdArrayFilterTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayFilter, MyArithmeticTypes);
 
     template <typename T>
     class TestNdArrayIterate : public ::testing::Test {};
@@ -605,13 +593,9 @@ namespace nd {
         }
     }
 
-    typedef ::testing::Types<bool, int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyNdArrayIterateTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayIterate,
                                TestNdArrayBeginEnd);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIterate, MyNdArrayIterateTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIterate, MyArithmeticTypes);
 
 
 
@@ -1024,10 +1008,6 @@ namespace nd {
         ASSERT_TRUE(x.equals(y));}
     }
 
-    typedef ::testing::Types<int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyNdArrayManipulationTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayManipulation,
                                TestCopy,
                                TestAsContiguousArray,
@@ -1035,7 +1015,7 @@ namespace nd {
                                TestReshape,
                                TestRavel,
                                TestBroadcastTo);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayManipulation, MyNdArrayManipulationTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayManipulation, MyIntFloatComplexTypes);
 
     template <typename T>
     class TestNdArrayCast : public ::testing::Test {};
@@ -1055,11 +1035,9 @@ namespace nd {
         }
     }
 
-    typedef ::testing::Types<int, size_t,
-                             float, double> MyNdArrayCastTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayCast,
                                TestCast);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayCast, MyNdArrayCastTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayCast, MyIntFloatTypes);
 }
 
 #endif // TEST_NDARRAY_CPP

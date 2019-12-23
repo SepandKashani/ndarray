@@ -13,72 +13,49 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "test_type.hpp"
 
 #include "ndarray/ndarray.hpp"
 
 namespace nd {
     template <typename T> class TestNdFuncBool : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncBool);
-    typedef ::testing::Types<bool> MyBoolTypes;
 
     template <typename T> class TestNdFuncInt : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncInt);
-    typedef ::testing::Types<int, size_t> MyIntTypes;
 
     template <typename T> class TestNdFuncSignedInt : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncSignedInt);
-    typedef ::testing::Types<int> MySignedIntTypes;
 
     template <typename T> class TestNdFuncFloat : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncFloat);
-    typedef ::testing::Types<float, double> MyFloatTypes;
 
     template <typename T> class TestNdFuncComplex : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncComplex);
-    typedef ::testing::Types<std::complex<float>, std::complex<double>> MyComplexTypes;
 
     template <typename T> class TestNdFuncBoolInt : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncBoolInt);
-    typedef ::testing::Types<bool, int, size_t> MyBoolIntTypes;
 
     template <typename T> class TestNdFuncIntFloat : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncIntFloat);
-    typedef ::testing::Types<int, size_t, float, double> MyIntFloatTypes;
 
     template <typename T> class TestNdFuncSignedIntFloat : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncSignedIntFloat);
-    typedef ::testing::Types<int, float, double> MySignedIntFloatTypes;
 
     template <typename T> class TestNdFuncSignedIntFloatComplex : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncSignedIntFloatComplex);
-    typedef ::testing::Types<int,
-                             float, double,
-                             std::complex<float>, std::complex<double>> MySignedIntFloatComplexTypes;
 
     template <typename T> class TestNdFuncIntFloatComplex : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncIntFloatComplex);
-    typedef ::testing::Types<int, size_t,
-                             float, double,
-                             std::complex<float>, std::complex<double>> MyIntFloatComplexTypes;
 
     template <typename T> class TestNdFuncFloatComplex : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncFloatComplex);
-    typedef ::testing::Types<float, double,
-                             std::complex<float>, std::complex<double>> MyFloatComplexTypes;
 
     template <typename T> class TestNdFuncSignedArithmetic : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncSignedArithmetic);
-    typedef ::testing::Types<int,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MySignedArithmeticTypes;
 
     template <typename T> class TestNdFuncArithmetic : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncArithmetic);
-    typedef ::testing::Types<bool, int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyArithmeticTypes;
 
 
 
@@ -745,7 +722,7 @@ namespace nd {
 
 
 
-    /* Initialize tests ==================================================== 
+    /* Initialize tests ====================================================
      * Some test functions are not templated. We nevertheless list all of them here for
      * completeness.
      */

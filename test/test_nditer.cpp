@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "test_type.hpp"
 
 #include "ndarray/ndarray.hpp"
 
@@ -125,10 +126,6 @@ namespace nd {
         }}
     }
 
-    typedef ::testing::Types<bool, int, size_t,
-                             float, double,
-                             std::complex<float>,
-                             std::complex<double>> MyNdIterTypes;
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayIter,
                                TestOperatorEqualEqual,
                                TestOperatorEqual,
@@ -136,7 +133,7 @@ namespace nd {
                                TestOperatorIncrement,
                                TestAssignment,
                                TestSTL);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIter, MyNdIterTypes);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIter, MyArithmeticTypes);
 }
 
 #endif // TEST_NDITER_CPP
