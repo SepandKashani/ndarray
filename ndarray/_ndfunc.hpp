@@ -1366,7 +1366,7 @@ namespace nd {
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the input.
-     * 
+     *
      * Returns
      * -------
      * out : ndarray<T>

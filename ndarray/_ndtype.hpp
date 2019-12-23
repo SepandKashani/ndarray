@@ -59,7 +59,7 @@ namespace nd {
         return is_bool<T>() || is_int<T>() || is_float<T>() || is_complex<T>();
     }
 
-    /* 
+    /*
      * Interoperability types.
      *
      * These are used to interface with the Eigen3 library.

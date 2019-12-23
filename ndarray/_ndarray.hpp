@@ -528,7 +528,7 @@ namespace nd {
                 size_t const new_size = std::accumulate(shape.begin(), shape.end(),
                                                         1, std::multiplies<size_t>());
                 std::stringstream error_msg;
-                error_msg << "Cannot reshape array of size " << std::to_string(size()) 
+                error_msg << "Cannot reshape array of size " << std::to_string(size())
                           << " into shape " << shape << ".\n";
                 util::NDARRAY_ASSERT(new_size == size(), error_msg.str());
 
