@@ -163,9 +163,11 @@ namespace nd {
         T step = (stop - start) / static_cast<T>(endpoint ? (N - 1) : N);
 
         y.data()[0] = start;
-        for(size_t i = 1; i < N; ++i) {
+        for(size_t i = 1; i < N - 1; ++i) {
             y.data()[i] = y.data()[i - 1] + step;
         }
+        // Last element computed outside loop to avoid overflowing past `stop` with FP arithmetic.
+        y.data()[N - 1] = stop - static_cast<T>(endpoint ? 0 : ((stop - start) / static_cast<T>(N)));
 
         return y;
     }
