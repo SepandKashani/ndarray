@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <limits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -624,7 +625,25 @@ namespace nd {
         ASSERT_TRUE(std::isnan(y[{0}]));
         ASSERT_TRUE(std::isnan(y[{1}]));}
     }
-    
+
+    TYPED_TEST_P(TestNdFuncFloat, TestArcTan) {
+        TypeParam const inf = std::numeric_limits<TypeParam>::infinity();
+        ndarray<TypeParam> x = (r_<TypeParam>({0, 1, inf, -1, 0, 1, -inf, -1})
+                                .reshape(shape_t({2, 4})));
+        ndarray<TypeParam> gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, -M_PI/4, 0, M_PI/4, -M_PI/2, -M_PI/4})
+                                 .reshape(shape_t({2, 4})));
+
+        // No buffer provided
+       {ndarray<TypeParam> y = arctan(x);
+        ASSERT_TRUE(allclose(y, gt));}
+
+        // Buffer provided
+       {ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> z = arctan(x, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_TRUE(allclose(y, gt));}
+    }
+
     /* Unit Transformation ================================================= */
     TYPED_TEST_P(TestNdFuncFloat, TestDeg2Rad) {
         ndarray<TypeParam> ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
@@ -792,6 +811,7 @@ namespace nd {
                                TestTan,
                                TestArcSin,
                                TestArcCos,
+                               TestArcTan,
                                TestDeg2Rad,
                                TestRad2Deg,
                                TestReal,
