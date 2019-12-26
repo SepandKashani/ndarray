@@ -274,6 +274,54 @@ namespace nd {
         }}
     }
 
+    TYPED_TEST_P(TestNdFuncFloat, TestLog) {
+        // No buffer provided
+       {auto x = (linspace<double>(0, 5, 51)
+                  .reshape({3, 17})
+                  .template cast<TypeParam>());
+        auto y = log(x);
+
+        auto x_ptr = x.begin();
+        auto y_ptr = y.begin();
+        for(auto x_ptr = x.begin(), y_ptr = y.begin();
+            x_ptr != x.end();
+            ++x_ptr, ++y_ptr) {
+            TypeParam const _lx = std::log(*x_ptr);
+            TypeParam const& _y = *y_ptr;
+
+            ASSERT_EQ(_lx, _y);
+        }}
+
+        // Buffer provided
+       {auto x = (linspace<double>(0, 5, 51)
+                  .reshape({3, 17})
+                  .template cast<TypeParam>());
+        auto y = ndarray<TypeParam>(x.shape());
+
+        ndarray<TypeParam> z = log(x, &y);
+        ASSERT_TRUE(y.equals(z));
+
+        auto x_ptr = x.begin();
+        auto y_ptr = y.begin();
+        for(auto x_ptr = x.begin(), y_ptr = y.begin();
+            x_ptr != x.end();
+            ++x_ptr, ++y_ptr) {
+            TypeParam const _lx = std::log(*x_ptr);
+            TypeParam const& _y = *y_ptr;
+
+            ASSERT_EQ(_lx, _y);
+        }}
+
+        // Out-of-Range
+       {auto x = r_<TypeParam>({-1.1, -0.1, 0});
+        auto y = log(x);
+        TypeParam const inf = std::numeric_limits<TypeParam>::infinity();
+
+        ASSERT_TRUE(std::isnan(y[{0}]));
+        ASSERT_TRUE(std::isnan(y[{1}]));
+        ASSERT_EQ(y[{2}], -inf);}
+    }
+
     TYPED_TEST_P(TestNdFuncFloat, TestCeil) {
         ndarray<TypeParam> x = (arange<TypeParam>(-3.1, 3.9, 0.5)
                                 .reshape(shape_t({2, 7})));
@@ -880,6 +928,7 @@ namespace nd {
                                TestPi,
                                TestEuler,
                                TestLinSpace,
+                               TestLog,
                                TestCeil,
                                TestFloor,
                                TestSin,

@@ -934,10 +934,22 @@ namespace nd {
      * Returns
      * -------
      * y : ndarray<T>
-     *     ln(x)
+     *     ln(x) \in \bR, NaN if x < 0.
      */
     template <typename T>
-    ndarray<T> log(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> log(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::log(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Find the unique elements of an array.
