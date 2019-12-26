@@ -906,7 +906,20 @@ namespace nd {
      *     e ** x
      */
     template <typename T>
-    ndarray<T> exp(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> exp(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>() || is_complex<T>(),
+                      "Only {float, complex} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::exp(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise base-E logarithm.

@@ -235,6 +235,45 @@ namespace nd {
         }}
     }
 
+    TYPED_TEST_P(TestNdFuncFloatComplex, TestExp) {
+        // No buffer provided
+       {auto x = (linspace<double>(-5, 5, 51)
+                  .reshape({3, 17})
+                  .template cast<TypeParam>());
+        auto y = exp(x);
+
+        auto x_ptr = x.begin();
+        auto y_ptr = y.begin();
+        for(auto x_ptr = x.begin(), y_ptr = y.begin();
+            x_ptr != x.end();
+            ++x_ptr, ++y_ptr) {
+            TypeParam const _ex = std::exp(*x_ptr);
+            TypeParam const& _y = *y_ptr;
+
+            ASSERT_EQ(_ex, _y);
+        }}
+
+        // Buffer provided
+       {auto x = (linspace<double>(-5, 5, 51)
+                  .reshape({3, 17})
+                  .template cast<TypeParam>());
+        auto y = ndarray<TypeParam>(x.shape());
+
+        ndarray<TypeParam> z = exp(x, &y);
+        ASSERT_TRUE(y.equals(z));
+
+        auto x_ptr = x.begin();
+        auto y_ptr = y.begin();
+        for(auto x_ptr = x.begin(), y_ptr = y.begin();
+            x_ptr != x.end();
+            ++x_ptr, ++y_ptr) {
+            TypeParam const _ex = std::exp(*x_ptr);
+            TypeParam const& _y = *y_ptr;
+
+            ASSERT_EQ(_ex, _y);
+        }}
+    }
+
     TYPED_TEST_P(TestNdFuncFloat, TestCeil) {
         ndarray<TypeParam> x = (arange<TypeParam>(-3.1, 3.9, 0.5)
                                 .reshape(shape_t({2, 7})));
@@ -883,6 +922,7 @@ namespace nd {
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncIntFloatComplex, MyIntFloatComplexTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncFloatComplex,
+                               TestExp,
                                TestIsClose,
                                TestAllClose);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncFloatComplex, MyFloatComplexTypes);
