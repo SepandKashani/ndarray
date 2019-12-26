@@ -752,7 +752,19 @@ namespace nd {
      *     arctan(x1 / x2) \in [-\pi, \pi]
      */
     template <typename T>
-    ndarray<T> arctan2(ndarray<T> const& x1, ndarray<T> const& x2, ndarray<T>* const out = nullptr);
+    ndarray<T> arctan2(ndarray<T> const& x1, ndarray<T> const& x2, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x1, T const& _x2) -> T { return std::atan2(_x1, _x2); };
+        if(out == nullptr) {
+            ndarray<T> y(util::predict_shape_broadcast(x1.shape(), x2.shape()));
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x1), const_cast<ndarray<T>*>(&x2), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x1), const_cast<ndarray<T>*>(&x2), out);
+            return *out;
+        }
+    }
 
     /*
      * Convert angles from degrees to radians.
