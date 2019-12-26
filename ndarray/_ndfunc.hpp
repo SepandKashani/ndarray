@@ -847,25 +847,6 @@ namespace nd {
     ndarray<T> sinc(ndarray<T> const& x, ndarray<T>* const out = nullptr);
 
     /*
-     * Element-wise exponentiatian.
-     *
-     * Parameters
-     * ----------
-     * base : ndarray<T> const&
-     * exponent : ndarray<T> const&
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the output.
-     *
-     * Returns
-     * -------
-     * res : ndarray<T>
-     *     base ** exponent
-     */
-    template <typename T>
-    ndarray<T> pow(ndarray<T> const& base, ndarray<T> const& exponent, ndarray<T>* const out = nullptr);
-
-    /*
      * Element-wise absolution value.
      *
      * Parameters
@@ -915,42 +896,6 @@ namespace nd {
     ndarray<T> exp(ndarray<T> const& x, ndarray<T>* const out = nullptr);
 
     /*
-     * Element-wise base-2 exponentiation.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the input.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     2 ** x
-     */
-    template <typename T>
-    ndarray<T> exp2(ndarray<T> const& x, ndarray<T>* const out = nullptr);
-
-    /*
-     * Element-wise base-10 exponentiation.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the input.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     10 ** x
-     */
-    template <typename T>
-    ndarray<T> exp10(ndarray<T> const& x, ndarray<T>* const out = nullptr);
-
-    /*
      * Element-wise base-E logarithm.
      *
      * Parameters
@@ -967,42 +912,6 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> log(ndarray<T> const& x, ndarray<T>* const out = nullptr);
-
-    /*
-     * Element-wise base-2 logarithm.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the input.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     log_{2}(x)
-     */
-    template <typename T>
-    ndarray<T> log2(ndarray<T> const& x, ndarray<T>* const out = nullptr);
-
-    /*
-     * Element-wise base-10 logarithm.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the input.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     log_{10}(x)
-     */
-    template <typename T>
-    ndarray<T> log10(ndarray<T> const& x, ndarray<T>* const out = nullptr);
 
     /*
      * Find the unique elements of an array.
