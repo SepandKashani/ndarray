@@ -48,6 +48,19 @@ namespace nd {
     }
 
     /*
+     * Returns
+     * -------
+     * j : T
+     *     Imaginary constant j = \sqrt(-1)
+     */
+    template <typename T>
+    T constexpr j() {
+        static_assert(is_complex<T>(), "Only {complex} types allowed.");
+
+        return T(0.0, 1.0);
+    }
+
+    /*
      * Return a contiguous array in memory (C-order).
      *
      * Parameters

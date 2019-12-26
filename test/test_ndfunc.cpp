@@ -75,6 +75,13 @@ namespace nd {
         ASSERT_EQ(tested, correct);
     }
 
+    TYPED_TEST_P(TestNdFuncComplex, TestImaginary) {
+        TypeParam const tested = j<TypeParam>();
+        TypeParam const correct = TypeParam(0.0, 1.0);
+
+        ASSERT_EQ(tested, correct);
+    }
+
 
 
     /* Utility ============================================================= */
@@ -850,8 +857,9 @@ namespace nd {
                                TestConj);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncFloat, MyFloatTypes);
 
-    // REGISTER_TYPED_TEST_CASE_P(TestNdFuncComplex,);
-    // INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncComplex, MyComplexTypes);
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncComplex,
+                               TestImaginary);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncComplex, MyComplexTypes);
 
     // REGISTER_TYPED_TEST_CASE_P(TestNdFuncBoolInt,);
     // INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncBoolInt, MyBoolIntTypes);
