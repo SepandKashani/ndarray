@@ -657,10 +657,22 @@ namespace nd {
      * Returns
      * -------
      * y : ndarray<T>
-     *     arcsin(x) \in [-\pi/2, \pi/2]
+     *     arcsin(x) \in [-\pi/2, \pi/2], NaN if out-of-range.
      */
     template <typename T>
-    ndarray<T> arcsin(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> arcsin(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T { return std::asin(_x); };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise trigonometric inverse cosine.
