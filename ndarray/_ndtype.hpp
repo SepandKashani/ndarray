@@ -60,6 +60,13 @@ namespace nd {
     }
 
     /*
+     * Convenience types.
+     */
+    using cfloat = std::complex<float>;
+    using cdouble = std::complex<double>;
+    using cldouble = std::complex<long double>;
+
+    /*
      * Interoperability types.
      *
      * These are used to interface with the Eigen3 library.

@@ -11,13 +11,15 @@
 
 #include <gtest/gtest.h>
 
+#include "ndarray/ndarray.hpp"
+
 namespace nd {
     // Elementary Types
     typedef ::testing::Types<bool> MyBoolTypes;
     typedef ::testing::Types<int> MySignedIntTypes;
     typedef ::testing::Types<int, size_t> MyIntTypes;
     typedef ::testing::Types<float, double> MyFloatTypes;
-    typedef ::testing::Types<std::complex<float>, std::complex<double>> MyComplexTypes;
+    typedef ::testing::Types<cfloat, cdouble> MyComplexTypes;
 
     // Combination Types
     typedef ::testing::Types<bool, int, size_t> MyBoolIntTypes;
@@ -25,15 +27,15 @@ namespace nd {
     typedef ::testing::Types<int, size_t, float, double> MyIntFloatTypes;
     typedef ::testing::Types<int,
                              float, double,
-                             std::complex<float>, std::complex<double>> MySignedIntFloatComplexTypes;
+                             cfloat, cdouble> MySignedIntFloatComplexTypes;
     typedef ::testing::Types<int, size_t,
                              float, double,
-                             std::complex<float>, std::complex<double>> MyIntFloatComplexTypes;
+                             cfloat, cdouble> MyIntFloatComplexTypes;
     typedef ::testing::Types<float, double,
-                             std::complex<float>, std::complex<double>> MyFloatComplexTypes;
+                             cfloat, cdouble> MyFloatComplexTypes;
     typedef ::testing::Types<bool, int, size_t,
                              float, double,
-                             std::complex<float>, std::complex<double>> MyArithmeticTypes;
+                             cfloat, cdouble> MyArithmeticTypes;
 }
 
 #endif // TEST_TYPE_HPP

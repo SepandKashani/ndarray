@@ -602,7 +602,7 @@ namespace nd::util::interop {
         ASSERT_EQ(res.str(), "[0, 1, 2, 3, 4, 5]");}
 
        {auto x = (nd::arange<int>(0, N * M, 1)
-                  .template cast<std::complex<double>>()) + nd::ndarray<std::complex<double>>(0.5);
+                  .template cast<cdouble>()) + nd::ndarray<cdouble>(0.5);
         std::stringstream res;
         res << x;
         ASSERT_EQ(res.str(), "[(0.5,0), (1.5,0), (2.5,0), (3.5,0), (4.5,0), (5.5,0)]");}
