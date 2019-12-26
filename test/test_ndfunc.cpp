@@ -801,6 +801,28 @@ namespace nd {
         ASSERT_TRUE(allclose(deg, deg_gt));}
     }
 
+    TYPED_TEST_P(TestNdFuncFloat, TestSinc) {
+        auto x = r_<TypeParam>({0.        , 0.05263158, 0.10526316, 0.15789474, 0.21052632,
+                                0.26315789, 0.31578947, 0.36842105, 0.42105263, 0.47368421,
+                                0.52631579, 0.57894737, 0.63157895, 0.68421053, 0.73684211,
+                                0.78947368, 0.84210526, 0.89473684, 0.94736842, 1. });
+        auto gt = r_<TypeParam>({1.00000000e+00, 9.95449621e-01, 9.81872985e-01, 9.59492150e-01,
+                                 9.28672399e-01, 8.89915138e-01, 8.43848160e-01, 7.91213481e-01,
+                                 7.32853010e-01, 6.69692359e-01, 6.02723123e-01, 5.32984007e-01,
+                                 4.61541197e-01, 3.89468382e-01, 3.17826835e-01, 2.47645973e-01,
+                                 1.79904778e-01, 1.15514469e-01, 5.53027567e-02, 3.89817183e-17});
+
+        // No buffer provided
+       {ndarray<TypeParam> y = sinc(x);
+        ASSERT_TRUE(allclose(y, gt, 1e-5, 1e-7));}
+
+        // Buffer provided
+       {ndarray<TypeParam> y(x.shape());
+        ndarray<TypeParam> z = sinc(x, &y);
+        ASSERT_TRUE(z.equals(y));
+        ASSERT_TRUE(allclose(y, gt, 1e-5, 1e-7));}
+    }
+
 
 
     /* Complex Numbers ===================================================== */
@@ -940,6 +962,7 @@ namespace nd {
                                TestArcTan2,
                                TestDeg2Rad,
                                TestRad2Deg,
+                               TestSinc,
                                TestReal,
                                TestImag,
                                TestConj);

@@ -857,7 +857,22 @@ namespace nd {
      *     sin(\pi x) / (\pi x)
      */
     template <typename T>
-    ndarray<T> sinc(ndarray<T> const& x, ndarray<T>* const out = nullptr);
+    ndarray<T> sinc(ndarray<T> const& x, ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>(), "Only {float} types allowed.");
+
+        auto ufunc = [](T const& _x) -> T {
+            T const px = pi<T>() * ((_x != 0) ? _x : 1e-20);
+            return std::sin(px) / px;
+        };
+        if(out == nullptr) {
+            ndarray<T> y(x.shape());
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), &y);
+            return y;
+        } else {
+            util::apply(ufunc, const_cast<ndarray<T>*>(&x), out);
+            return *out;
+        }
+    }
 
     /*
      * Element-wise absolution value.
