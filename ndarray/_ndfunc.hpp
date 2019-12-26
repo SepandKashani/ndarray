@@ -28,7 +28,7 @@ namespace nd {
      *     Mathematical constant \pi \approx 3.1415
      */
     template <typename T>
-    T pi() {
+    T constexpr pi() {
         static_assert(is_float<T>(), "Only {float} types allowed.");
 
         return static_cast<T>(M_PI);
@@ -41,7 +41,7 @@ namespace nd {
      *     Euler's constant e \approx 2.71828
      */
     template <typename T>
-    T e() {
+    T constexpr e() {
         static_assert(is_float<T>(), "Only {float} types allowed.");
 
         return static_cast<T>(M_E);
