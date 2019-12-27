@@ -1016,8 +1016,8 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to compute the statistic.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
      *     If true, the axis which is reduced is left in the result as
      *     dimension of size 1.
@@ -1036,7 +1036,16 @@ namespace nd {
     ndarray<T> mean(ndarray<T> const& x,
                     size_t const axis,
                     bool const keepdims = false,
-                    ndarray<T>* const out = nullptr);
+                    ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>() || is_complex<T>(),
+                      "Only {float, complex} types allowed.");
+
+        ndarray<T> y = sum(x, axis, true, out);
+        T const N = static_cast<T>(x.shape()[axis]);
+        y /= N;
+
+        return (keepdims ? y : y.squeeze({axis}));
+    }
 
     /*
      * Range of values over given axis.

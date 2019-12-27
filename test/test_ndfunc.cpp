@@ -322,6 +322,25 @@ namespace nd {
         ASSERT_EQ(y[{2}], -inf);}
     }
 
+    TYPED_TEST_P(TestNdFuncFloatComplex, TestMean) {
+        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
+                                .reshape(shape_t({5, 3, 4}))
+                                .template cast<TypeParam>());
+        ndarray gt = (arange<int>(24, 36, 1)
+                      .reshape(shape_t({3, 4}))
+                      .template cast<TypeParam>());
+
+        // No buffer provided, keepdims
+       {ndarray<TypeParam> y = mean(x, 0);
+        ASSERT_TRUE(allclose(y, gt));};
+
+        // Buffer provided, dropdims
+       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
+        ndarray<TypeParam> z = mean(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_TRUE(allclose(y, gt));}
+    }
+
     TYPED_TEST_P(TestNdFuncFloat, TestCeil) {
         ndarray<TypeParam> x = (arange<TypeParam>(-3.1, 3.9, 0.5)
                                 .reshape(shape_t({2, 7})));
@@ -995,6 +1014,7 @@ namespace nd {
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncFloatComplex,
                                TestExp,
+                               TestMean,
                                TestIsClose,
                                TestAllClose);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncFloatComplex, MyFloatComplexTypes);
