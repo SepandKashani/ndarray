@@ -19,6 +19,9 @@
 namespace nd {
     template <typename T> class ndarray;
 
+    /*
+     * LegacyForwardIterator to traverse ndarrays.
+     */
     template <typename T>
     class ndarray_iterator {
         public:
@@ -33,6 +36,18 @@ namespace nd {
             std::vector<size_t> m_index;
             int                 m_offset = 0;
 
+            /*
+             * Move iterator forward.
+             *
+             * Example
+             * -------
+             * Let `x` be an ndarray_iterator<T> on a (5, 3, 4) array, with `m_index = {2, 0, 1}`::
+             *
+             *     x.advance();   // m_index == {2, 0, 2}
+             *     x.advance();   // m_index == {2, 0, 3}
+             *     x.advance();   // m_index == {2, 1, 0}
+             *     x.advance();   // m_index == {2, 1, 1}
+             */
             void advance() {
                 size_t   const  ndim   = m_index.size();
                 shape_t  const& shape  = m_iterable->shape();
