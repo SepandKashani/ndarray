@@ -988,8 +988,8 @@ namespace nd {
      * Parameters
      * ----------
      * x : ndarray<T> const&
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to compute the statistic.
+     * axis : size_t const
+     *     Dimension along which to reduce.
      * keepdims : bool const
      *     If true, the axis which is reduced is left in the result as
      *     dimension of size 1.
@@ -1003,12 +1003,28 @@ namespace nd {
      *     STD-reduced array with
      *     * (x.ndim() - 1) dimensions if `keepdims` is false;
      *     * x.ndim() dimensions if `keepdims` is true.
+     *
+     * Notes
+     * -----
+     * STD is implemented as mean(abs(x - x.mean()) ** 2).
      */
     template <typename T>
     ndarray<T> std(ndarray<T> const& x,
                    size_t const axis,
                    bool const keepdims = false,
-                   ndarray<T>* const out = nullptr);
+                   ndarray<T>* const out = nullptr) {
+        static_assert(is_float<T>() || is_complex<T>(),
+                      "Only {float, complex} types allowed.");
+
+        auto n = x - mean(x, axis, true);
+        abs(n, &n);
+        n *= n;
+        auto y = mean(n, axis, keepdims, out);
+        auto sqrt = [](T const& _var) -> T { return std::sqrt(_var); };
+        util::apply(sqrt, &y, &y);
+
+        return y;
+    }
 
     /*
      * Average over given axis.

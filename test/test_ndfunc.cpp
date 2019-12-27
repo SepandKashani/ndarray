@@ -322,6 +322,47 @@ namespace nd {
         ASSERT_EQ(y[{2}], -inf);}
     }
 
+    TYPED_TEST_P(TestNdFuncFloat, TestStd) {
+        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
+                                .reshape(shape_t({5, 3, 4}))
+                                .template cast<TypeParam>());
+        ndarray<TypeParam> gt = (r_<double>({16.97056275, })
+                                 .broadcast_to(shape_t({3, 4}))
+                                 .template cast<TypeParam>());
+
+        // No buffer provided, keepdims
+       {ndarray<TypeParam> y = std(x, 0);
+        ASSERT_TRUE(allclose(y, gt));};
+
+        // Buffer provided, dropdims
+       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
+        ndarray<TypeParam> z = std(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_TRUE(allclose(y, gt));}
+    }
+
+    TYPED_TEST_P(TestNdFuncComplex, TestStdComplex) {
+        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
+                                .reshape(shape_t({5, 3, 4}))
+                                .template cast<TypeParam>());
+        x += (arange<int>(0, 5 * 3 * 4, 1)
+              .reshape(shape_t({5, 3, 4}))
+              .template cast<TypeParam>()) * j<TypeParam>();
+        ndarray<TypeParam> gt = (r_<int>({24, })
+                                 .broadcast_to(shape_t({3, 4}))
+                                 .template cast<TypeParam>());
+
+        // No buffer provided, keepdims
+       {ndarray<TypeParam> y = std(x, 0);
+        ASSERT_TRUE(allclose(y, gt));};
+
+        // Buffer provided, dropdims
+       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
+        ndarray<TypeParam> z = std(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_TRUE(allclose(y, gt));}
+    }
+
     TYPED_TEST_P(TestNdFuncFloatComplex, TestMean) {
         ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
                                 .reshape(shape_t({5, 3, 4}))
@@ -982,13 +1023,15 @@ namespace nd {
                                TestDeg2Rad,
                                TestRad2Deg,
                                TestSinc,
+                               TestStd,
                                TestReal,
                                TestImag,
                                TestConj);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncFloat, MyFloatTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncComplex,
-                               TestImaginary);
+                               TestImaginary,
+                               TestStdComplex);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncComplex, MyComplexTypes);
 
     // REGISTER_TYPED_TEST_CASE_P(TestNdFuncBoolInt,);
