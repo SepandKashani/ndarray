@@ -1064,34 +1064,6 @@ namespace nd {
     }
 
     /*
-     * Range of values over given axis.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * axes : std::vector<size_t> const&
-     *     Subset of dimensions along which to compute the statistic.
-     * keepdims : bool const
-     *     If true, the axis which is reduced is left in the result as
-     *     dimension of size 1.
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the output.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     (MAX - MIN)-reduced array with
-     *     * (x.ndim() - 1) dimensions if `keepdims` is false;
-     *     * x.ndim() dimensions if `keepdims` is true.
-     */
-    template <typename T>
-    ndarray<T> ptp(ndarray<T> const& x,
-                   size_t const axis,
-                   bool const keepdims = false,
-                   ndarray<T>* const out = nullptr);
-
-    /*
      * Minimum of array elements over given axis.
      *
      * Parameters
