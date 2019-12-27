@@ -1133,7 +1133,23 @@ namespace nd {
     ndarray<T> max(ndarray<T> const& x,
                    size_t const axis,
                    bool const keepdims = false,
-                   ndarray<T>* const out = nullptr);
+                   ndarray<T>* const out = nullptr) {
+        static_assert(is_int<T>() || is_float<T>(),
+                      "Only {int, float} types allowed.");
+
+        auto f_max = [](T const& _x, T const& _y) -> T const& { return std::max(_x, _y); };
+        T constexpr init = std::numeric_limits<T>::lowest();
+
+        if(out == nullptr) {
+            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(shape_y);
+            util::reduce(f_max, const_cast<ndarray<T>*>(&x), &y, axis, init);
+            return (keepdims ? y : y.squeeze({axis}));
+        } else {
+            util::reduce(f_max, const_cast<ndarray<T>*>(&x), out, axis, init);
+            return (keepdims ? *out : out->squeeze({axis}));
+        }
+    }
 
     /*
      * Sort an array.

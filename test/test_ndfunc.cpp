@@ -497,6 +497,121 @@ namespace nd {
         ASSERT_TRUE(allclose(y, gt));}
     }
 
+    TYPED_TEST_P(TestNdFuncInt, TestMaxInt) { // contains unsigned types
+        auto x = (r_<size_t>({18446744073709551599u,                    8u,                   13u, 18446744073709551599u,
+                              18446744073709551610u, 18446744073709551609u, 18446744073709551615u, 18446744073709551601u,
+                              18446744073709551613u,                    8u,                   25u, 18446744073709551601u,
+
+                                                 6u, 18446744073709551593u,                    2u, 18446744073709551593u,
+                              18446744073709551599u,                    3u, 18446744073709551614u, 18446744073709551596u,
+                                                17u, 18446744073709551601u,                    1u,                   12u,
+
+                                                 9u, 18446744073709551602u, 18446744073709551602u,                    3u,
+                                                 2u, 18446744073709551591u, 18446744073709551612u,                   23u,
+                                                22u, 18446744073709551594u,                    9u,                    9u,
+
+                                                11u,                   12u,                   16u, 18446744073709551604u,
+                                                 1u, 18446744073709551615u, 18446744073709551596u, 18446744073709551596u,
+                              18446744073709551615u, 18446744073709551594u, 18446744073709551607u,                   24u,
+
+                                                 4u, 18446744073709551608u, 18446744073709551595u, 18446744073709551615u,
+                                                14u, 18446744073709551610u, 18446744073709551603u,                   19u,
+                              18446744073709551608u,                    7u,                   22u,                   16u})
+                  .reshape(shape_t({5, 3, 4})));
+        auto gt = (r_<size_t>({18446744073709551599u, 18446744073709551608u, 18446744073709551602u, 18446744073709551615u,
+                               18446744073709551610u, 18446744073709551615u, 18446744073709551615u, 18446744073709551601u,
+                               18446744073709551615u, 18446744073709551601u, 18446744073709551607u, 18446744073709551601u})
+                   .reshape(shape_t({3, 4})));
+
+        // No buffer provided, keepdims
+       {auto y = max(x, 0);
+        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+
+        // Buffer provided, dropdims
+       {ndarray<size_t> y(shape_t({1, 3, 4}));
+        auto z = max(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+    }
+
+    TYPED_TEST_P(TestNdFuncSignedInt, TestMaxSignedInt) {
+        auto x = (r_<int>({-17,   8,  13, -17,
+                            -6,  -7,  -1, -15,
+                            -3,   8,  25, -15,
+
+                             6, -23,   2, -23,
+                           -17,   3,  -2, -20,
+                            17, -15,   1,  12,
+
+                             9, -14, -14,   3,
+                             2, -25,  -4,  23,
+                            22, -22,   9,   9,
+
+                            11,  12,  16, -12,
+                             1,  -1, -20, -20,
+                            -1, -22,  -9,  24,
+
+                             4,  -8, -21,  -1,
+                            14,  -6, -13,  19,
+                            -8,   7,  22,  16})
+                  .reshape(shape_t({5, 3, 4}))
+                  .template cast<TypeParam>());
+        auto gt = (r_<int>({11, 12, 16,  3,
+                            14,  3, -1, 23,
+                            22,  8, 25, 24})
+                   .reshape(shape_t({3, 4}))
+                   .template cast<TypeParam>());
+
+        // No buffer provided, keepdims
+       {ndarray<TypeParam> y = max(x, 0);
+        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+
+        // Buffer provided, dropdims
+       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
+        ndarray<TypeParam> z = max(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+    }
+
+    TYPED_TEST_P(TestNdFuncFloat, TestMaxFloat) {
+        auto x = (r_<double>({-0.28886621, -3.25025675, -0.48248167, -1.03443742,
+                              -2.3840612 ,  0.90533714, -2.59267573, -1.52151508,
+                               0.43544824, -1.8137003 , -0.73946422, -0.55333563,
+
+                              -1.73222065,  0.19630151,  1.59952943,  0.41002929,
+                              -0.78312669,  0.24594309, -0.20868591,  0.36898835,
+                              -0.08556923,  0.65485166,  1.07289282, -1.10491782,
+
+                               1.60937945, -1.34027855,  0.14498698, -0.46166759,
+                              -0.53442947,  1.61575812,  0.07057698, -0.21031971,
+                              -0.1200899 , -0.09881275, -0.80477885,  0.7645095 ,
+
+                               2.33508446,  0.4511968 , -0.03822192,  0.37240465,
+                              -0.67925243,  0.89249273,  0.55537163,  0.73655173,
+                              -1.52435019,  2.32402258,  1.4468852 ,  1.20810735,
+
+                               1.60602113,  1.14513947, -1.1708768 ,  1.71955045,
+                               1.59878618,  1.16292662, -1.22018913,  0.617383  ,
+                               0.64868714, -1.12826506,  0.35627699,  0.51074455})
+                  .reshape(shape_t({5, 3, 4}))
+                  .template cast<TypeParam>());
+        auto gt = (r_<double>({2.33508446, 1.14513947, 1.59952943, 1.71955045,
+                               1.59878618, 1.61575812, 0.55537163, 0.73655173,
+                               0.64868714, 2.32402258, 1.4468852 , 1.20810735})
+                   .reshape(shape_t({3, 4}))
+                   .template cast<TypeParam>());
+
+        // No buffer provided, keepdims
+       {ndarray<TypeParam> y = max(x, 0);
+        ASSERT_TRUE(allclose(y, gt));};
+
+        // Buffer provided, dropdims
+       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
+        ndarray<TypeParam> z = max(x, 0, true, &y);
+        ASSERT_TRUE(y.equals(z));
+        ASSERT_TRUE(allclose(y, gt));}
+    }
+
     TYPED_TEST_P(TestNdFuncFloat, TestCeil) {
         ndarray<TypeParam> x = (arange<TypeParam>(-3.1, 3.9, 0.5)
                                 .reshape(shape_t({2, 7})));
@@ -1116,11 +1231,13 @@ namespace nd {
     // INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncBool, MyBoolTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncInt,
-                               TestMinInt);
+                               TestMinInt,
+                               TestMaxInt);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncInt, MyIntTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncSignedInt,
-                               TestMinSignedInt);
+                               TestMinSignedInt,
+                               TestMaxSignedInt);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncSignedInt, MySignedIntTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncFloat,
@@ -1129,6 +1246,7 @@ namespace nd {
                                TestLinSpace,
                                TestLog,
                                TestMinFloat,
+                               TestMaxFloat,
                                TestCeil,
                                TestFloor,
                                TestSin,
