@@ -1152,40 +1152,6 @@ namespace nd {
     }
 
     /*
-     * Sort an array.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * axis : size_t const
-     *     Dimension along which to sort.
-     *
-     * Returns
-     * -------
-     * y : ndarray<T>
-     *     Sorted copy of `x`.
-     */
-    template <typename T>
-    ndarray<T> sort(ndarray<T> const& x, size_t const axis);
-
-    /*
-     * Indices that would sort an array.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T> const&
-     * axis : size_t const
-     *     Dimension along which to sort.
-     *
-     * Returns
-     * -------
-     * y : ndarray<size_t>
-     *     Array of indices that sort `x` along dimension `axis`.
-     */
-    template <typename T>
-    ndarray<size_t> argsort(ndarray<T> const& x, size_t const axis);
-
-    /*
      * Element-wise ceiling.
      *
      * Parameters
