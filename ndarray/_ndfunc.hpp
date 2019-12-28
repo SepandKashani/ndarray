@@ -11,6 +11,7 @@
 #include <cmath>
 #include <complex>
 #include <functional>
+#include <set>
 #include <type_traits>
 #include <vector>
 
@@ -980,7 +981,17 @@ namespace nd {
      *     (N,) array with sorted unique values of `x.ravel()`.
      */
     template <typename T>
-    ndarray<T> unique(ndarray<T> const& x);
+    ndarray<T> unique(ndarray<T> const& x) {
+        static_assert(is_bool<T>() || is_int<T>() || is_float<T>(),
+                      "Only {bool, int, float} types allowed.");
+
+        std::set<T> _unique(x.begin(), x.end());
+        size_t const N = _unique.size();
+
+        ndarray<T> y(shape_t({N,}));
+        std::copy(_unique.cbegin(), _unique.cend(), y.begin());
+        return y;
+    }
 
     /*
      * Standard deviation over given axis.

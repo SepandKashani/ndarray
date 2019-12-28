@@ -322,6 +322,130 @@ namespace nd {
         ASSERT_EQ(y[{2}], -inf);}
     }
 
+    TYPED_TEST_P(TestNdFuncBool, TestUniqueBool) {
+        auto x = (r_<TypeParam>({  true,  true,  true,  true,
+                                   true,  true,  true,  true,
+                                   true,  true,  true,  true,
+
+                                   true,  true,  true,  true,
+                                   true, false,  true,  true,
+                                   true,  true,  true,  true,
+
+                                   true, false,  true,  true,
+                                   true,  true,  true,  true,
+                                   true,  true,  true,  true,
+
+                                   true,  true, false,  true,
+                                   true,  true,  true,  true,
+                                   true,  true,  true,  true,
+
+                                   true,  true,  true,  true,
+                                   true,  true,  true,  true,
+                                   true,  true,  true,  true})
+                  .reshape(shape_t({5, 3, 4})));
+        auto gt = r_<TypeParam>({false,  true});
+
+        auto y = unique(x);
+        ASSERT_TRUE(all(y == gt, 0)[{0}]);
+    }
+
+    TYPED_TEST_P(TestNdFuncInt, TestUniqueInt) {
+        auto x = (r_<TypeParam>({ 9, 14, 15, 13,
+                                 15,  3, 13,  6,
+                                 24, 11,  4, 12,
+
+                                  2,  8,  4, 12,
+                                 12,  0, 17, 18,
+                                  7, 20, 22, 20,
+
+                                  9,  0, 16, 16,
+                                 11, 12, 12, 24,
+                                 17,  8, 24,  1,
+
+                                  5, 18,  0, 13,
+                                 19, 20, 19, 10,
+                                  3,  2, 20, 11,
+
+                                 18, 16, 15, 11,
+                                 20, 22, 13,  1,
+                                 13, 17,  8,  7})
+                  .reshape(shape_t({5, 3, 4})));
+        auto gt = r_<TypeParam>({  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+                                  17, 18, 19, 20, 22, 24});
+
+        auto y = unique(x);
+        ASSERT_TRUE(all(y == gt, 0)[{0}]);
+    }
+
+    TYPED_TEST_P(TestNdFuncSignedInt, TestUniqueSignedInt) {
+        auto x = (r_<TypeParam>({ 18,  18, -16,  -8,
+                                  19, -22, -20,   5,
+                                 -20,  -3,  20,  18,
+
+                                 -21,   4,  13,  16,
+                                  22,  11,  12,  10,
+                                  17,  -5,  -1,   0,
+
+                                 -15,  16, -17,  19,
+                                   0,  18,  -6,  13,
+                                   6,  21,   9,   8,
+
+                                 -15,   6, -20,   0,
+                                  -3, -15,  12,   4,
+                                  10,   8,  13,  -2,
+
+                                   6,  -3,  -6,   6,
+                                  -6,  18,  11,   8,
+                                   7,   5,   2,  18})
+                  .reshape(shape_t({5, 3, 4})));
+        auto gt = r_<TypeParam>({-22, -21, -20, -17, -16, -15,  -8,  -6,  -5,  -3,  -2,  -1,   0,
+                                   2,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  16,  17,
+                                  18,  19,  20,  21,  22});
+
+        auto y = unique(x);
+        ASSERT_TRUE(all(y == gt, 0)[{0}]);
+    }
+
+    TYPED_TEST_P(TestNdFuncFloat, TestUniqueFloat) {
+        auto x = (r_<double>({-0.28886621, -3.25025675, -0.48248167, -1.03443742,
+                              -2.3840612 ,  0.90533714, -2.59267573, -1.52151508,
+                               0.43544824, -1.8137003 , -0.73946422, -0.55333563,
+
+                              -1.73222065,  0.19630151,  1.59952943,  0.41002929,
+                              -0.78312669,  0.24594309, -0.20868591,  0.36898835,
+                              -0.08556923,  0.65485166,  1.07289282, -1.10491782,
+
+                               1.60937945, -1.34027855,  0.14498698, -0.46166759,
+                              -0.53442947,  1.61575812,  0.07057698, -0.21031971,
+                              -0.1200899 , -0.09881275, -0.80477885,  0.7645095 ,
+
+                               2.33508446,  0.4511968 , -0.03822192,  0.37240465,
+                              -0.67925243,  0.89249273,  0.55537163,  0.73655173,
+                              -1.52435019,  2.32402258,  1.4468852 ,  1.20810735,
+
+                               1.60602113,  1.14513947, -1.1708768 ,  1.71955045,
+                               1.59878618,  1.16292662, -1.22018913,  0.617383  ,
+                               0.64868714, -1.12826506,  0.35627699,  0.51074455})
+                  .reshape(shape_t({5, 3, 4}))
+                  .template cast<TypeParam>());
+        auto gt = (r_<double>({-3.25025675, -2.59267573, -2.3840612 , -1.8137003 , -1.73222065,
+                               -1.52435019, -1.52151508, -1.34027855, -1.22018913, -1.1708768 ,
+                               -1.12826506, -1.10491782, -1.03443742, -0.80477885, -0.78312669,
+                               -0.73946422, -0.67925243, -0.55333563, -0.53442947, -0.48248167,
+                               -0.46166759, -0.28886621, -0.21031971, -0.20868591, -0.1200899 ,
+                               -0.09881275, -0.08556923, -0.03822192,  0.07057698,  0.14498698,
+                                0.19630151,  0.24594309,  0.35627699,  0.36898835,  0.37240465,
+                                0.41002929,  0.43544824,  0.4511968 ,  0.51074455,  0.55537163,
+                                0.617383  ,  0.64868714,  0.65485166,  0.73655173,  0.7645095 ,
+                                0.89249273,  0.90533714,  1.07289282,  1.14513947,  1.16292662,
+                                1.20810735,  1.4468852 ,  1.59878618,  1.59952943,  1.60602113,
+                                1.60937945,  1.61575812,  1.71955045,  2.32402258,  2.33508446})
+                   .template cast<TypeParam>());
+
+        auto y = unique(x);
+        ASSERT_TRUE(allclose(y, gt));
+    }
+
     TYPED_TEST_P(TestNdFuncFloat, TestStd) {
         ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
                                 .reshape(shape_t({5, 3, 4}))
@@ -1225,17 +1349,20 @@ namespace nd {
      * Some test functions are not templated. We nevertheless list all of them here for
      * completeness.
      */
-    // REGISTER_TYPED_TEST_CASE_P(TestNdFuncBool,
-    //                            TestAny,
-    //                            TestAll);
-    // INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncBool, MyBoolTypes);
+    REGISTER_TYPED_TEST_CASE_P(TestNdFuncBool,
+                               // TestAny,
+                               // TestAll,
+                               TestUniqueBool);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncBool, MyBoolTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncInt,
+                               TestUniqueInt,
                                TestMinInt,
                                TestMaxInt);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncInt, MyIntTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncSignedInt,
+                               TestUniqueSignedInt,
                                TestMinSignedInt,
                                TestMaxSignedInt);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncSignedInt, MySignedIntTypes);
@@ -1244,6 +1371,7 @@ namespace nd {
                                TestPi,
                                TestEuler,
                                TestLinSpace,
+                               TestUniqueFloat,
                                TestLog,
                                TestMinFloat,
                                TestMaxFloat,
