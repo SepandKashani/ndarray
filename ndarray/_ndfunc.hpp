@@ -187,23 +187,39 @@ namespace nd {
     }
 
     /*
-     * Coordinate arrays from coordinate vectors.
+     * (Sparse) coordinate arrays from coordinate vectors.
      *
      * Parameters
      * ----------
      * x : std::vector<ndarray<T>> const&
      *     1-D arrays representing coordinates of a grid.
-     * sparse : bool const
-     *     Return grids that are not fleshed-out to conserve memory.
      *
      * Returns
      * -------
      * mesh : std::vector<ndarray<T>>
-     *     Given x[i].size() = s[i], return (s[0], s[1], ..., s[N-1]) shaped
-     *     arrays where mesh[i][{a, ..., z}] = x[i][{<corresponding letter from {a, ..., z}>}].
+     *     mesh[i] = x[i].reshape({1, ..., x[i].size(), ..., 1})
      */
     template <typename T>
-    std::vector<ndarray<T>> meshgrid(std::vector<ndarray<T>> const& x, bool const sparse = false);
+    std::vector<ndarray<T>> meshgrid(std::vector<ndarray<T>> const& x) {
+        static_assert(is_arithmetic<T>(), "Only {bool, int, float, complex} types allowed.");
+
+        for(auto const& _x : x) {
+            util::NDARRAY_ASSERT(_x.ndim() == static_cast<size_t>(1),
+                                 "Only 1d coordinate arrays allowed.");
+        }
+
+        std::vector<ndarray<T>> mesh;
+        for(size_t i = 0, N = x.size(); i < N; ++i) {
+            ndarray<T> const& _x = x[i];
+
+            shape_t shape(N, 1);
+            shape[i] = _x.size();
+
+            mesh.push_back(_x.copy().reshape(shape));
+        }
+
+        return mesh;
+    }
 
     /*
      * Returns

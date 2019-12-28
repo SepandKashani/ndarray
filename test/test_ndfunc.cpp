@@ -200,6 +200,39 @@ namespace nd {
         ASSERT_TRUE(std::abs(stop - (*min_el)) < 1e-5);}
     }
 
+    TEST(TestNdFunc, TestMeshGrid) {
+       { // Empty array
+        auto const X = meshgrid(std::vector<ndarray<int>>());
+        ASSERT_TRUE(X.size() == 0);}
+
+       { // 1d arrays only
+        auto const x = (arange<int>(0, 6, 1)
+                        .reshape(shape_t({2, 3})));
+        ASSERT_THROW(meshgrid<int>({x, }), std::runtime_error);}
+
+       { // 1d meshgrid
+        auto const x = arange<int>(0, 3, 1);
+        auto const y = meshgrid<int>({x, });
+
+        ASSERT_EQ(y.size(), 1u);
+        ASSERT_EQ(y[0].shape(), x.shape());
+        ASSERT_TRUE(all(y[0] == x, 0)[{0}]);
+        ASSERT_TRUE(!y[0].equals(x));}
+
+       { // 2d meshgrid
+        auto const x1 = arange<int>(0, 3, 1);
+        auto const x2 = arange<int>(3, 7, 1);
+        auto const y = meshgrid<int>({x1, x2});
+
+        ASSERT_EQ(y.size(), 2u);
+        ASSERT_EQ(y[0].shape(), shape_t({3, 1}));
+        ASSERT_EQ(y[1].shape(), shape_t({1, 4}));
+        ASSERT_TRUE(all(y[0].ravel() == x1, 0)[{0}]);
+        ASSERT_TRUE(all(y[1].ravel() == x2, 0)[{0}]);
+        ASSERT_TRUE(!y[0].equals(x1));
+        ASSERT_TRUE(!y[1].equals(x2));}
+    }
+
 
 
     /* Math Functions ====================================================== */
@@ -1592,6 +1625,7 @@ namespace nd {
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncArithmetic,
                                // TestStack,
+                               // TestMeshGrid,
                                TestRUnderscore,
                                TestZeros,
                                TestOnes,
