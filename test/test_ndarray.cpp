@@ -9,6 +9,7 @@
 
 #include <complex>
 #include <numeric>
+#include <stdexcept>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -1008,7 +1009,159 @@ namespace nd {
         ASSERT_TRUE(x.equals(y));}
     }
 
+    TEST(TestNdArrayManipulation, TestTranspose) {
+       { // Initially contiguous arrays
+        auto x = (arange<int>(0, 2 * 3 * 4, 1)
+                  .reshape(shape_t({2, 3, 4})));
+        auto gt012 = x.copy();
+        auto gt120 = (r_<int>({ 0, 12,
+                                1, 13,
+                                2, 14,
+                                3, 15,
+
+                                4, 16,
+                                5, 17,
+                                6, 18,
+                                7, 19,
+
+                                8, 20,
+                                9, 21,
+                               10, 22,
+                               11, 23})
+                      .reshape(shape_t({3, 4, 2})));
+        auto gt201 = (r_<int>({ 0,  4,  8,
+                               12, 16, 20,
+
+                                1,  5,  9,
+                               13, 17, 21,
+
+                                2,  6, 10,
+                               14, 18, 22,
+
+                                3,  7, 11,
+                               15, 19, 23})
+                      .reshape(shape_t({4, 2, 3})));
+        auto gt102 = (r_<int>({ 0,  1,  2,  3,
+                               12, 13, 14, 15,
+
+                                4,  5,  6,  7,
+                               16, 17, 18, 19,
+
+                                8,  9, 10, 11,
+                               20, 21, 22, 23})
+                      .reshape(shape_t({3, 2, 4})));
+        auto gt021 = (r_<int>({ 0,  4,  8,
+                                1,  5,  9,
+                                2,  6, 10,
+                                3,  7, 11,
+
+                               12, 16, 20,
+                               13, 17, 21,
+                               14, 18, 22,
+                               15, 19, 23})
+                      .reshape(shape_t({2, 4, 3})));
+        auto gt210 = (r_<int>({ 0, 12,
+                                4, 16,
+                                8, 20,
+
+                                1, 13,
+                                5, 17,
+                                9, 21,
+
+                                2, 14,
+                                6, 18,
+                               10, 22,
+
+                                3, 15,
+                                7, 19,
+                               11, 23})
+                      .reshape(shape_t({4, 3, 2})));
+
+        ASSERT_NO_THROW(x.transpose());
+        ASSERT_NO_THROW(x.transpose({0, 1, 2}));
+        ASSERT_NO_THROW(x.transpose({1, 2, 0}));
+        ASSERT_NO_THROW(x.transpose({2, 0, 1}));
+        ASSERT_NO_THROW(x.transpose({1, 0, 2}));
+        ASSERT_NO_THROW(x.transpose({0, 2, 1}));
+        ASSERT_NO_THROW(x.transpose({2, 1, 0}));
+        ASSERT_THROW(x.transpose({0, 1, 3}), std::runtime_error);
+        ASSERT_THROW(x.transpose({1, 0, 0}), std::runtime_error);
+
+        ASSERT_TRUE(all((x.transpose({0, 1, 2}) == gt012).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({1, 2, 0}) == gt120).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({2, 0, 1}) == gt201).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({1, 0, 2}) == gt102).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({0, 2, 1}) == gt021).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({2, 1, 0}) == gt210).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose()          == gt210).ravel(), 0)[{0}]);}
+
+       { // Initially non-contiguous arrays
+        auto x = (arange<int>(0, 2 * 3 * 4, 1)
+                  .reshape(shape_t({2, 3, 4}))
+                  .operator()(std::vector({util::slice(), util::slice(), util::slice(3, -1, -2)})));
+        ASSERT_EQ(x.shape(), shape_t({2, 3, 2}));
+        ASSERT_FALSE(x.is_contiguous());
+        auto gt012 = x.copy();
+        auto gt120 = (r_<int>({ 3, 15,
+                                1, 13,
+
+                                7, 19,
+                                5, 17,
+
+                               11, 23,
+                                9, 21})
+                      .reshape(shape_t({3, 2, 2})));
+        auto gt201 = (r_<int>({ 3,  7, 11,
+                               15, 19, 23,
+
+                                1,  5,  9,
+                               13, 17, 21})
+                      .reshape(shape_t({2, 2, 3})));
+        auto gt102 = (r_<int>({ 3,  1,
+                               15, 13,
+
+                                7,  5,
+                               19, 17,
+
+                               11,  9,
+                               23, 21})
+                      .reshape(shape_t({3, 2, 2})));
+        auto gt021 = (r_<int>({ 3,  7, 11,
+                                1,  5,  9,
+
+                               15, 19, 23,
+                               13, 17, 21})
+                      .reshape(shape_t({2, 2, 3})));
+        auto gt210 = (r_<int>({ 3, 15,
+                                7, 19,
+                               11, 23,
+
+                                1, 13,
+                                5, 17,
+                                9, 21})
+                      .reshape(shape_t({2, 3, 2})));
+
+        ASSERT_NO_THROW(x.transpose());
+        ASSERT_NO_THROW(x.transpose({0, 1, 2}));
+        ASSERT_NO_THROW(x.transpose({1, 2, 0}));
+        ASSERT_NO_THROW(x.transpose({2, 0, 1}));
+        ASSERT_NO_THROW(x.transpose({1, 0, 2}));
+        ASSERT_NO_THROW(x.transpose({0, 2, 1}));
+        ASSERT_NO_THROW(x.transpose({2, 1, 0}));
+        ASSERT_THROW(x.transpose({0, 1, 3}), std::runtime_error);
+        ASSERT_THROW(x.transpose({1, 0, 0}), std::runtime_error);
+
+        ASSERT_TRUE(all((x.transpose({0, 1, 2}) == gt012).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({1, 2, 0}) == gt120).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({2, 0, 1}) == gt201).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({1, 0, 2}) == gt102).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({0, 2, 1}) == gt021).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose({2, 1, 0}) == gt210).ravel(), 0)[{0}]);
+        ASSERT_TRUE(all((x.transpose()          == gt210).ravel(), 0)[{0}]);}
+    }
+
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayManipulation,
+                               //TestTranspose,
                                TestCopy,
                                TestAsContiguousArray,
                                TestSqueeze,

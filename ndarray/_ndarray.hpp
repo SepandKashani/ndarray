@@ -605,7 +605,13 @@ namespace nd {
              * tr : ndarray<T>
              *     View on :cpp:ptr:`this` with axes reversed.
              */
-            ndarray<T> transpose() const;
+            ndarray<T> transpose() const {
+                std::vector<size_t> axes(ndim());
+                std::iota(axes.rbegin(), axes.rend(), 0);
+
+                ndarray<T> tr = transpose(axes);
+                return tr;
+            }
 
             /*
              * Array view with axes transposed.
@@ -620,7 +626,22 @@ namespace nd {
              * tr : ndarray<T>
              *     View on :cpp:ptr:`this` with axes suitably permuted.
              */
-            ndarray<T> transpose(std::vector<size_t> const& axes) const;
+            ndarray<T> transpose(std::vector<size_t> const& axes) const {
+                std::set<size_t> const _axes(axes.begin(), axes.end());
+                size_t const max_axes = *_axes.crbegin();
+                util::NDARRAY_ASSERT((_axes.size() == ndim()) && (max_axes == (ndim() - 1)),
+                                     "Parameter[axes] don't match array.");
+
+                shape_t shape;
+                stride_t strides;
+                for(size_t const& ax : axes) {
+                    shape.push_back(m_shape[ax]);
+                    strides.push_back(m_strides[ax]);
+                }
+
+                ndarray<T> tr(m_base, m_data, shape, strides);
+                return tr;
+            }
 
             /*
              * Element-wise static_cast<U>() of the array.
