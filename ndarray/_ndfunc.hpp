@@ -531,23 +531,6 @@ namespace nd {
     }
 
     /*
-     * Join a sequence of arrays along an existing axis.
-     *
-     * Parameters
-     * ----------
-     * x : std::vector<ndarray<T> const&> const&
-     *     Arrays to join.
-     *     All arrays must have the same shape, except along the dimension specified by `axis`.
-     * axis : size_t const
-     *     Dimension along which arrays are joined.
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the output.
-     */
-    template <typename T>
-    ndarray<T> concatenate(std::vector<ndarray<T> const&> const& x, size_t const axis, ndarray<T>* const out = nullptr);
-
-    /*
      * Join a sequence of arrays along a new axis.
      *
      * Parameters
