@@ -11,6 +11,7 @@
 #include <cmath>
 #include <complex>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -952,6 +953,166 @@ namespace nd {
         ASSERT_EQ(y.data()[11], static_cast<TypeParam>(253.0));}
     }
 
+    TEST(TestNdFunc, TestStack) {
+        { // 1d arrays
+            auto const x1 = arange<int>(0, 6, 1);
+            auto const x2 = arange<int>(6, 12, 1) * 2;
+            auto const x3 = arange<int>(12, 18, 1) * 3;
+            auto const x4 = arange<int>(18, 24, 1) * 4;
+            auto const x_broken = arange<int>(0, 3, 1);
+
+           { // Same shapes
+            ASSERT_NO_THROW(stack(std::vector({x1,}), 0));
+            ASSERT_NO_THROW(stack(std::vector({x1, x2, x3, x4,}), 0));
+            ASSERT_THROW(stack(std::vector({x_broken, x1, x2, x3, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x_broken, x2, x3, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x2, x_broken, x3, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x2, x3, x_broken, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x2, x3, x4, x_broken}), 0), std::runtime_error);}
+
+           { // axis
+            ASSERT_NO_THROW(stack(std::vector({x1,}), 0));
+            ASSERT_NO_THROW(stack(std::vector({x1,}), 1));
+            ASSERT_THROW(stack(std::vector({x1,}), 2), std::runtime_error);
+            ASSERT_NO_THROW(stack(std::vector({x1, x2, x3, x4,}), 0));
+            ASSERT_NO_THROW(stack(std::vector({x1, x2, x3, x4,}), 1));
+            ASSERT_THROW(stack(std::vector({x1, x2, x3, x4,}), 2), std::runtime_error);}
+
+           { // correct output (single)
+           {auto gt = x1.reshape({1, 6});
+            auto y = stack(std::vector({x1, }), 0);
+            ASSERT_TRUE(all(gt == y, 0)[{0}]);}
+           {auto gt = x1.reshape({6, 1});
+            auto y = stack(std::vector({x1, }), 1);
+            ASSERT_TRUE(all(gt == y, 0)[{0}]);}}
+
+           { // correct output (multi)
+           {auto gt = (r_<int>({ 0,  1,  2,  3,  4,  5,
+                                12, 14, 16, 18, 20, 22,
+                                36, 39, 42, 45, 48, 51,
+                                72, 76, 80, 84, 88, 92})
+                       .reshape(shape_t({4, 6})));
+            auto y = stack(std::vector({x1, x2, x3, x4}), 0);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+           {auto gt = (r_<int>({ 0, 12, 36, 72,
+                                 1, 14, 39, 76,
+                                 2, 16, 42, 80,
+                                 3, 18, 45, 84,
+                                 4, 20, 48, 88,
+                                 5, 22, 51, 92})
+                               .reshape({6, 4}));
+            auto y = stack(std::vector({x1, x2, x3, x4}), 1);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}}
+
+           { // output array provided
+            auto gt = (r_<int>({ 0,  1,  2,  3,  4,  5,
+                                12, 14, 16, 18, 20, 22,
+                                36, 39, 42, 45, 48, 51,
+                                72, 76, 80, 84, 88, 92})
+                       .reshape(shape_t({4, 6})));
+            ndarray<int> y(gt.shape());
+            auto z = stack(std::vector({x1, x2, x3, x4}), 0, &y);
+            ASSERT_TRUE(y.equals(z));
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);
+           }
+        }
+
+        { // 2d arrays
+            shape_t const shape({2, 3});
+            auto const x1 = arange<int>(0, 6, 1).reshape(shape);
+            auto const x2 = arange<int>(6, 12, 1).reshape(shape) * 2;
+            auto const x3 = arange<int>(12, 18, 1).reshape(shape) * 3;
+            auto const x4 = arange<int>(18, 24, 1).reshape(shape) * 4;
+            auto const x_broken = arange<int>(0, 3, 1);
+
+           { // Same shapes
+            ASSERT_NO_THROW(stack(std::vector({x1,}), 0));
+            ASSERT_NO_THROW(stack(std::vector({x1, x2, x3, x4,}), 0));
+            ASSERT_THROW(stack(std::vector({x_broken, x1, x2, x3, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x_broken, x2, x3, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x2, x_broken, x3, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x2, x3, x_broken, x4}), 0), std::runtime_error);
+            ASSERT_THROW(stack(std::vector({x1, x2, x3, x4, x_broken}), 0), std::runtime_error);}
+
+           { // axis
+            ASSERT_NO_THROW(stack(std::vector({x1,}), 0));
+            ASSERT_NO_THROW(stack(std::vector({x1,}), 1));
+            ASSERT_NO_THROW(stack(std::vector({x1,}), 2));
+            ASSERT_THROW(stack(std::vector({x1,}), 3), std::runtime_error);
+            ASSERT_NO_THROW(stack(std::vector({x1, x2, x3, x4,}), 0));
+            ASSERT_NO_THROW(stack(std::vector({x1, x2, x3, x4,}), 1));
+            ASSERT_NO_THROW(stack(std::vector({x1, x2, x3, x4,}), 2));
+            ASSERT_THROW(stack(std::vector({x1, x2, x3, x4,}), 3), std::runtime_error);}
+
+           { // correct output (single)
+           {auto gt = x1.reshape({1, 2, 3});
+            auto y = stack(std::vector({x1,}), 0);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+           {auto gt = x1.reshape({2, 1, 3});
+            auto y = stack(std::vector({x1,}), 1);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+           {auto gt = x1.reshape({2, 3, 1});
+            auto y = stack(std::vector({x1,}), 2);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}}
+
+           { // correct output (multi)
+           {auto gt = (r_<int>({ 0,  1,  2,
+                                 3,  4,  5,
+
+                                12, 14, 16,
+                                18, 20, 22,
+
+                                36, 39, 42,
+                                45, 48, 51,
+
+                                72, 76, 80,
+                                84, 88, 92})
+                       .reshape(shape_t({4, 2, 3})));
+            auto y = stack(std::vector({x1, x2, x3, x4}), 0);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+           {auto gt = (r_<int>({ 0,  1,  2,
+                                12, 14, 16,
+                                36, 39, 42,
+                                72, 76, 80,
+
+                                 3,  4,  5,
+                                18, 20, 22,
+                                45, 48, 51,
+                                84, 88, 92})
+                       .reshape(shape_t({2, 4, 3})));
+            auto y = stack(std::vector({x1, x2, x3, x4}), 1);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+           {auto gt = (r_<int>({ 0, 12, 36, 72,
+                                 1, 14, 39, 76,
+                                 2, 16, 42, 80,
+
+                                 3, 18, 45, 84,
+                                 4, 20, 48, 88,
+                                 5, 22, 51, 92})
+                       .reshape(shape_t({2, 3, 4})));
+            auto y = stack(std::vector({x1, x2, x3, x4}), 2);
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}}
+
+           { // output array provided
+            auto gt = (r_<int>({ 0,  1,  2,
+                                 3,  4,  5,
+
+                                12, 14, 16,
+                                18, 20, 22,
+
+                                36, 39, 42,
+                                45, 48, 51,
+
+                                72, 76, 80,
+                                84, 88, 92})
+                       .reshape(shape_t({4, 2, 3})));
+            ndarray<int> y(gt.shape());
+            auto z = stack(std::vector({x1, x2, x3, x4}), 0, &y);
+            ASSERT_TRUE(y.equals(z));
+            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+        }
+    }
+
     TEST(TestNdFunc, TestAny) {
         // No buffer provided, keepdims
        {ndarray<bool> x = zeros<bool>({2, 3});
@@ -1430,6 +1591,7 @@ namespace nd {
     // INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncSignedArithmetic, MySignedArithmeticTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncArithmetic,
+                               // TestStack,
                                TestRUnderscore,
                                TestZeros,
                                TestOnes,

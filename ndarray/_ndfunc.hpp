@@ -535,17 +535,63 @@ namespace nd {
      *
      * Parameters
      * ----------
-     * x : std::vector<ndarray<T> const&> const&
+     * x : std::vector<ndarray<T>> const&
      *     Arrays to join.
      *     All arrays must have the same shape.
      * axis : size_t const
      *     Dimension in the output array along which arrays are joined.
+     *     Must lie in {0, ..., x[0].ndim()}.
      * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
+     *
+     * Returns
+     * -------
+     * y : ndarray<T>
+     *     Stacked array with one more dimension (at position=axis) than input arrays.
      */
     template <typename T>
-    ndarray<T> stack(std::vector<ndarray<T> const&> const& x, size_t const axis, ndarray<T>* const out = nullptr);
+    ndarray<T> stack(std::vector<ndarray<T>> const& x, size_t const axis, ndarray<T>* const out = nullptr) {
+        static_assert(is_arithmetic<T>(), "Only {bool, int, float, complex} types allowed.");
+
+        {   // Validate shapes
+            util::NDARRAY_ASSERT(x.size() > 0, "No array(s) to stack.");
+
+            std::stringstream error_msg;
+            error_msg << "Cannot concatenate arrays of shape {";
+            for(size_t i = 0, N = x.size(); i < N; ++i) {
+                error_msg << x[i].shape() << ((i != N-1) ? ", " : "");
+            }
+            error_msg << "}. \n";
+
+            auto same_shape = [&x](ndarray<T> const& _x) -> bool {
+                shape_t const& shape_1 = x[0].shape();
+                shape_t const& shape_2 = _x.shape();
+                return shape_1 == shape_2;
+            };
+            util::NDARRAY_ASSERT(std::all_of(x.begin(), x.end(), same_shape), error_msg.str());
+        }
+
+        {   // Validate axis
+            size_t const N_axis = x[0].ndim();
+            util::NDARRAY_ASSERT(axis <= N_axis, "Parameter[axis] is out of bounds.");
+        }
+
+        auto shape_y = x[0].shape();
+        shape_y.insert(shape_y.begin() + axis, x.size());
+        ndarray<T> y((out == nullptr) ? shape_y : *out);
+
+        auto shape_x = shape_y;
+        shape_x[axis] = 1;
+
+        auto slicer = std::vector(shape_y.size(), util::slice());
+        for(int i = 0, N = x.size(); i < N; ++i) {
+            slicer[axis] = util::slice(i, i + 1);
+            y(slicer) = x[i].reshape(shape_x);
+        }
+
+        return y;
+    }
 
     /*
      * Element-wise trigonometric sine.
