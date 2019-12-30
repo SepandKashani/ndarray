@@ -12,6 +12,7 @@
 #include <complex>
 #include <functional>
 #include <set>
+#include <sstream>
 #include <type_traits>
 #include <vector>
 
