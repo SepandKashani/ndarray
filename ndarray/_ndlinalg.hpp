@@ -91,28 +91,94 @@ namespace nd::linalg {
      * Parameters
      * ----------
      * A : ndarray<T> const&
-     *     (N, M) or (..., N, M) array.
-     *     If `A` is (N, M), it is transformed to a (1, N, M) array.
+     *     ([M,] N, P) array.
      * B : ndarray<T> const&
-     *     (M, Q) or (..., M, Q) array.
-     *     If `B` is (M, Q), it is transformed to a (1, M, Q) array.
-     * out : ndarray<T> * const
+     *     ([M,] P, Q) array.
+     * out : ndarray<T>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
      *
      * Returns
      * -------
      * C : ndarray<T>
-     *     (..., N, Q) layer-wise matrix product of `A` and `B`.
+     *     (M, N, Q) layer-wise matrix product of `A` and `B`.
      *
      * Examples
      * --------
-     * Let A \in \bR^{a1, d, N, M} and B \in \bR^{d, M, Q}.
-     * Then C = bmm(A, B) \in \bR^{a1, d, N, Q} such that
-     *     C[i, j, :, :] = mm(A[i, j, :, :], B[j, :, :])
+     * Let A \in \bR^{M, N, P} and B \in \bR^{M, P, Q}.
+     * Then C = bmm(A, B) \in \bR^{M, N, Q} such that
+     *     C[i, :, :] = mm(A[i, :, :], B[i, :, :])
+     *
+     * Let A \in \bR^{M, N, P} and B \in \bR^{P, Q}.
+     * Then C = bmm(A, B) \in \bR^{M, N, Q} such that
+     *     C[i, :, :] = mm(A[i, :, :], B[:, :])
+     *
+     * Notes
+     * -----
+     * This is a convenience function that calls nd::linalg::mm() under the hood.
      */
     template <typename T>
-    ndarray<T> bmm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr);
+    ndarray<T> bmm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr) {
+        static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
+                      "Only {int, float, complex} types allowed.");
+
+        util::NDARRAY_ASSERT((A.ndim() == 2) || (A.ndim() == 3), "Parameter[A] must be 2D or 3D.");
+        util::NDARRAY_ASSERT((B.ndim() == 2) || (B.ndim() == 3), "Parameter[B] must be 2D or 3D.");
+
+        /*
+         * TODO: .reshape() will cause a copy if (A, B) are not contiguous.
+         * Call ndarray<T>(byte_t* const, shape_t const&, stride_t const&) instead.
+         */
+        auto const& AA = (A.ndim() == 3) ? A : A.reshape({1, A.shape()[0], A.shape()[1]});
+        auto const& BB = (B.ndim() == 3) ? B : B.reshape({1, B.shape()[0], B.shape()[1]});
+
+        shape_t const& sh_AA = AA.shape();
+        shape_t const& sh_BB = BB.shape();
+
+        { // Validate shapes
+            bool const correct_shape = (((sh_AA[0] == sh_BB[0]) ||
+                                         (sh_AA[0] == 1) ||
+                                         (sh_BB[0] == 1)) &&
+                                        (sh_AA[2] == sh_BB[1]));
+            std::stringstream error_msg;
+            error_msg << "Cannon broadcast-multiply arrays of shape {"
+                      << A.shape() << ", " << B.shape() << "}. \n";
+            util::NDARRAY_ASSERT(correct_shape, error_msg.str());
+        }
+
+        size_t const M(std::max(sh_AA[0], sh_BB[0]));
+        size_t const N(sh_AA[1]);
+        size_t const P(sh_BB[1]);
+        size_t const Q(sh_BB[2]);
+        auto const& bcast_AA = AA.broadcast_to({M, N, P});
+        auto const& bcast_BB = BB.broadcast_to({M, P, Q});
+        shape_t const sh_C({M, N, Q});
+        if(out != nullptr) {
+            std::stringstream error_msg;
+            error_msg << "Parameter[out]: Expected " << sh_C << " array, "
+                      << "got " << out->shape() << ".\n";
+            util::NDARRAY_ASSERT(sh_C == out->shape(), error_msg.str());
+            util::NDARRAY_ASSERT(out->is_contiguous(), "Parameter[out] must point to a contiguous array.");
+        }
+        ndarray<T> C = (out == nullptr) ? ndarray<T>(sh_C) : *out;
+
+        std::vector<util::slice> subset(3, util::slice());
+        for(size_t i = 0; i < M; ++i) {
+            subset[0] = util::slice(i, i + 1);
+
+            /*
+             * TODO: .reshape() will cause a copy if (A, B) are not contiguous.
+             * Call ndarray<T>(byte_t* const, shape_t const&, stride_t const&) instead.
+             */
+            auto const& _A = bcast_AA(subset).reshape({N, P});
+            auto const& _B = bcast_BB(subset).reshape({P, Q});
+            auto _C = C(subset).reshape({N, Q});
+
+            mm(_A, _B, &_C);
+        }
+
+        return C;
+    }
 }
 
 #endif // _NDLINALG_HPP

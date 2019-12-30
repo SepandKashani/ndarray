@@ -282,9 +282,193 @@ namespace nd::linalg {
         }
     }
 
+    TYPED_TEST_P(TestNdLinalgIntFloatComplex, TestBMM) {
+        using ndT = ndarray<TypeParam>;
+
+        // Wrong shapes
+        ASSERT_THROW(bmm(ndT(shape_t({2, 3})), ndT(shape_t({4, 5}))), std::runtime_error);
+        ASSERT_THROW(bmm(ndT(shape_t({1, 2, 3, 4})), ndT(shape_t({3,}))), std::runtime_error);
+
+        { // Non-contiguous buffers
+            auto C = ndarray<TypeParam>(shape_t({4, 10}))({util::slice(0, 4, 2),
+                                                           util::slice(0, 10, 2)});
+            ASSERT_THROW(bmm(ndT(shape_t({2, 3})), ndT(shape_t({3, 5})), &C), std::runtime_error);
+        }
+
+        // Valid Output
+        {   // (2, 3) x (3, 4) -> (1, 2, 4)
+            auto A = (r_<int>({7, 8, 4,
+                               3, 8, 7})
+                      .reshape({2, 3})
+                      .template cast<TypeParam>());
+            auto B = (r_<int>({7, 7, 4, 5,
+                               8, 5, 0, 1,
+                               3, 7, 0, 7})
+                      .reshape({3, 4})
+                      .template cast<TypeParam>());
+            auto C_gt = (r_<int>({125, 117,  28,  71,
+                                  106, 110,  12,  72})
+                         .reshape({1, 2, 4})
+                         .template cast<TypeParam>());
+            auto C = bmm(A, B);
+            ASSERT_EQ(C.shape(), C_gt.shape());
+            if constexpr (is_int<TypeParam>()) {
+                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
+            } else {
+                ASSERT_TRUE(allclose(C, C_gt));
+            }
+        }
+        {   // (3, 1, 4) x (1, 4, 1) -> (3, 1, 1)
+            auto A = (r_<int>({2, 1, 1, 0,
+                               4, 1, 0, 4,
+                               2, 9, 0, 2})
+                      .reshape({3, 1, 4})
+                      .template cast<TypeParam>());
+            auto B = (r_<int>({5, 3, 2, 2})
+                      .reshape({1, 4, 1})
+                      .template cast<TypeParam>());
+            auto C_gt = (r_<int>({15, 31, 41})
+                         .reshape({3, 1, 1})
+                         .template cast<TypeParam>());
+            auto C = bmm(A, B);
+            ASSERT_EQ(C.shape(), C_gt.shape());
+            if constexpr (is_int<TypeParam>()) {
+                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
+            } else {
+                ASSERT_TRUE(allclose(C, C_gt));
+            }
+        }
+        {   // (1, 2, 3) x (3, 3, 2) -> (3, 2, 2)
+            auto A = (r_<int>({2, 0, 5,
+                               0, 4, 0})
+                      .reshape({1, 2, 3})
+                      .template cast<TypeParam>());
+            auto B = (r_<int>({3, 6,
+                               7, 8,
+                               5, 1,
+
+                               7, 1,
+                               8, 5,
+                               4, 4,
+
+                               1, 6,
+                               6, 6,
+                               6, 2})
+                      .reshape({3, 3, 2})
+                      .template cast<TypeParam>());
+            auto C_gt = (r_<int>({31, 17,
+                                  28, 32,
+
+                                  34, 22,
+                                  32, 20,
+
+                                  32, 22,
+                                  24, 24})
+                         .reshape({3, 2, 2})
+                         .template cast<TypeParam>());
+            auto C = bmm(A, B);
+            ASSERT_EQ(C.shape(), C_gt.shape());
+            if constexpr (is_int<TypeParam>()) {
+                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
+            } else {
+                ASSERT_TRUE(allclose(C, C_gt));
+            }
+        }
+
+        // Valid Output (buffer)
+        {   // (2, 3) x (3, 4) -> (1, 2, 4)
+            auto A = (r_<int>({7, 8, 4,
+                               3, 8, 7})
+                      .reshape({2, 3})
+                      .template cast<TypeParam>());
+            auto B = (r_<int>({7, 7, 4, 5,
+                               8, 5, 0, 1,
+                               3, 7, 0, 7})
+                      .reshape({3, 4})
+                      .template cast<TypeParam>());
+            auto C_gt = (r_<int>({125, 117,  28,  71,
+                                  106, 110,  12,  72})
+                         .reshape({1, 2, 4})
+                         .template cast<TypeParam>());
+            ndarray<TypeParam> C(C_gt.shape());
+            auto Z = bmm(A, B, &C);
+            ASSERT_TRUE(C.equals(Z));
+
+            ASSERT_EQ(C.shape(), C_gt.shape());
+            if constexpr (is_int<TypeParam>()) {
+                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
+            } else {
+                ASSERT_TRUE(allclose(C, C_gt));
+            }
+        }
+        {   // (3, 1, 4) x (1, 4, 1) -> (3, 1, 1)
+            auto A = (r_<int>({2, 1, 1, 0,
+                               4, 1, 0, 4,
+                               2, 9, 0, 2})
+                      .reshape({3, 1, 4})
+                      .template cast<TypeParam>());
+            auto B = (r_<int>({5, 3, 2, 2})
+                      .reshape({1, 4, 1})
+                      .template cast<TypeParam>());
+            auto C_gt = (r_<int>({15, 31, 41})
+                         .reshape({3, 1, 1})
+                         .template cast<TypeParam>());
+            ndarray<TypeParam> C(C_gt.shape());
+            auto Z = bmm(A, B, &C);
+            ASSERT_TRUE(C.equals(Z));
+
+            ASSERT_EQ(C.shape(), C_gt.shape());
+            if constexpr (is_int<TypeParam>()) {
+                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
+            } else {
+                ASSERT_TRUE(allclose(C, C_gt));
+            }
+        }
+        {   // (1, 2, 3) x (3, 3, 2) -> (3, 2, 2)
+            auto A = (r_<int>({2, 0, 5,
+                               0, 4, 0})
+                      .reshape({1, 2, 3})
+                      .template cast<TypeParam>());
+            auto B = (r_<int>({3, 6,
+                               7, 8,
+                               5, 1,
+
+                               7, 1,
+                               8, 5,
+                               4, 4,
+
+                               1, 6,
+                               6, 6,
+                               6, 2})
+                      .reshape({3, 3, 2})
+                      .template cast<TypeParam>());
+            auto C_gt = (r_<int>({31, 17,
+                                  28, 32,
+
+                                  34, 22,
+                                  32, 20,
+
+                                  32, 22,
+                                  24, 24})
+                         .reshape({3, 2, 2})
+                         .template cast<TypeParam>());
+            ndarray<TypeParam> C(C_gt.shape());
+            auto Z = bmm(A, B, &C);
+            ASSERT_TRUE(C.equals(Z));
+
+            ASSERT_EQ(C.shape(), C_gt.shape());
+            if constexpr (is_int<TypeParam>()) {
+                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
+            } else {
+                ASSERT_TRUE(allclose(C, C_gt));
+            }
+        }
+    }
+
     // Initialize tests ====================================================
     REGISTER_TYPED_TEST_CASE_P(TestNdLinalgIntFloatComplex,
-                               TestMM);
+                               TestMM,
+                               TestBMM);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdLinalgIntFloatComplex, MyIntFloatComplexTypes);
 }
 
