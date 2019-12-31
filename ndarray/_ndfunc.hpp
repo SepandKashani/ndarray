@@ -13,10 +13,8 @@
 #include <functional>
 #include <set>
 #include <sstream>
-#include <type_traits>
-#include <vector>
+#include <vector> // todo
 
-#include "_ndarray.hpp"
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
 
@@ -116,7 +114,8 @@ namespace nd {
      * stop : T const
      *     End of interval.
      *     The interval does not include this value, except in some cases where
-     *     step is not an integer and floating point round-off affects the length of out.
+     *     step is not an integer and floating point round-off affects the length
+     *     of `out`.
      * step : T const
      *     Spacing between values.
      *
@@ -205,8 +204,7 @@ namespace nd {
         static_assert(is_arithmetic<T>(), "Only {bool, int, float, complex} types allowed.");
 
         for(auto const& _x : x) {
-            util::NDARRAY_ASSERT(_x.ndim() == static_cast<size_t>(1),
-                                 "Only 1d coordinate arrays allowed.");
+            util::NDARRAY_ASSERT(_x.ndim() == 1u, "Only 1d coordinate arrays allowed.");
         }
 
         std::vector<ndarray<T>> mesh;
@@ -226,14 +224,25 @@ namespace nd {
      * Returns
      * -------
      * out : ndarray<T>
+     *     Array of `value` of the given shape.
+     */
+    template <typename T>
+    ndarray<T> full(shape_t const& shape, T const value) {
+        ndarray<T> out(shape);
+        std::fill_n(out.data(), out.size(), value);
+
+        return out;
+    }
+
+    /*
+     * Returns
+     * -------
+     * out : ndarray<T>
      *     Array of zeros of the given shape.
      */
     template <typename T>
     ndarray<T> zeros(shape_t const& shape) {
-        ndarray<T> out(shape);
-        std::fill_n(out.data(), out.size(), static_cast<T>(0.0));
-
-        return out;
+        return full(shape, static_cast<T>(0.0));
     }
 
     /*
@@ -244,24 +253,7 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> ones(shape_t const& shape) {
-        ndarray<T> out(shape);
-        std::fill_n(out.data(), out.size(), static_cast<T>(1.0));
-
-        return out;
-    }
-
-    /*
-     * Returns
-     * -------
-     * out : ndarray<T>
-     *     Array of `value` of the given shape.
-     */
-    template <typename T>
-    ndarray<T> full(shape_t const& shape, T const value) {
-        ndarray<T> out(shape);
-        std::fill_n(out.data(), out.size(), value);
-
-        return out;
+        return full<T>(shape, static_cast<T>(1.0));
     }
 
     /*

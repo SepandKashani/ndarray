@@ -10,14 +10,12 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <iterator>
 #include <memory>
 #include <numeric>
 #include <set>
 #include <sstream>
 #include <string>
-#include <type_traits>
-#include <vector>
+#include <vector>  // todo
 
 #include "_ndcontainer.hpp"
 #include "_ndfunc.hpp"
@@ -436,14 +434,7 @@ namespace nd {
              */
             ndarray<T> copy() const {
                 ndarray<T> cpy(m_shape);
-
-                for(ndarray_iterator<T> it_this = this->begin(),
-                                        it_cpy = cpy.begin();
-                    it_this != this->end();
-                    ++it_this, ++it_cpy) {
-                    *it_cpy = *it_this;
-                }
-
+                std::copy(begin(), end(), cpy.begin());
                 return cpy;
             }
 
@@ -522,7 +513,8 @@ namespace nd {
              * Returns
              * -------
              * reshaped : ndarray<T>
-             *     This will be a new view object if possible; otherwise, it will be a copy.
+             *     This will be a new view object if possible; otherwise, it
+             *     will be a copy.
              */
             ndarray<T> reshape(shape_t const& shape) const {
                 size_t const new_size = std::accumulate(shape.begin(), shape.end(),

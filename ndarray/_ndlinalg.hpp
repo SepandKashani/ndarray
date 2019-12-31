@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include "_ndarray.hpp"
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
 
@@ -68,8 +67,8 @@ namespace nd::linalg {
         auto const eBr = util::interop::aseigenarray<T, mapM_t<T>>(&Br);
 
         shape_t sh_C(std::max<size_t>(A.ndim() + B.ndim() - 2, 1), 1);
-        std::copy_n(sh_A.cbegin(), A.ndim() - 1, sh_C.begin());
-        std::copy_n(sh_B.crbegin(), B.ndim() - 1, sh_C.rbegin());
+        std::copy_n(sh_A.begin(), A.ndim() - 1, sh_C.begin());
+        std::copy_n(sh_B.rbegin(), B.ndim() - 1, sh_C.rbegin());
         if(out != nullptr) {
             std::stringstream error_msg;
             error_msg << "Parameter[out]: Expected " << sh_C << " array, "
@@ -82,6 +81,7 @@ namespace nd::linalg {
         auto eCr = util::interop::aseigenarray<T, mapM_t<T>>(&Cr);
 
         (*eCr) = (*eAr) * (*eBr);
+        // At this point the result is already in C.
         return C;
     }
 

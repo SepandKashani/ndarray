@@ -17,8 +17,6 @@
 #include <stdexcept>
 #include <string>
 
-#include <iostream>
-
 namespace nd::util {
     template <typename T> void NDARRAY_ASSERT(bool const cond, T const& msg);
 }
@@ -33,11 +31,12 @@ namespace nd {
      *
      * The way nd::ndarray(s) are handled however means that they are (very)
      * frequently shallow-copied around the place. The consequence is that
-     * dynamic memory allocation is omnipresent when manipulating these data
-     * structures.
+     * dynamic memory allocation (for shape/stride info) is omnipresent when
+     * manipulating these data structures.
      *
      * In practice most arrays created are of small rank, say < 8. Knowing this,
-     * it is worthwhile to stack-allocate these structures with some extra space.
+     * it is worthwhile to stack-allocate these structures provided some
+     * over-provisioning.
      *
      * Note
      * ----
@@ -206,7 +205,7 @@ namespace nd {
                 size_type const d = std::distance(pos, end());
                 std::copy_n(rbegin(), d, rbegin() - 1);
                 *pos = value;
-                m_size += 1u;
+                m_size += 1;
 
                 return pos;
             }

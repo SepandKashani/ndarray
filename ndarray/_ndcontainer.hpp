@@ -10,7 +10,10 @@
 #include <cstdint>
 
 #include "_ndtype.hpp"
-#include "_ndutil.hpp"
+
+namespace nd::util {
+    template <typename T> void NDARRAY_ASSERT(bool const cond, T const& msg);
+}
 
 namespace nd {
     /*

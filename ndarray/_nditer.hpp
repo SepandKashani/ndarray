@@ -7,14 +7,15 @@
 #ifndef _NDITER_HPP
 #define _NDITER_HPP
 
-#include <cstddef>
 #include <iterator>
 #include <numeric>
-#include <vector>
+#include <vector> // todo: remove after transition
 
-#include "_ndarray.hpp"
 #include "_ndtype.hpp"
-#include "_ndutil.hpp"
+
+namespace nd::util {
+    template <typename T> void NDARRAY_ASSERT(bool const cond, T const& msg);
+}
 
 namespace nd {
     template <typename T> class ndarray;
@@ -25,15 +26,15 @@ namespace nd {
     template <typename T>
     class ndarray_iterator {
         public:
-            typedef std::forward_iterator_tag   iterator_category;
-            typedef T                                  value_type;
-            typedef std::ptrdiff_t                difference_type;
-            typedef T*                                    pointer;
-            typedef T&                                  reference;
+            typedef std::forward_iterator_tag iterator_category;
+            typedef T                                value_type;
+            typedef std::ptrdiff_t              difference_type;
+            typedef T*                                  pointer;
+            typedef T&                                reference;
 
         private:
             ndarray<T>*         m_iterable = nullptr;
-            std::vector<size_t> m_index;
+            std::vector<size_t> m_index;  // todo: shape_t/stride_t transition
             int                 m_offset = 0;
 
             /*
@@ -92,7 +93,7 @@ namespace nd {
                     util::NDARRAY_ASSERT(index.size() == x->ndim(),
                                          "Index inconsistent with array rank.");
                     m_offset = std::inner_product(index.begin(), index.end(),
-                                                  (x->strides()).begin(), int(0));
+                                                  (*x).strides().begin(), int(0));
                 }
 
             ndarray_iterator(ndarray_iterator<T> const& other):
@@ -111,7 +112,7 @@ namespace nd {
             }
 
             bool operator==(ndarray_iterator<T> const& other) const {
-                bool const same_iterable = m_iterable->equals(*(other.m_iterable));
+                bool const same_iterable = m_iterable->equals(*other.m_iterable);
                 bool const same_index    = (m_index == other.m_index);
                 bool const same_offset   = (m_offset == other.m_offset);
 
@@ -119,7 +120,7 @@ namespace nd {
             }
 
             bool operator!=(ndarray_iterator<T> const& other) const {
-                return !((*this) == other);
+                return !operator==(other);
             }
 
             T& operator*() const {

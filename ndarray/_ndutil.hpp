@@ -8,15 +8,13 @@
 #define _NDUTIL_HPP
 
 #include <algorithm>
-#include <functional>
 #include <limits>
 #include <memory>
 #include <numeric>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
-#include <type_traits>
-#include <vector>
+#include <vector> // todo
 
 #include "Eigen/Eigen"
 
@@ -151,8 +149,8 @@ namespace nd::util {
              * start : int const
              *     Initialisation index (inclusive).
              * stop : int const
-             *     Termination index (exclusive). `-1` is a valid termination index to include the
-             *     first element of an array.
+             *     Termination index (exclusive). `-1` is a valid termination
+             *     index to include the first element of an array.
              * step : int const
              *     Step size (non-zero).
              */
@@ -172,8 +170,8 @@ namespace nd::util {
             int step() const { return m_step; }
 
             /*
-             * Set (ambiguous) slice limits to correct values for an
-             * array dimension of length `length`.
+             * Set (ambiguous) slice limits to correct values for an array
+             * dimension of length `length`.
              *
              * Parameters
              * ----------
@@ -204,7 +202,8 @@ namespace nd::util {
     };
 
     /*
-     * Apply unary function to every element of input buffer, then place result in output buffer.
+     * Apply unary function to every element of input buffer, then place result
+     * in output buffer.
      *
      * Parameters
      * ----------
@@ -231,7 +230,8 @@ namespace nd::util {
     }
 
     /*
-     * Apply binary function to every element of input buffers, then place result in output buffer.
+     * Apply binary function to every element of input buffers, then place
+     * result in output buffer.
      *
      * Parameters
      * ----------
@@ -272,13 +272,15 @@ namespace nd::util {
     }
 
     /*
-     * Apply reduction function along input buffer, then place result in output buffer.
+     * Apply reduction function along input buffer, then place result in output
+     * buffer.
      *
      * Parameters
      * ----------
      * ufunc : F
      *     Reduction function to apply.
-     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed commutative/associative.
+     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed
+     *     commutative/associative.
      * in : ndarray<T>* const
      *     (in_1, in_2, in_3) contiguous input buffer.
      * out : ndarray<T>* const
@@ -366,18 +368,21 @@ namespace nd::util {
     }
 
     /*
-     * Apply reduction function along input buffer, then place result in output buffer.
+     * Apply reduction function along input buffer, then place result in output
+     * buffer.
      *
      * Parameters
      * ----------
      * ufunc : F
      *     Reduction function to apply.
-     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed commutative/associative.
+     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed
+     *     commutative/associative.
      * in : ndarray<T>* const
      *     N-D input buffer.
      * out : ndarray<T>* const
      *     N-D contiguous output buffer.
-     *     Must have (out->shape()[k] == in->shape()[k]), except along `axis` where (out->shape()[axis] == 1).
+     *     Must have (out->shape()[k] == in->shape()[k]), except along `axis`
+     *     where (out->shape()[axis] == 1).
      * axis : size_t const
      *     Dimension along which to apply the reduction.
      * init : T const
@@ -590,11 +595,9 @@ namespace {
     template <typename T>
     std::ostream& operator<<(std::ostream& os, std::vector<T> const& v) {
         os << "{";
-        for(size_t i = 0; i < v.size() - 1; ++i) {
-            os << v[i] << ", ";
+        for(size_t i = 0, N = v.size(); i < N; ++i) {
+            os << v[i] << ((i < N - 1) ? ", " : "}");
         }
-        os << v[v.size() - 1] << "}";
-
         return os;
     }
 

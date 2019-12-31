@@ -16,6 +16,8 @@
 
 #include "Eigen/Eigen"
 
+#include "_ndvector.hpp"
+
 namespace nd {
     using byte_t = uint8_t;
     /*
@@ -24,7 +26,9 @@ namespace nd {
      * Must set nd::byte_alignment to sizeof(<largest type you want to use>).
      */
     constexpr size_t byte_alignment = sizeof(std::complex<long double>);
-    using shape_t  = std::vector<size_t>;
+    // using shape_t  = nd::vector<size_t>;
+    // using stride_t = nd::vector<int>;
+    using shape_t = std::vector<size_t>;
     using stride_t = std::vector<int>;
 
     template <typename T>
