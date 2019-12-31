@@ -1342,24 +1342,6 @@ namespace nd {
     }
 
     /*
-     * Angle of complex argument.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<std::complex<T>> const&
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the input.
-     *
-     * Returns
-     * -------
-     * arg : ndarray<T>
-     *     Counter-clockwise angle [rad] from the positive real axis.
-     */
-    template <typename T>
-    ndarray<T> angle(ndarray<std::complex<T>> const& x, ndarray<T>* const out = nullptr);
-
-    /*
      * Element-wise real-part extraction.
      *
      * Parameters
