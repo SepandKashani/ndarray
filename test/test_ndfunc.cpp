@@ -35,9 +35,6 @@ namespace nd {
     template <typename T> class TestNdFuncComplex : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncComplex);
 
-    template <typename T> class TestNdFuncBoolInt : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdFuncBoolInt);
-
     template <typename T> class TestNdFuncIntFloat : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncIntFloat);
 
@@ -53,15 +50,11 @@ namespace nd {
     template <typename T> class TestNdFuncFloatComplex : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncFloatComplex);
 
-    template <typename T> class TestNdFuncSignedArithmetic : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdFuncSignedArithmetic);
-
     template <typename T> class TestNdFuncArithmetic : public ::testing::Test {};
     TYPED_TEST_CASE_P(TestNdFuncArithmetic);
 
 
 
-    /* Constants =========================================================== */
     TYPED_TEST_P(TestNdFuncFloat, TestPi) {
         TypeParam const tested = pi<TypeParam>();
         TypeParam const correct = static_cast<TypeParam>(M_PI);
@@ -83,12 +76,9 @@ namespace nd {
         ASSERT_EQ(tested, correct);
     }
 
-
-
-    /* Utility ============================================================= */
     TYPED_TEST_P(TestNdFuncArithmetic, TestRUnderscore) {
        {std::vector<TypeParam> const x;
-        ndarray<TypeParam> y = r_(x);
+        auto y = r_(x);
         ASSERT_EQ(y.shape(), shape_t({x.size()}));
         for(size_t i = 0; i < x.size(); ++i) {
             TypeParam const& tested_elem = y[{i}];
@@ -99,7 +89,7 @@ namespace nd {
        {std::vector<TypeParam> const x({static_cast<TypeParam>(1),
                                         static_cast<TypeParam>(2),
                                         static_cast<TypeParam>(3)});
-        ndarray<TypeParam> y = r_(x);
+        auto y = r_(x);
         ASSERT_EQ(y.shape(), shape_t({x.size()}));
         for(size_t i = 0; i < x.size(); ++i) {
             TypeParam const& tested_elem = y[{i}];
@@ -109,30 +99,30 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncArithmetic, TestZeros) {
-        ndarray<TypeParam> x = zeros<TypeParam>(shape_t({5, 3, 4}));
-        for(auto it = x.begin(); it != x.end(); ++it) {
-            ASSERT_EQ(*it, static_cast<TypeParam>(0.0));
+        auto x = zeros<TypeParam>({5, 3, 4});
+        for(auto const& _x : x) {
+            ASSERT_EQ(_x, static_cast<TypeParam>(0.0));
         }
     }
 
     TYPED_TEST_P(TestNdFuncArithmetic, TestOnes) {
-        ndarray<TypeParam> x = ones<TypeParam>(shape_t({5, 3, 4}));
-        for(auto it = x.begin(); it != x.end(); ++it) {
-            ASSERT_EQ(*it, static_cast<TypeParam>(1.0));
+        auto x = ones<TypeParam>({5, 3, 4});
+        for(auto const& _x : x) {
+            ASSERT_EQ(_x, static_cast<TypeParam>(1.0));
         }
     }
 
     TYPED_TEST_P(TestNdFuncArithmetic, TestFull) {
         TypeParam value = static_cast<TypeParam>(3.0);
-        ndarray<TypeParam> x = full<TypeParam>(shape_t({5, 3, 4}), value);
-        for(auto it = x.begin(); it != x.end(); ++it) {
-            ASSERT_EQ(*it, value);
+        auto x = full<TypeParam>({5, 3, 4}, value);
+        for(auto const& _x : x) {
+            ASSERT_EQ(_x, value);
         }
     }
 
     TYPED_TEST_P(TestNdFuncArithmetic, TestEye) {
         size_t const N = 5;
-        ndarray<TypeParam> I = eye<TypeParam>(N);
+        auto I = eye<TypeParam>(N);
 
         ASSERT_EQ(I.shape(), shape_t({N, N}));
         for(size_t i = 0; i < N; ++i) {
@@ -149,7 +139,7 @@ namespace nd {
        {TypeParam const start = static_cast<TypeParam>(5.0);
         TypeParam const stop = static_cast<TypeParam>(40.0);
         TypeParam const step = static_cast<TypeParam>(1.25);
-        ndarray<TypeParam> x = arange<TypeParam>(start, stop, step);
+        auto x = arange<TypeParam>(start, stop, step);
 
         auto min_el = std::min_element(x.begin(), x.end());
         auto max_el = std::max_element(x.begin(), x.end());
@@ -182,7 +172,7 @@ namespace nd {
         // start < stop
        {TypeParam const start = static_cast<TypeParam>(5.0);
         TypeParam const stop = static_cast<TypeParam>(40.0);
-        ndarray<TypeParam> x = linspace<TypeParam>(start, stop, N);
+        auto x = linspace<TypeParam>(start, stop, N);
 
         auto min_el = std::min_element(x.begin(), x.end());
         auto max_el = std::max_element(x.begin(), x.end());
@@ -192,7 +182,7 @@ namespace nd {
         // start > stop
        {TypeParam const start = static_cast<TypeParam>(40.0);
         TypeParam const stop = static_cast<TypeParam>(5.0);
-        ndarray<TypeParam> x = linspace<TypeParam>(start, stop, N);
+        auto x = linspace<TypeParam>(start, stop, N);
 
         auto min_el = std::min_element(x.begin(), x.end());
         auto max_el = std::max_element(x.begin(), x.end());
@@ -207,7 +197,7 @@ namespace nd {
 
        { // 1d arrays only
         auto const x = (arange<int>(0, 6, 1)
-                        .reshape(shape_t({2, 3})));
+                        .reshape({2, 3}));
         ASSERT_THROW(meshgrid<int>({x, }), std::runtime_error);}
 
        { // 1d meshgrid
@@ -233,12 +223,9 @@ namespace nd {
         ASSERT_TRUE(!y[1].equals(x2));}
     }
 
-
-
-    /* Math Functions ====================================================== */
     TYPED_TEST_P(TestNdFuncSignedIntFloatComplex, TestAbs) {
         // No buffer provided
-       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+       {auto x = zeros<TypeParam>({5, 3, 4});
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = static_cast<TypeParam>(-i);
         }
@@ -252,13 +239,13 @@ namespace nd {
         }}
 
         // Buffer provided
-       {ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
+       {auto x = zeros<TypeParam>({5, 3, 4});
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = static_cast<TypeParam>(-i);
         }
 
-        ndarray<TypeParam> buffer = zeros<TypeParam>(x.shape());
-        ndarray<TypeParam> y = abs<TypeParam>(x, &buffer);
+        auto buffer = zeros<TypeParam>(x.shape());
+        auto y = abs<TypeParam>(x, &buffer);
 
         ASSERT_TRUE(y.equals(buffer));
 
@@ -293,7 +280,7 @@ namespace nd {
                   .template cast<TypeParam>());
         auto y = ndarray<TypeParam>(x.shape());
 
-        ndarray<TypeParam> z = exp(x, &y);
+        auto z = exp(x, &y);
         ASSERT_TRUE(y.equals(z));
 
         auto x_ptr = x.begin();
@@ -332,7 +319,7 @@ namespace nd {
                   .template cast<TypeParam>());
         auto y = ndarray<TypeParam>(x.shape());
 
-        ndarray<TypeParam> z = log(x, &y);
+        auto z = log(x, &y);
         ASSERT_TRUE(y.equals(z));
 
         auto x_ptr = x.begin();
@@ -376,7 +363,7 @@ namespace nd {
                                    true,  true,  true,  true,
                                    true,  true,  true,  true,
                                    true,  true,  true,  true})
-                  .reshape(shape_t({5, 3, 4})));
+                  .reshape({5, 3, 4}));
         auto gt = r_<TypeParam>({false,  true});
 
         auto y = unique(x);
@@ -403,7 +390,7 @@ namespace nd {
                                  18, 16, 15, 11,
                                  20, 22, 13,  1,
                                  13, 17,  8,  7})
-                  .reshape(shape_t({5, 3, 4})));
+                  .reshape({5, 3, 4}));
         auto gt = r_<TypeParam>({  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
                                   17, 18, 19, 20, 22, 24});
 
@@ -431,7 +418,7 @@ namespace nd {
                                    6,  -3,  -6,   6,
                                   -6,  18,  11,   8,
                                    7,   5,   2,  18})
-                  .reshape(shape_t({5, 3, 4})));
+                  .reshape({5, 3, 4}));
         auto gt = r_<TypeParam>({-22, -21, -20, -17, -16, -15,  -8,  -6,  -5,  -3,  -2,  -1,   0,
                                    2,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  16,  17,
                                   18,  19,  20,  21,  22});
@@ -460,7 +447,7 @@ namespace nd {
                                1.60602113,  1.14513947, -1.1708768 ,  1.71955045,
                                1.59878618,  1.16292662, -1.22018913,  0.617383  ,
                                0.64868714, -1.12826506,  0.35627699,  0.51074455})
-                  .reshape(shape_t({5, 3, 4}))
+                  .reshape({5, 3, 4})
                   .template cast<TypeParam>());
         auto gt = (r_<double>({-3.25025675, -2.59267573, -2.3840612 , -1.8137003 , -1.73222065,
                                -1.52435019, -1.52151508, -1.34027855, -1.22018913, -1.1708768 ,
@@ -481,61 +468,61 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestStd) {
-        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
-        ndarray<TypeParam> gt = (r_<double>({16.97056275, })
-                                 .broadcast_to(shape_t({3, 4}))
-                                 .template cast<TypeParam>());
+        auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
+        auto gt = (r_<double>({16.97056275, })
+                   .broadcast_to({3, 4})
+                   .template cast<TypeParam>());
 
         // No buffer provided, keepdims
-       {ndarray<TypeParam> y = std(x, 0);
+       {auto y = std(x, 0);
         ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = std(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = std(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
     }
 
     TYPED_TEST_P(TestNdFuncComplex, TestStdComplex) {
-        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+        auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
         x += (arange<int>(0, 5 * 3 * 4, 1)
-              .reshape(shape_t({5, 3, 4}))
+              .reshape({5, 3, 4})
               .template cast<TypeParam>()) * j<TypeParam>();
-        ndarray<TypeParam> gt = (r_<int>({24, })
-                                 .broadcast_to(shape_t({3, 4}))
-                                 .template cast<TypeParam>());
+        auto gt = (r_<int>({24, })
+                   .broadcast_to({3, 4})
+                   .template cast<TypeParam>());
 
         // No buffer provided, keepdims
-       {ndarray<TypeParam> y = std(x, 0);
+       {auto y = std(x, 0);
         ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = std(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = std(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
     }
 
     TYPED_TEST_P(TestNdFuncFloatComplex, TestMean) {
-        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
-        ndarray gt = (arange<int>(24, 36, 1)
-                      .reshape(shape_t({3, 4}))
-                      .template cast<TypeParam>());
+        auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
+        auto gt = (arange<int>(24, 36, 1)
+                   .reshape({3, 4})
+                   .template cast<TypeParam>());
 
         // No buffer provided, keepdims
-       {ndarray<TypeParam> y = mean(x, 0);
+       {auto y = mean(x, 0);
         ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = mean(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = mean(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
     }
@@ -560,18 +547,18 @@ namespace nd {
                                                  4u, 18446744073709551608u, 18446744073709551595u, 18446744073709551615u,
                                                 14u, 18446744073709551610u, 18446744073709551603u,                   19u,
                               18446744073709551608u,                    7u,                   22u,                   16u})
-                  .reshape(shape_t({5, 3, 4})));
+                  .reshape({5, 3, 4}));
         auto gt = (r_<size_t>({                    4u,                    8u,                    2u,                    3u,
                                                    1u,                    3u, 18446744073709551596u,                   19u,
                                                   17u,                    7u,                    1u,                    9u})
-                   .reshape(shape_t({3, 4})));
+                   .reshape({3, 4}));
 
         // No buffer provided, keepdims
        {auto y = min(x, 0);
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
 
         // Buffer provided, dropdims
-       {ndarray<size_t> y(shape_t({1, 3, 4}));
+       {ndarray<size_t> y({1, 3, 4});
         auto z = min(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
@@ -597,21 +584,21 @@ namespace nd {
                              4,  -8, -21,  -1,
                             14,  -6, -13,  19,
                             -8,   7,  22,  16})
-                  .reshape(shape_t({5, 3, 4}))
+                  .reshape({5, 3, 4})
                   .template cast<TypeParam>());
         auto gt = (r_<int>({-17, -23, -21, -23,
                             -17, -25, -20, -20,
                              -8, -22,  -9, -15})
-                   .reshape(shape_t({3, 4}))
+                   .reshape({3, 4})
                    .template cast<TypeParam>());
 
         // No buffer provided, keepdims
-       {ndarray<TypeParam> y = min(x, 0);
+       {auto y = min(x, 0);
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = min(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = min(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
     }
@@ -636,21 +623,21 @@ namespace nd {
                                1.60602113,  1.14513947, -1.1708768 ,  1.71955045,
                                1.59878618,  1.16292662, -1.22018913,  0.617383  ,
                                0.64868714, -1.12826506,  0.35627699,  0.51074455})
-                  .reshape(shape_t({5, 3, 4}))
+                  .reshape({5, 3, 4})
                   .template cast<TypeParam>());
         auto gt = (r_<double>({-1.73222065, -3.25025675, -1.1708768 , -1.03443742,
                                -2.3840612 ,  0.24594309, -2.59267573, -1.52151508,
                                -1.52435019, -1.8137003 , -0.80477885, -1.10491782})
-                   .reshape(shape_t({3, 4}))
+                   .reshape({3, 4})
                    .template cast<TypeParam>());
 
         // No buffer provided, keepdims
-       {ndarray<TypeParam> y = min(x, 0);
+       {auto y = min(x, 0);
         ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = min(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = min(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
     }
@@ -675,18 +662,18 @@ namespace nd {
                                                  4u, 18446744073709551608u, 18446744073709551595u, 18446744073709551615u,
                                                 14u, 18446744073709551610u, 18446744073709551603u,                   19u,
                               18446744073709551608u,                    7u,                   22u,                   16u})
-                  .reshape(shape_t({5, 3, 4})));
+                  .reshape({5, 3, 4}));
         auto gt = (r_<size_t>({18446744073709551599u, 18446744073709551608u, 18446744073709551602u, 18446744073709551615u,
                                18446744073709551610u, 18446744073709551615u, 18446744073709551615u, 18446744073709551601u,
                                18446744073709551615u, 18446744073709551601u, 18446744073709551607u, 18446744073709551601u})
-                   .reshape(shape_t({3, 4})));
+                   .reshape({3, 4}));
 
         // No buffer provided, keepdims
        {auto y = max(x, 0);
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
 
         // Buffer provided, dropdims
-       {ndarray<size_t> y(shape_t({1, 3, 4}));
+       {ndarray<size_t> y({1, 3, 4});
         auto z = max(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
@@ -712,21 +699,21 @@ namespace nd {
                              4,  -8, -21,  -1,
                             14,  -6, -13,  19,
                             -8,   7,  22,  16})
-                  .reshape(shape_t({5, 3, 4}))
+                  .reshape({5, 3, 4})
                   .template cast<TypeParam>());
         auto gt = (r_<int>({11, 12, 16,  3,
                             14,  3, -1, 23,
                             22,  8, 25, 24})
-                   .reshape(shape_t({3, 4}))
+                   .reshape({3, 4})
                    .template cast<TypeParam>());
 
         // No buffer provided, keepdims
-       {ndarray<TypeParam> y = max(x, 0);
+       {auto y = max(x, 0);
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = max(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = max(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
     }
@@ -751,149 +738,146 @@ namespace nd {
                                1.60602113,  1.14513947, -1.1708768 ,  1.71955045,
                                1.59878618,  1.16292662, -1.22018913,  0.617383  ,
                                0.64868714, -1.12826506,  0.35627699,  0.51074455})
-                  .reshape(shape_t({5, 3, 4}))
+                  .reshape({5, 3, 4})
                   .template cast<TypeParam>());
         auto gt = (r_<double>({2.33508446, 1.14513947, 1.59952943, 1.71955045,
                                1.59878618, 1.61575812, 0.55537163, 0.73655173,
                                0.64868714, 2.32402258, 1.4468852 , 1.20810735})
-                   .reshape(shape_t({3, 4}))
+                   .reshape({3, 4})
                    .template cast<TypeParam>());
 
         // No buffer provided, keepdims
-       {ndarray<TypeParam> y = max(x, 0);
+       {auto y = max(x, 0);
         ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = max(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = max(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestCeil) {
-        ndarray<TypeParam> x = (arange<TypeParam>(-3.1, 3.9, 0.5)
-                                .reshape(shape_t({2, 7})));
-        ndarray<TypeParam> truth = (r_(std::vector<TypeParam> {-3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4})
-                                    .reshape(shape_t({2, 7})));
+        auto x = (arange<TypeParam>(-3.1, 3.9, 0.5)
+                  .reshape({2, 7}));
+        auto gt = (r_(std::vector<TypeParam> {-3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4})
+                   .reshape({2, 7}));
 
         // No buffer provided
-       {ndarray<TypeParam> y = ceil<TypeParam>(x);
+       {auto y = ceil<TypeParam>(x);
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> _y = ceil<TypeParam>(x, &y);
+        auto _y = ceil<TypeParam>(x, &y);
         ASSERT_TRUE(_y.equals(y));
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestFloor) {
-        ndarray<TypeParam> x = (arange<TypeParam>(-3.1, 3.9, 0.5)
-                                .reshape(shape_t({2, 7})));
-        ndarray<TypeParam> truth = (r_(std::vector<TypeParam> {-4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3})
-                                    .reshape(shape_t({2, 7})));
+        auto x = (arange<TypeParam>(-3.1, 3.9, 0.5)
+                  .reshape({2, 7}));
+        auto gt = (r_(std::vector<TypeParam> {-4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3})
+                   .reshape({2, 7}));
 
         // No buffer provided
-       {ndarray<TypeParam> y = floor<TypeParam>(x);
+       {auto y = floor<TypeParam>(x);
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> _y = floor<TypeParam>(x, &y);
+        auto _y = floor<TypeParam>(x, &y);
         ASSERT_TRUE(_y.equals(y));
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
     }
 
     TYPED_TEST_P(TestNdFuncIntFloat, TestClip) {
-        ndarray<TypeParam> x = (arange<int>(3, 9, 1)
-                                .reshape(shape_t({2, 3}))
-                                .template cast<TypeParam>());
+        auto x = (arange<int>(3, 9, 1)
+                  .reshape({2, 3})
+                  .template cast<TypeParam>());
         TypeParam const down = static_cast<TypeParam>(5);
         TypeParam const up = static_cast<TypeParam>(7);
-        ndarray<TypeParam> truth = (r_(std::vector<TypeParam> {5, 5, 5, 6, 7, 7})
-                                    .reshape(shape_t({2, 3})));
+        auto gt = (r_(std::vector<TypeParam> {5, 5, 5, 6, 7, 7})
+                   .reshape({2, 3}));
 
         // No buffer provided
-       {ndarray<TypeParam> y = clip<TypeParam>(x, down, up);
+       {auto y = clip<TypeParam>(x, down, up);
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> _y = clip<TypeParam>(x, down, up, &y);
+        auto _y = clip<TypeParam>(x, down, up, &y);
         ASSERT_TRUE(_y.equals(y));
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
     }
 
     TYPED_TEST_P(TestNdFuncSignedIntFloat, TestSign) {
-        ndarray<TypeParam> x = (arange<TypeParam>(-3, 3, 1)
-                                .reshape(shape_t({2, 3})));
-        ndarray<TypeParam> truth = (r_(std::vector<TypeParam> {-1, -1, -1, 0, 1, 1})
-                                    .reshape(shape_t({2, 3})));
+        auto x = (arange<TypeParam>(-3, 3, 1)
+                  .reshape({2, 3}));
+        auto gt = (r_(std::vector<TypeParam> {-1, -1, -1, 0, 1, 1})
+                   .reshape({2, 3}));
 
         // No buffer provided
-       {ndarray<TypeParam> y = sign<TypeParam>(x);
+       {auto y = sign<TypeParam>(x);
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> _y = sign<TypeParam>(x, &y);
+        auto _y = sign<TypeParam>(x, &y);
         ASSERT_TRUE(_y.equals(y));
         for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& correct = truth.data()[i];
+            TypeParam const& correct = gt.data()[i];
             TypeParam const& tested = y.data()[i];
             ASSERT_EQ(correct, tested);
         }}
     }
 
-
-
-    /* Proximity Tests ===================================================== */
     TYPED_TEST_P(TestNdFuncFloatComplex, TestIsClose) {
         // No buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
-        ndarray<bool> y = isclose(x, x);
+        auto y = isclose(x, x);
         for(auto it_y = y.begin(); it_y != y.end(); ++it_y) {
             ASSERT_TRUE(*it_y);
         }}
 
         // Buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
         ndarray<bool> y(x.shape());
-        ndarray<bool> z = isclose(x, x, &y);
+        auto z = isclose(x, x, &y);
         ASSERT_TRUE(y.equals(z));
 
         for(auto it_y = y.begin(); it_y != y.end(); ++it_y) {
@@ -902,9 +886,9 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncFloatComplex, TestAllClose) {
-        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+        auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
         bool y = allclose(x, x);
         ASSERT_TRUE(y);
@@ -915,11 +899,11 @@ namespace nd {
     /* Reduction Functions ================================================= */
     TYPED_TEST_P(TestNdFuncIntFloatComplex, TestSum) {
         // No buffer provided, keepdims
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
-        ndarray<TypeParam> y = sum(x, 0);
+        auto y = sum(x, 0);
         ASSERT_EQ(y.shape(), shape_t({3, 4}));
         TypeParam correct_elem = static_cast<TypeParam>(120.0);
         for(auto it_y = y.begin(); it_y != y.end();
@@ -928,12 +912,12 @@ namespace nd {
         }}
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
-        ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = sum(x, 0, true, &y);
+        ndarray<TypeParam> y({1, 3, 4});
+        auto z = sum(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
 
         TypeParam correct_elem = static_cast<TypeParam>(120.0);
@@ -944,46 +928,32 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncIntFloatComplex, TestProd) {
-        // No buffer provided, keepdims
-       {ndarray<TypeParam> x = (arange<int>(0, 2 * 3 * 4, 1)
-                                .reshape(shape_t({2, 3, 4}))
-                                .template cast<TypeParam>());
+        auto x = (arange<int>(0, 2 * 3 * 4, 1)
+                  .reshape({2, 3, 4})
+                  .template cast<TypeParam>());
+        auto gt = (r_<int>({  0,  13,  28,  45,
+                             64,  85, 108, 133,
+                            160, 189, 220, 253})
+                   .reshape({3, 4})
+                   .template cast<TypeParam>());
 
-        ndarray<TypeParam> y = prod(x, 0);
-        ASSERT_EQ(y.shape(), shape_t({3, 4}));
-        ASSERT_EQ(y.data()[0],  static_cast<TypeParam>(0.0));
-        ASSERT_EQ(y.data()[1],  static_cast<TypeParam>(13.0));
-        ASSERT_EQ(y.data()[2],  static_cast<TypeParam>(28.0));
-        ASSERT_EQ(y.data()[3],  static_cast<TypeParam>(45.0));
-        ASSERT_EQ(y.data()[4],  static_cast<TypeParam>(64.0));
-        ASSERT_EQ(y.data()[5],  static_cast<TypeParam>(85.0));
-        ASSERT_EQ(y.data()[6],  static_cast<TypeParam>(108.0));
-        ASSERT_EQ(y.data()[7],  static_cast<TypeParam>(133.0));
-        ASSERT_EQ(y.data()[8],  static_cast<TypeParam>(160.0));
-        ASSERT_EQ(y.data()[9],  static_cast<TypeParam>(189.0));
-        ASSERT_EQ(y.data()[10], static_cast<TypeParam>(220.0));
-        ASSERT_EQ(y.data()[11], static_cast<TypeParam>(253.0));}
+        // No buffer provided, keepdims
+       {auto y = prod(x, 0);
+        if constexpr (is_float<TypeParam>() || is_complex<TypeParam>()) {
+            ASSERT_TRUE(allclose(y, gt));
+        } else {
+            ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);
+        }}
 
         // Buffer provided, dropdims
-       {ndarray<TypeParam> x = (arange<int>(0, 2 * 3 * 4, 1)
-                                .reshape(shape_t({2, 3, 4}))
-                                .template cast<TypeParam>());
-
-        ndarray<TypeParam> y(shape_t({1, 3, 4}));
-        ndarray<TypeParam> z = prod(x, 0, true, &y);
+       {ndarray<TypeParam> y({1, 3, 4});
+        auto z = prod(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
-        ASSERT_EQ(y.data()[0],  static_cast<TypeParam>(0.0));
-        ASSERT_EQ(y.data()[1],  static_cast<TypeParam>(13.0));
-        ASSERT_EQ(y.data()[2],  static_cast<TypeParam>(28.0));
-        ASSERT_EQ(y.data()[3],  static_cast<TypeParam>(45.0));
-        ASSERT_EQ(y.data()[4],  static_cast<TypeParam>(64.0));
-        ASSERT_EQ(y.data()[5],  static_cast<TypeParam>(85.0));
-        ASSERT_EQ(y.data()[6],  static_cast<TypeParam>(108.0));
-        ASSERT_EQ(y.data()[7],  static_cast<TypeParam>(133.0));
-        ASSERT_EQ(y.data()[8],  static_cast<TypeParam>(160.0));
-        ASSERT_EQ(y.data()[9],  static_cast<TypeParam>(189.0));
-        ASSERT_EQ(y.data()[10], static_cast<TypeParam>(220.0));
-        ASSERT_EQ(y.data()[11], static_cast<TypeParam>(253.0));}
+        if constexpr (is_float<TypeParam>() || is_complex<TypeParam>()) {
+            ASSERT_TRUE(allclose(y, gt));
+        } else {
+            ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);
+        }}
     }
 
     TEST(TestNdFunc, TestStack) {
@@ -1024,7 +994,7 @@ namespace nd {
                                 12, 14, 16, 18, 20, 22,
                                 36, 39, 42, 45, 48, 51,
                                 72, 76, 80, 84, 88, 92})
-                       .reshape(shape_t({4, 6})));
+                       .reshape({4, 6}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 0);
             ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
            {auto gt = (r_<int>({ 0, 12, 36, 72,
@@ -1042,7 +1012,7 @@ namespace nd {
                                 12, 14, 16, 18, 20, 22,
                                 36, 39, 42, 45, 48, 51,
                                 72, 76, 80, 84, 88, 92})
-                       .reshape(shape_t({4, 6})));
+                       .reshape({4, 6}));
             ndarray<int> y(gt.shape());
             auto z = stack(std::vector({x1, x2, x3, x4}), 0, &y);
             ASSERT_TRUE(y.equals(z));
@@ -1100,7 +1070,7 @@ namespace nd {
 
                                 72, 76, 80,
                                 84, 88, 92})
-                       .reshape(shape_t({4, 2, 3})));
+                       .reshape({4, 2, 3}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 0);
             ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
            {auto gt = (r_<int>({ 0,  1,  2,
@@ -1112,7 +1082,7 @@ namespace nd {
                                 18, 20, 22,
                                 45, 48, 51,
                                 84, 88, 92})
-                       .reshape(shape_t({2, 4, 3})));
+                       .reshape({2, 4, 3}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 1);
             ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
            {auto gt = (r_<int>({ 0, 12, 36, 72,
@@ -1122,7 +1092,7 @@ namespace nd {
                                  3, 18, 45, 84,
                                  4, 20, 48, 88,
                                  5, 22, 51, 92})
-                       .reshape(shape_t({2, 3, 4})));
+                       .reshape({2, 3, 4}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 2);
             ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}}
 
@@ -1138,7 +1108,7 @@ namespace nd {
 
                                 72, 76, 80,
                                 84, 88, 92})
-                       .reshape(shape_t({4, 2, 3})));
+                       .reshape({4, 2, 3}));
             ndarray<int> y(gt.shape());
             auto z = stack(std::vector({x1, x2, x3, x4}), 0, &y);
             ASSERT_TRUE(y.equals(z));
@@ -1148,20 +1118,20 @@ namespace nd {
 
     TEST(TestNdFunc, TestAny) {
         // No buffer provided, keepdims
-       {ndarray<bool> x = zeros<bool>({2, 3});
+       {auto x = zeros<bool>({2, 3});
         x[{1, 1}] = true;
 
-        ndarray<bool> y = any(x, 0);
+        auto y = any(x, 0);
         ASSERT_EQ(y.shape(), shape_t({3}));
         ASSERT_EQ(y.data()[0],  false);
         ASSERT_EQ(y.data()[1],  true);
         ASSERT_EQ(y.data()[2],  false);}
 
-       {ndarray<bool> x = zeros<bool>({2, 3});
+       {auto x = zeros<bool>({2, 3});
         x[{1, 1}] = true;
 
         ndarray<bool> y(shape_t({1, 3}));
-        ndarray<bool> z = any(x, 0, true, &y);
+        auto z = any(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_EQ(y.shape(), shape_t({1, 3}));
         ASSERT_EQ(y.data()[0],  false);
@@ -1171,20 +1141,20 @@ namespace nd {
 
     TEST(TestNdFunc, TestAll) {
         // No buffer provided, keepdims
-       {ndarray<bool> x = zeros<bool>({2, 3});
+       {auto x = zeros<bool>({2, 3});
         x[{1, 1}] = true;
 
-        ndarray<bool> y = all(x, 0);
+        auto y = all(x, 0);
         ASSERT_EQ(y.shape(), shape_t({3}));
         ASSERT_EQ(y.data()[0],  false);
         ASSERT_EQ(y.data()[1],  false);
         ASSERT_EQ(y.data()[2],  false);}
 
-       {ndarray<bool> x = zeros<bool>({2, 3});
+       {auto x = zeros<bool>({2, 3});
         x[{1, 1}] = true;
 
         ndarray<bool> y(shape_t({1, 3}));
-        ndarray<bool> z = all(x, 0, true, &y);
+        auto z = all(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_EQ(y.shape(), shape_t({1, 3}));
         ASSERT_EQ(y.data()[0],  false);
@@ -1192,16 +1162,13 @@ namespace nd {
         ASSERT_EQ(y.data()[2],  false);}
     }
 
-
-
-    /* Trigonometric Functions ============================================= */
     TYPED_TEST_P(TestNdFuncFloat, TestSin) {
         // No buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
-        ndarray<TypeParam> y = sin(x);
+        auto y = sin(x);
         for(auto it_x = x.begin(), it_y = y.begin();
             it_y != y.end();
             ++it_x, ++it_y) {
@@ -1209,9 +1176,9 @@ namespace nd {
         }}
 
         // Buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
         ndarray<TypeParam> y(x.shape());
         ndarray<TypeParam> z = sin(x, &y);
@@ -1226,11 +1193,11 @@ namespace nd {
 
     TYPED_TEST_P(TestNdFuncFloat, TestCos) {
         // No buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
-        ndarray<TypeParam> y = cos(x);
+        auto y = cos(x);
         for(auto it_x = x.begin(), it_y = y.begin();
             it_y != y.end();
             ++it_x, ++it_y) {
@@ -1238,9 +1205,9 @@ namespace nd {
         }}
 
         // Buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
         ndarray<TypeParam> y(x.shape());
         ndarray<TypeParam> z = cos(x, &y);
@@ -1255,11 +1222,11 @@ namespace nd {
 
     TYPED_TEST_P(TestNdFuncFloat, TestTan) {
         // No buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
-        ndarray<TypeParam> y = tan(x);
+        auto y = tan(x);
         for(auto it_x = x.begin(), it_y = y.begin();
             it_y != y.end();
             ++it_x, ++it_y) {
@@ -1267,9 +1234,9 @@ namespace nd {
         }}
 
         // Buffer provided
-       {ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4})
+                  .template cast<TypeParam>());
 
         ndarray<TypeParam> y(x.shape());
         ndarray<TypeParam> z = tan(x, &y);
@@ -1283,10 +1250,10 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestArcSin) {
-        ndarray<TypeParam> x = (r_<TypeParam>({0, 1/M_SQRT2, 1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2})
-                                .reshape(shape_t({2, 4})));
-        ndarray<TypeParam> gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, M_PI/4, 0, -M_PI/4, -M_PI/2, -M_PI/4})
-                                 .reshape(shape_t({2, 4})));
+        auto x = (r_<TypeParam>({0, 1/M_SQRT2, 1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2})
+                  .reshape({2, 4}));
+        auto gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, M_PI/4, 0, -M_PI/4, -M_PI/2, -M_PI/4})
+                   .reshape({2, 4}));
 
         // No buffer provided
        {ndarray<TypeParam> y = arcsin(x);
@@ -1294,117 +1261,114 @@ namespace nd {
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> z = arcsin(x, &y);
+        auto z = arcsin(x, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
 
         // Out-of-Range
-       {ndarray<TypeParam> x = r_<TypeParam>({-1.1, 1.1});
-        ndarray<TypeParam> y = arcsin(x);
+       {auto x = r_<TypeParam>({-1.1, 1.1});
+        auto y = arcsin(x);
         ASSERT_TRUE(std::isnan(y[{0}]));
         ASSERT_TRUE(std::isnan(y[{1}]));}
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestArcCos) {
-        ndarray<TypeParam> x = (r_<TypeParam>({1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2, 0, 1/M_SQRT2})
-                                .reshape(shape_t({2, 4})));
-        ndarray<TypeParam> gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, 3*M_PI/4, M_PI, 3*M_PI/4, M_PI/2, M_PI/4})
-                                 .reshape(shape_t({2, 4})));
+        auto x = (r_<TypeParam>({1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2, 0, 1/M_SQRT2})
+                  .reshape({2, 4}));
+        auto gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, 3*M_PI/4, M_PI, 3*M_PI/4, M_PI/2, M_PI/4})
+                   .reshape({2, 4}));
 
         // No buffer provided
-       {ndarray<TypeParam> y = arccos(x);
+       {auto y = arccos(x);
         ASSERT_TRUE(allclose(y, gt));}
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> z = arccos(x, &y);
+        auto z = arccos(x, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
 
         // Out-of-Range
-       {ndarray<TypeParam> x = r_<TypeParam>({-1.1, 1.1});
-        ndarray<TypeParam> y = arccos(x);
+       {auto x = r_<TypeParam>({-1.1, 1.1});
+        auto y = arccos(x);
         ASSERT_TRUE(std::isnan(y[{0}]));
         ASSERT_TRUE(std::isnan(y[{1}]));}
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestArcTan) {
         TypeParam const inf = std::numeric_limits<TypeParam>::infinity();
-        ndarray<TypeParam> x = (r_<TypeParam>({0, 1, inf, -1, 0, 1, -inf, -1})
-                                .reshape(shape_t({2, 4})));
-        ndarray<TypeParam> gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, -M_PI/4, 0, M_PI/4, -M_PI/2, -M_PI/4})
-                                 .reshape(shape_t({2, 4})));
+        auto x = (r_<TypeParam>({0, 1, inf, -1, 0, 1, -inf, -1})
+                  .reshape({2, 4}));
+        auto gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, -M_PI/4, 0, M_PI/4, -M_PI/2, -M_PI/4})
+                   .reshape({2, 4}));
 
         // No buffer provided
-       {ndarray<TypeParam> y = arctan(x);
+       {auto y = arctan(x);
         ASSERT_TRUE(allclose(y, gt));}
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> z = arctan(x, &y);
+        auto z = arctan(x, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_TRUE(allclose(y, gt));}
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestArcTan2) {
-        ndarray<TypeParam> x = (r_<TypeParam>({1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2, 0, 1/M_SQRT2})
-                                .reshape(shape_t({2, 4})));
-        ndarray<TypeParam> y = (r_<TypeParam>({0, 1/M_SQRT2, 1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2})
-                                .reshape(shape_t({2, 4})));
-        ndarray<TypeParam> gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, 3*M_PI/4, M_PI, -3*M_PI/4, -M_PI/2, -M_PI/4})
-                                 .reshape(shape_t({2, 4})));
+        auto x = (r_<TypeParam>({1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2, 0, 1/M_SQRT2})
+                  .reshape({2, 4}));
+        auto y = (r_<TypeParam>({0, 1/M_SQRT2, 1, 1/M_SQRT2, 0, -1/M_SQRT2, -1, -1/M_SQRT2})
+                  .reshape({2, 4}));
+        auto gt = (r_<TypeParam>({0, M_PI/4, M_PI/2, 3*M_PI/4, M_PI, -3*M_PI/4, -M_PI/2, -M_PI/4})
+                   .reshape({2, 4}));
 
         // No buffer provided
-       {ndarray<TypeParam> res = arctan2(y, x);
+       {auto res = arctan2(y, x);
         ASSERT_TRUE(allclose(res, gt));}
 
         // Buffer provided
        {ndarray<TypeParam> res(shape_t({2, 4}));
-        ndarray<TypeParam> z = arctan2(y, x, &res);
+        auto z = arctan2(y, x, &res);
         ASSERT_TRUE(res.equals(z));
         ASSERT_TRUE(allclose(res, gt));}
 
         // Broadcasting
        {TypeParam const sqrt_3 = std::sqrt(3.0);
-        ndarray<TypeParam> x = r_<TypeParam>({1, });
-        ndarray<TypeParam> y = r_<TypeParam>({0, 1/sqrt_3, 1, -1/sqrt_3, -1});
-        ndarray<TypeParam> gt = r_<TypeParam>({0, M_PI/6, M_PI/4, -M_PI/6, -M_PI/4});
+        auto x = r_<TypeParam>({1, });
+        auto y = r_<TypeParam>({0, 1/sqrt_3, 1, -1/sqrt_3, -1});
+        auto gt = r_<TypeParam>({0, M_PI/6, M_PI/4, -M_PI/6, -M_PI/4});
 
-        ndarray<TypeParam> res = arctan2(y, x);
+        auto res = arctan2(y, x);
         ASSERT_TRUE(allclose(res, gt));}
     }
 
-
-
-    /* Unit Transformation ================================================= */
     TYPED_TEST_P(TestNdFuncFloat, TestDeg2Rad) {
-        ndarray<TypeParam> ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
-        ndarray<TypeParam> deg = ratio * ndarray<TypeParam>(180.0);
-        ndarray<TypeParam> rad_gt = ratio * ndarray<TypeParam>(M_PI);
+        auto ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
+        auto deg = ratio * ndarray<TypeParam>(180.0);
+        auto rad_gt = ratio * ndarray<TypeParam>(M_PI);
 
         // No buffer provided
-       {ndarray<TypeParam> rad = deg2rad<TypeParam>(deg);
+       {auto rad = deg2rad<TypeParam>(deg);
         ASSERT_TRUE(allclose(rad, rad_gt));}
 
         // Buffer provided
        {ndarray<TypeParam> rad(deg.shape());
-        ndarray<TypeParam> _rad = deg2rad<TypeParam>(deg, &rad);
+        auto _rad = deg2rad<TypeParam>(deg, &rad);
         ASSERT_TRUE(_rad.equals(rad));
         ASSERT_TRUE(allclose(rad, rad_gt));}
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestRad2Deg) {
-        ndarray<TypeParam> ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
-        ndarray<TypeParam> rad = ratio * ndarray<TypeParam>(M_PI);
-        ndarray<TypeParam> deg_gt = ratio * ndarray<TypeParam>(180.0);
+        auto ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
+        auto rad = ratio * ndarray<TypeParam>(M_PI);
+        auto deg_gt = ratio * ndarray<TypeParam>(180.0);
 
         // No buffer provided
-       {ndarray<TypeParam> deg = rad2deg<TypeParam>(rad);
+       {auto deg = rad2deg<TypeParam>(rad);
         ASSERT_TRUE(allclose(deg, deg_gt));}
 
         // Buffer provided
        {ndarray<TypeParam> deg(rad.shape());
-        ndarray<TypeParam> _deg = rad2deg<TypeParam>(rad, &deg);
+        auto _deg = rad2deg<TypeParam>(rad, &deg);
         ASSERT_TRUE(_deg.equals(deg));
         ASSERT_TRUE(allclose(deg, deg_gt));}
     }
@@ -1421,28 +1385,25 @@ namespace nd {
                                  1.79904778e-01, 1.15514469e-01, 5.53027567e-02, 3.89817183e-17});
 
         // No buffer provided
-       {ndarray<TypeParam> y = sinc(x);
+       {auto y = sinc(x);
         ASSERT_TRUE(allclose(y, gt, 1e-5, 1e-7));}
 
         // Buffer provided
        {ndarray<TypeParam> y(x.shape());
-        ndarray<TypeParam> z = sinc(x, &y);
+        auto z = sinc(x, &y);
         ASSERT_TRUE(z.equals(y));
         ASSERT_TRUE(allclose(y, gt, 1e-5, 1e-7));}
     }
 
-
-
-    /* Complex Numbers ===================================================== */
     TYPED_TEST_P(TestNdFuncFloat, TestReal) {
         // Contiguous array
-       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+       {ndarray<std::complex<TypeParam>> x({5, 3, 4});
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                  -static_cast<TypeParam>(i + 1.0));
         }
 
-        ndarray<TypeParam> y = real(x);
+        auto y = real(x);
         ASSERT_EQ(y.shape(), x.shape());
 
         auto it_y = y.begin();
@@ -1451,14 +1412,14 @@ namespace nd {
         }}
 
         // Non-contiguous array
-       {ndarray<std::complex<TypeParam>> _x(shape_t({5, 3, 8}));
+       {ndarray<std::complex<TypeParam>> _x({5, 3, 8});
         for(size_t i = 0; i < _x.size(); ++i) {
             _x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                   -static_cast<TypeParam>(i + 1.0));
         }
         auto x = _x({util::slice(), util::slice(), util::slice(0, 8, 2)});
 
-        ndarray<TypeParam> y = real(x);
+        auto y = real(x);
         ASSERT_EQ(y.shape(), x.shape());
 
         auto it_y = y.begin();
@@ -1469,13 +1430,13 @@ namespace nd {
 
     TYPED_TEST_P(TestNdFuncFloat, TestImag) {
         // Contiguous array
-       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+       {ndarray<std::complex<TypeParam>> x({5, 3, 4});
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                  -static_cast<TypeParam>(i + 1.0));
         }
 
-        ndarray<TypeParam> y = imag(x);
+        auto y = imag(x);
         ASSERT_EQ(y.shape(), x.shape());
 
         auto it_y = y.begin();
@@ -1484,14 +1445,14 @@ namespace nd {
         }}
 
         // Non-contiguous array
-       {ndarray<std::complex<TypeParam>> _x(shape_t({5, 3, 8}));
+       {ndarray<std::complex<TypeParam>> _x({5, 3, 8});
         for(size_t i = 0; i < _x.size(); ++i) {
             _x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                   -static_cast<TypeParam>(i + 1.0));
         }
         auto x = _x({util::slice(), util::slice(), util::slice(0, 8, 2)});
 
-        ndarray<TypeParam> y = imag(x);
+        auto y = imag(x);
         ASSERT_EQ(y.shape(), x.shape());
 
         auto it_y = y.begin();
@@ -1502,13 +1463,13 @@ namespace nd {
 
     TYPED_TEST_P(TestNdFuncFloat, TestConj) {
         // No buffer provided
-       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+       {ndarray<std::complex<TypeParam>> x({5, 3, 4});
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                  -static_cast<TypeParam>(i + 1.0));
         }
 
-        ndarray<std::complex<TypeParam>> y = conj(x);
+        auto y = conj(x);
         ASSERT_EQ(y.shape(), x.shape());
 
         for(auto it_x = x.begin(), it_y = y.begin();
@@ -1519,14 +1480,14 @@ namespace nd {
         }}
 
         // Buffer provided
-       {ndarray<std::complex<TypeParam>> x(shape_t({5, 3, 4}));
+       {ndarray<std::complex<TypeParam>> x({5, 3, 4});
         for(size_t i = 0; i < x.size(); ++i) {
             x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                  -static_cast<TypeParam>(i + 1.0));
         }
 
         ndarray<std::complex<TypeParam>> buffer(x.shape());
-        ndarray<std::complex<TypeParam>> y = conj(x, &buffer);
+        auto y = conj(x, &buffer);
         ASSERT_TRUE(buffer.equals(y));
 
         for(auto it_x = x.begin(), it_y = y.begin();
@@ -1539,13 +1500,8 @@ namespace nd {
 
 
 
-    /* Initialize tests ====================================================
-     * Some test functions are not templated. We nevertheless list all of them here for
-     * completeness.
-     */
+    // Initialize tests ====================================================
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncBool,
-                               // TestAny,
-                               // TestAll,
                                TestUniqueBool);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncBool, MyBoolTypes);
 
@@ -1592,9 +1548,6 @@ namespace nd {
                                TestStdComplex);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncComplex, MyComplexTypes);
 
-    // REGISTER_TYPED_TEST_CASE_P(TestNdFuncBoolInt,);
-    // INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncBoolInt, MyBoolIntTypes);
-
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncIntFloat,
                                TestClip);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncIntFloat, MyIntFloatTypes);
@@ -1620,12 +1573,7 @@ namespace nd {
                                TestAllClose);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncFloatComplex, MyFloatComplexTypes);
 
-    // REGISTER_TYPED_TEST_CASE_P(TestNdFuncSignedArithmetic,);
-    // INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncSignedArithmetic, MySignedArithmeticTypes);
-
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncArithmetic,
-                               // TestStack,
-                               // TestMeshGrid,
                                TestRUnderscore,
                                TestZeros,
                                TestOnes,

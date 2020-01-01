@@ -18,14 +18,22 @@
 #include "ndarray/ndarray.hpp"
 
 namespace nd {
-    /* Constructors ======================================================== */
+    /*
+     * Note
+     * ----
+     * We mostly test ndarray<T> when T=int for test readability.
+     * When we have doubts on whether a method will work for another type, then
+     * we test those explicitly.
+     */
+
     template <typename T>
-    class TestNdArrayConstructor : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayConstructor);
+    class TestNdArrayArithmetic : public ::testing::Test {};
+    TYPED_TEST_CASE_P(TestNdArrayArithmetic);
 
-    TYPED_TEST_P(TestNdArrayConstructor, TestScalar) {
+
+
+    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorScalar) {
         TypeParam scalar = TypeParam(1.0);
-
         ndarray<TypeParam> x(scalar);
 
         ASSERT_EQ(x.data()[0], scalar);
@@ -36,7 +44,7 @@ namespace nd {
         ASSERT_EQ(x.strides(), expected_strides);
     }
 
-    TYPED_TEST_P(TestNdArrayConstructor, TestShape) {
+    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorShape) {
         shape_t const shape({1, 2, 3});
         ndarray<TypeParam> x(shape);
 
@@ -51,7 +59,7 @@ namespace nd {
         ASSERT_TRUE(x.is_contiguous());
     }
 
-    TYPED_TEST_P(TestNdArrayConstructor, TestCopyExplicit) {
+    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorCopyExplicit) {
         shape_t const shape({1, 2, 3});
         ndarray<TypeParam> x(shape);
         ASSERT_EQ(x.base().use_count(), 1);
@@ -66,7 +74,7 @@ namespace nd {
         ASSERT_TRUE(y.is_contiguous());
     }
 
-    TYPED_TEST_P(TestNdArrayConstructor, TestCopy) {
+    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorCopy) {
         size_t const nelem = 50;
         auto x = new ndarray<TypeParam>(shape_t({nelem}));
         ASSERT_EQ((x->base()).use_count(), 1);
@@ -85,7 +93,7 @@ namespace nd {
         }
     }
 
-    TYPED_TEST_P(TestNdArrayConstructor, TestPointerAndShape) {
+    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorPointerAndShape) {
         shape_t const shape({3, 4, 5});
         size_t const nelem = 3 * 4 * 5;
         TypeParam* data = new TypeParam[nelem];
@@ -112,7 +120,7 @@ namespace nd {
         }
     }
 
-    TYPED_TEST_P(TestNdArrayConstructor, TestPointerAndShapeAndStride) {
+    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorPointerAndShapeAndStride) {
         size_t const nelem = 6 * 8 * 10;
         TypeParam* data = new TypeParam[nelem];
         for(size_t i = 0; i < nelem; ++i) {
@@ -144,50 +152,33 @@ namespace nd {
                   static_cast<TypeParam>(206));
     }
 
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayConstructor,
-                               TestScalar,
-                               TestShape,
-                               TestCopyExplicit,
-                               TestCopy,
-                               TestPointerAndShape,
-                               TestPointerAndShapeAndStride);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayConstructor, MyArithmeticTypes);
-
-
-
-    /* Property ============================================================ */
-    template <typename T>
-    class TestNdArrayProperty : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayProperty);
-
-    TYPED_TEST_P(TestNdArrayProperty, TestSize) {
-        ndarray<TypeParam> x(shape_t({2, 3, 4}));
-
-        ASSERT_EQ(x.size(), size_t(2 * 3 * 4));
+    TEST(TestNdArray, TestSize) {
+        ndarray<int> x({2, 3, 4});
+        ASSERT_EQ(x.size(), 2u * 3u * 4u);
     }
 
-    TYPED_TEST_P(TestNdArrayProperty, TestNDim) {
-        ndarray<TypeParam> x(shape_t({5}));
-        ndarray<TypeParam> y(shape_t({2, 3, 4}));
+    TEST(TestNdArray, TestNDim) {
+       {ndarray<int> x(shape_t({5}));
+        ASSERT_EQ(x.ndim(), 1u);}
 
-        ASSERT_EQ(x.ndim(), size_t(1));
-        ASSERT_EQ(y.ndim(), size_t(3));
+       {ndarray<int> x({2, 3, 4});
+        ASSERT_EQ(x.ndim(), 3u);}
     }
 
-    TYPED_TEST_P(TestNdArrayProperty, TestNBytes) {
-        ndarray<TypeParam> x(shape_t({5}));
-        ndarray<TypeParam> y(shape_t({2, 3, 4}));
+    TEST(TestNdArray, TestNBytes) {
+       {ndarray<int> x(shape_t({5}));
+        ASSERT_EQ(x.nbytes(), 5 * sizeof(int));}
 
-        ASSERT_EQ(x.nbytes(), 5 * sizeof(TypeParam));
-        ASSERT_EQ(y.nbytes(), 2 * 3 * 4 * sizeof(TypeParam));
+       {ndarray<int> x({2, 3, 4});
+        ASSERT_EQ(x.nbytes(), 2 * 3 * 4 * sizeof(int));}
     }
 
-    TYPED_TEST_P(TestNdArrayProperty, TestEquals) {
-        ndarray<TypeParam> w(shape_t({5}));
-        ndarray<TypeParam> x(shape_t({2, 3, 4}));
-        ndarray<TypeParam> y(shape_t({2, 3, 4}));
-        ndarray<TypeParam> z(y);
-        ndarray<TypeParam> t = y;
+    TEST(TestNdArray, TestEquals) {
+        ndarray<int> w(shape_t({5}));
+        ndarray<int> x({2, 3, 4});
+        ndarray<int> y({2, 3, 4});
+        ndarray<int> z(y);
+        ndarray<int> t = y;
 
         ASSERT_FALSE(w.equals(x)); ASSERT_FALSE(x.equals(w));
         ASSERT_FALSE(w.equals(y)); ASSERT_FALSE(y.equals(w));
@@ -201,36 +192,22 @@ namespace nd {
         ASSERT_TRUE(t.equals(y)); ASSERT_TRUE(y.equals(t));
     }
 
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayProperty,
-                               TestSize,
-                               TestNDim,
-                               TestNBytes,
-                               TestEquals);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayProperty, MyArithmeticTypes);
-
-
-
-    /* Index / Filter / Iterate ============================================ */
-    template <typename T>
-    class TestNdArrayIndex : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayIndex);
-
-    TYPED_TEST_P(TestNdArrayIndex, TestOperatorSquareBracket) {
+    TEST(TestNdArray, TestOperatorSquareBracket) {
         // Positive strides
-        ndarray<TypeParam> x(shape_t({3, 1, 4, 5}));
-        std::iota(x.begin(), x.end(), TypeParam(0));
+        ndarray<int> x({3, 1, 4, 5});
+        std::iota(x.begin(), x.end(), 0);
 
         for(size_t i = 0; i < x.shape()[0]; ++i) {
             for(size_t j = 0; j < x.shape()[1]; ++j) {
                 for(size_t k = 0; k < x.shape()[2]; ++k) {
                     for(size_t l = 0; l < x.shape()[3]; ++l) {
-                        TypeParam const tested_elem = x[{i, j, k, l}];
+                        int const tested_elem = x[{i, j, k, l}];
                         int const offset = ((x.strides()[0] * i) +
                                             (x.strides()[1] * j) +
                                             (x.strides()[2] * k) +
                                             (x.strides()[3] * l));
                         byte_t* correct_addr = reinterpret_cast<byte_t*>(x.data()) + offset;
-                        TypeParam const correct_elem = reinterpret_cast<TypeParam*>(correct_addr)[0];
+                        int const correct_elem = reinterpret_cast<int*>(correct_addr)[0];
                         ASSERT_EQ(tested_elem, correct_elem);
                     }
                 }
@@ -238,71 +215,62 @@ namespace nd {
         }
 
         /* Can update entries. */
-        TypeParam& tested_elem = x[{2, 0, 3, 4}];
-        TypeParam const correct_elem = 500;
+        int& tested_elem = x[{2, 0, 3, 4}];
+        int const correct_elem = 500;
         tested_elem = correct_elem;
         ASSERT_EQ(tested_elem, correct_elem);
 
         // Negative strides
         shape_t shape({5, 3});
-        stride_t strides({-3*static_cast<int>(sizeof(TypeParam)), sizeof(TypeParam)});
-        TypeParam* data = new TypeParam[5 * 3];
-        TypeParam* data_end = data + 15;
-        std::iota(data, data_end, TypeParam(0));
-        ndarray<TypeParam> y(reinterpret_cast<byte_t*>(data_end - 1), shape, strides);
+        stride_t strides({-3 * static_cast<int>(sizeof(int)),
+                               static_cast<int>(sizeof(int))});
+        int* data = new int[5 * 3];
+        int* data_end = data + 15;
+        std::iota(data, data_end, 0);
+        ndarray<int> y(reinterpret_cast<byte_t*>(data_end - 1), shape, strides);
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {
-                TypeParam const tested_elem = y[{i, j}];
+                int const tested_elem = y[{i, j}];
                 int const offset = ((y.strides()[0] * i) +
                                     (y.strides()[1] * j));
                 byte_t* correct_addr = reinterpret_cast<byte_t*>(y.data()) + offset;
-                TypeParam const correct_elem = reinterpret_cast<TypeParam*>(correct_addr)[0];
+                int const correct_elem = reinterpret_cast<int*>(correct_addr)[0];
                 ASSERT_EQ(tested_elem, correct_elem);
             }
         }
     }
 
-    TYPED_TEST_P(TestNdArrayIndex, TestOperatorParenthesis1) {
-        ndarray<TypeParam> x(shape_t({2, 6, 7}));
-        std::iota(x.begin(), x.end(), TypeParam(0));
+    TEST(TestNdArray, TestOperatorParenthesis1) {
+        ndarray<int> x({2, 6, 7});
+        std::iota(x.begin(), x.end(), 0);
         ASSERT_EQ(x.base().use_count(), 1);
 
         // Slice into a contiguous array. =====================================
-        std::vector<util::slice> spec_1({util::slice(),
-                                         util::slice(0, 20, 3)});
-        auto y = x(spec_1);
+        std::vector<util::slice> s1({util::slice(),
+                                     util::slice(0, 20, 3)});
+        auto y = x(s1);
 
         ASSERT_EQ(y.base(), x.base());
         ASSERT_EQ(y.base().use_count(), 2);
         ASSERT_EQ(y.data(), x.data());
         ASSERT_EQ(y.shape(), shape_t({2, 2, 7}));
-        using stride_tt = stride_t::value_type;
-        auto expected_strides_y = stride_t({ 1 * 6 * 7 * static_cast<stride_tt>(sizeof(TypeParam)),
-                                             3 *     7 * static_cast<stride_tt>(sizeof(TypeParam)),
-                                             1 *         static_cast<stride_tt>(sizeof(TypeParam))});
+        auto expected_strides_y = stride_t({ 1 * 6 * 7 * sizeof(int),
+                                             3 *     7 * sizeof(int),
+                                             1 *         sizeof(int)});
         ASSERT_EQ(y.strides(), expected_strides_y);
 
-        std::vector<TypeParam> correct_y({ 0,  1,  2,  3,  4,  5,  6,
-                                          21, 22, 23, 24, 25, 26, 27,
-                                          42, 43, 44, 45, 46, 47, 48,
-                                          63, 64, 65, 66, 67, 68, 69});
-        size_t offset_1 = 0;
-        for(size_t i = 0; i < y.shape()[0]; ++i) {
-            for(size_t j = 0; j < y.shape()[1]; ++j) {
-                for(size_t k = 0; k < y.shape()[2]; ++k) {
-                    TypeParam const tested_elem = y[{i, j, k}];
-                    TypeParam const correct_elem = correct_y[offset_1];
-                    ASSERT_EQ(tested_elem, correct_elem);
-                    ++offset_1;
-                }
-            }
-        }
+        auto gt_y = (r_<int>({ 0,  1,  2,  3,  4,  5,  6,
+                              21, 22, 23, 24, 25, 26, 27,
+                              42, 43, 44, 45, 46, 47, 48,
+                              63, 64, 65, 66, 67, 68, 69})
+                     .reshape({2, 2, 7}));
+        ASSERT_TRUE(all((y == gt_y).ravel(), 0)[{0}]);
 
         // Slice into a non-contiguous array ==================================
-        std::vector<util::slice> spec_2({util::slice(1, 2),
-                                         util::slice(),
-                                         util::slice(2, 6, 3)});
-        auto z = y(spec_2);
+        std::vector<util::slice> s2({util::slice(1, 2),
+                                     util::slice(),
+                                     util::slice(2, 6, 3)});
+        auto z = y(s2);
 
         ASSERT_EQ(z.base(), x.base());
         ASSERT_EQ(z.base().use_count(), 3);
@@ -310,68 +278,49 @@ namespace nd {
         ASSERT_EQ(z.shape(), shape_t({1, 2, 2}));
         auto expected_strides_z = stride_t({expected_strides_y[0],
                                             expected_strides_y[1],
-                                            expected_strides_y[2] * spec_2[2].step()});
+                                            expected_strides_y[2] * s2[2].step()});
         ASSERT_EQ(z.strides(), expected_strides_z);
 
-        std::vector<TypeParam> correct_z {44, 47,
-                                          65, 68};
-        size_t offset_2 = 0;
-        for(size_t i = 0; i < z.shape()[0]; ++i) {
-            for(size_t j = 0; j < z.shape()[1]; ++j) {
-                for(size_t k = 0; k < z.shape()[2]; ++k) {
-                    TypeParam const tested_elem = z[{i, j, k}];
-                    TypeParam const correct_elem = correct_z[offset_2];
-                    ASSERT_EQ(tested_elem, correct_elem);
-                    ++offset_2;
-                }
-            }
-        }
+        auto gt_z = (r_<int>({44, 47,
+                              65, 68})
+                     .reshape({1, 2, 2}));
+        ASSERT_TRUE(all((z == gt_z).ravel(), 0)[{0}]);
     }
 
-    TYPED_TEST_P(TestNdArrayIndex, TestOperatorParenthesis2) {
-        ndarray<TypeParam> x(shape_t({2, 6, 7}));
-        std::iota(x.begin(), x.end(), TypeParam(0));
+    TEST(TestNdArray, TestOperatorParenthesis2) {
+        ndarray<int> x({2, 6, 7});
+        std::iota(x.begin(), x.end(), 0);
         ASSERT_EQ(x.base().use_count(), 1);
 
         // Slice into a contiguous array. =====================================
-        std::vector<util::slice> spec_1({util::slice(),
-                                         util::slice(10, 0, -2), // try degenerate(0, -1, -2)
-                                         util::slice(4, 0, -1)});
-        auto y = x(spec_1);
+        std::vector<util::slice> s1({util::slice(),
+                                     util::slice(10, 0, -2), // try degenerate(0, -1, -2)
+                                     util::slice(4, 0, -1)});
+        auto y = x(s1);
 
         ASSERT_EQ(y.base(), x.base());
         ASSERT_EQ(y.base().use_count(), 2);
         ASSERT_EQ(y.data(), x.data() + 39);
         ASSERT_EQ(y.shape(), shape_t({2, 3, 4}));
-        using stride_tt = stride_t::value_type;
-        auto expected_strides_y = stride_t({ 1 * 6 * 7 * static_cast<stride_tt>(sizeof(TypeParam)),
-                                            -2 *     7 * static_cast<stride_tt>(sizeof(TypeParam)),
-                                            -1 *         static_cast<stride_tt>(sizeof(TypeParam))});
+        auto expected_strides_y = stride_t({ 1 * 6 * 7 * sizeof(int),
+                                            -2 *     7 * static_cast<int>(sizeof(int)),
+                                            -1 *         static_cast<int>(sizeof(int))});
         ASSERT_EQ(y.strides(), expected_strides_y);
 
-        std::vector<TypeParam> correct_y({39, 38, 37, 36,
-                                          25, 24, 23, 22,
-                                          11, 10,  9,  8,
-                                          81, 80, 79, 78,
-                                          67, 66, 65, 64,
-                                          53, 52, 51, 50});
-        size_t offset_1 = 0;
-        for(size_t i = 0; i < y.shape()[0]; ++i) {
-            for(size_t j = 0; j < y.shape()[1]; ++j) {
-                for(size_t k = 0; k < y.shape()[2]; ++k) {
-                    TypeParam const tested_elem = y[{i, j, k}];
-                    TypeParam const correct_elem = correct_y[offset_1];
-                    ASSERT_EQ(tested_elem, correct_elem);
-                    ++offset_1;
-                }
-            }
-        }
+        auto gt_y = (r_<int>({39, 38, 37, 36,
+                              25, 24, 23, 22,
+                              11, 10,  9,  8,
+                              81, 80, 79, 78,
+                              67, 66, 65, 64,
+                              53, 52, 51, 50})
+                     .reshape({2, 3, 4}));
+        ASSERT_TRUE(all((y == gt_y).ravel(), 0)[{0}]);
 
         // Slice into a non-contiguous array ==================================
-        std::vector<util::slice> spec_2({util::slice(2, -1, -1),
-                                         util::slice(1, 2),
-                                         util::slice(2, 0, -2)});
-        auto z = y(spec_2);
+        std::vector<util::slice> s2({util::slice(2, -1, -1),
+                                     util::slice(1, 2),
+                                     util::slice(2, 0, -2)});
+        auto z = y(s2);
 
         ASSERT_EQ(z.base(), x.base());
         ASSERT_EQ(z.base().use_count(), 3);
@@ -382,506 +331,351 @@ namespace nd {
                                             -2 * expected_strides_y[2]});
         ASSERT_EQ(z.strides(), expected_strides_z);
 
-        std::vector<TypeParam> correct_z {65, 23};
-        size_t offset_2 = 0;
-        for(size_t i = 0; i < z.shape()[0]; ++i) {
-            for(size_t j = 0; j < z.shape()[1]; ++j) {
-                for(size_t k = 0; k < z.shape()[2]; ++k) {
-                    TypeParam const tested_elem = z[{i, j, k}];
-                    TypeParam const correct_elem = correct_z[offset_2];
-                    ASSERT_EQ(tested_elem, correct_elem);
-                    ++offset_2;
-                }
-            }
-        }
+        auto gt_z = (r_<int>({65, 23})
+                     .reshape({2, 1, 1}));
+        ASSERT_TRUE(all((z == gt_z).ravel(), 0)[{0}]);
     }
 
-    /*
-     * We only test integer types here to keep testing code simple.
-     * Index/subsetting should not be affected by types anyway.
-     */
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayIndex,
-                               TestOperatorSquareBracket,
-                               TestOperatorParenthesis1,
-                               TestOperatorParenthesis2);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIndex, MyIntTypes);
-
-    template <typename T>
-    class TestNdArrayFilter : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayFilter);
-
-    TYPED_TEST_P(TestNdArrayFilter, TestWhere) {
+    TEST(TestNdArray, TestWhere) {
         // shape(mask) == shape(array)
-       {ndarray<bool> mask = (r_(std::vector<bool>({true, false, true, false}))
-                              .reshape(shape_t({2, 2})));
-        ndarray<TypeParam> x = (arange<int>(0, mask.size(), 1)
-                                .reshape(shape_t({2, 2}))
-                                .template cast<TypeParam>());
-
-        ndarray<TypeParam> y = x.where(mask);
-        ASSERT_EQ(y.shape(), shape_t({2,}));
-        ASSERT_EQ(y.size(), size_t(2));
-        for(size_t i = 0; i < 2; ++i) {
-            TypeParam const& tested_elem = y[{i}];
-            TypeParam const& correct_elem = x[{i, 0}];
-            ASSERT_EQ(tested_elem, correct_elem);
-        }}
+       {ndarray<bool> mask = (r_<bool>({true, false, true, false})
+                              .reshape({2, 2}));
+        auto x = (arange<int>(0, mask.size(), 1)
+                  .reshape({2, 2}));
+        auto y = x.where(mask);
+        auto gt = r_<int>({0, 2});
+        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
 
         // shape(mask) broadcasts
-       {ndarray<bool> mask = nd::r_(std::vector<bool>({true, false}));
-       ndarray<TypeParam> x = (arange<int>(0, 4, 1)
-                               .reshape(shape_t({2, 2}))
-                               .template cast<TypeParam>());
-
-        ndarray<TypeParam> y = x.where(mask);
-        ASSERT_EQ(y.shape(), shape_t({2,}));
-        ASSERT_EQ(y.size(), size_t(2));
-        for(size_t i = 0; i < 2; ++i) {
-            TypeParam const& tested_elem = y[{i}];
-            TypeParam const& correct_elem = x[{i, 0}];
-            ASSERT_EQ(tested_elem, correct_elem);
-        }}
+       {ndarray<bool> mask = nd::r_<bool>({true, false});
+        auto x = (arange<int>(0, 4, 1)
+                  .reshape({2, 2}));
+        auto y = x.where(mask);
+        auto gt = r_<int>({0, 2});
+        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
     }
 
-    TYPED_TEST_P(TestNdArrayFilter, TestFilter) {
+    TEST(TestNdArray, TestFilter) {
         // shape(mask) == shape(array), scalar x
-       {ndarray<bool> mask = (r_(std::vector<bool>({true, false, true, false}))
-                              .reshape(shape_t({2, 2})));
-        ndarray<TypeParam> ar = (arange<int>(0, mask.size(), 1)
-                                 .reshape(shape_t({2, 2}))
-                                 .template cast<TypeParam>());
-        TypeParam const x = static_cast<TypeParam>(1.0);
+       {ndarray<bool> mask = (r_<bool>({true, false, true, false})
+                              .reshape({2, 2}));
+        auto ar = (arange<int>(0, mask.size(), 1)
+                   .reshape({2, 2}));
+        int const x = 1;
+        auto gt = (r_<int>({1, 1, 1, 3})
+                   .reshape({2, 2}));
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-
-        {TypeParam const& tested_elem = ar2[{0, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{0, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        }
+        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
 
         // shape(mask) == shape(array), vector x
-       {ndarray<bool> mask = (r_(std::vector<bool>({true, false, true, false}))
-                              .reshape(shape_t({2, 2})));
-        ndarray<TypeParam> ar = (arange<int>(0, mask.size(), 1)
-                                 .reshape(shape_t({2, 2}))
-                                 .template cast<TypeParam>());
-        ndarray<TypeParam> x = ((ndarray<int>(2) * arange<int>(0, 2, 1) + ndarray<int>(1))
-                                .template cast<TypeParam>());
+       {ndarray<bool> mask = (r_<bool>({true, false, true, false})
+                              .reshape({2, 2}));
+        auto ar = (arange<int>(0, mask.size(), 1)
+                   .reshape({2, 2}));
+        auto x = arange<int>(0, 2, 1) * 2 + 1;
+        auto gt = (r_<int>({1, 1, 3, 3})
+                   .reshape({2, 2}));
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-
-        {TypeParam const& tested_elem = ar2[{0, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{0, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        }
+        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
 
         // shape(mask) broadcasts, scalar x
-       {ndarray<bool> mask = r_(std::vector<bool>({true, false}));
-        ndarray<TypeParam> ar = (arange<int>(0, 4, 1)
-                                 .reshape(shape_t({2, 2}))
-                                 .template cast<TypeParam>());
-        TypeParam const x = static_cast<TypeParam>(1.0);
+       {ndarray<bool> mask = r_<bool>({true, false});
+        auto ar = (arange<int>(0, 4, 1)
+                   .reshape({2, 2}));
+        int const x = 1;
+        auto gt = (r_<int>({1, 1, 1, 3})
+                   .reshape({2, 2}));
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-
-        {TypeParam const& tested_elem = ar2[{0, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{0, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        }
+        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
 
         // shape(mask) broadcasts, vector x
-       {ndarray<bool> mask = r_(std::vector<bool>({true, false}));
-        ndarray<TypeParam> ar = (arange<int>(0, 4, 1)
-                                 .reshape(shape_t({2, 2}))
-                                 .template cast<TypeParam>());
-        ndarray<TypeParam> x = ((ndarray<int>(2) * arange<int>(0, 2, 1) + ndarray<int>(1))
-                                .template cast<TypeParam>());
+       {ndarray<bool> mask = r_<bool>({true, false});
+        auto ar = (arange<int>(0, 4, 1)
+                   .reshape({2, 2}));
+        auto x = arange<int>(0, 2, 1) * 2 + 1;
+        auto gt = (r_<int>({1, 1, 3, 3})
+                   .reshape({2, 2}));
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-
-        {TypeParam const& tested_elem = ar2[{0, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{0, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(1.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 0}];
-         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        {TypeParam const& tested_elem = ar2[{1, 1}];
-         TypeParam const correct_elem = static_cast<TypeParam>(3.0);
-         ASSERT_EQ(tested_elem, correct_elem);
-         }
-        }
+        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
     }
 
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayFilter,
-                               TestWhere,
-                               TestFilter);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayFilter, MyArithmeticTypes);
-
-    template <typename T>
-    class TestNdArrayIterate : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayIterate);
-    TYPED_TEST_P(TestNdArrayIterate, TestNdArrayBeginEnd) {
-        ndarray<TypeParam> x = (arange<int>(0, 5 * 3 * 4, 1)
-                                .reshape(shape_t({5, 3, 4}))
-                                .template cast<TypeParam>());
+    TEST(TestNdArray, TestBeginEnd) {
+        auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4}));
 
         size_t i = 0;
         for(auto it = x.begin(); it != x.end(); ++it, ++i) {
-            TypeParam const& tested_elem = *it;
-            TypeParam const& correct_elem = x.data()[i];
+            int const& tested_elem = *it;
+            int const& correct_elem = x.data()[i];
             ASSERT_EQ(tested_elem, correct_elem);
         }
 
-        ndarray<TypeParam> y = x({util::slice(5, -1, -2)});
+        auto y = x({util::slice(5, -1, -2)});
         auto it = y.begin();
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {
                 for(size_t k = 0; k < y.shape()[2]; ++k, ++it) {
-                    TypeParam const& tested_elem = *it;
-                    TypeParam const& correct_elem = y[{i,j,k}];
+                    int const& tested_elem = *it;
+                    int const& correct_elem = y[{i,j,k}];
                     ASSERT_EQ(tested_elem, correct_elem);
                 }
             }
         }
     }
 
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayIterate,
-                               TestNdArrayBeginEnd);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayIterate, MyArithmeticTypes);
-
-
-
-    /* Manipulation ======================================================== */
-    template <typename T>
-    class TestNdArrayManipulation : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayManipulation);
-
-    TYPED_TEST_P(TestNdArrayManipulation, TestCopy) {
+    TEST(TestNdArray, TestCopy) {
         // Contiguous array
-        ndarray<TypeParam> x = (arange<int>(0, 20 * 30 * 40, 1)
-                                .reshape(shape_t({20, 30, 40}))
-                                .template cast<TypeParam>());
+        auto x = (arange<int>(0, 20 * 30 * 40, 1)
+                  .reshape({20, 30, 40}));
 
-        ndarray<TypeParam> x_cpy = x.copy();
+       {auto x_cpy = x.copy();
         ASSERT_EQ(x.base().use_count(), 1);
         ASSERT_EQ(x_cpy.base().use_count(), 1);
-
         ASSERT_FALSE(x_cpy.equals(x));
         ASSERT_TRUE(x_cpy.is_contiguous());
         ASSERT_EQ(x_cpy.shape(), shape_t({20, 30, 40}));
-        auto x_cpy_iter = x_cpy.begin();
-        for(size_t i = 0; i < x_cpy.size(); ++i, ++x_cpy_iter) {
-            TypeParam const tested_elem = *x_cpy_iter;
-            TypeParam const correct_elem = static_cast<TypeParam>(i);
-            ASSERT_EQ(tested_elem, correct_elem);
-        }
+        ASSERT_TRUE(all((x == x_cpy).ravel(), 0)[{0}]);}
+
 
         // Strided array
-        ndarray<TypeParam> y = x({util::slice(20, 0, -5),
-                                  util::slice(0, 5, 2),
-                                  util::slice(10, 2, -3)});
-        ndarray<TypeParam> y_cpy = y.copy();
-        ASSERT_EQ(y_cpy.base().use_count(), 1);
+       {auto y = x({util::slice(20, 0, -5),
+                    util::slice(0, 5, 2),
+                    util::slice(10, 2, -3)});
+        auto y_cpy = y.copy();
+        auto gt = (r_<int>({22810, 22807, 22804,
+                            22890, 22887, 22884,
+                            22970, 22967, 22964,
 
+                            16810, 16807, 16804,
+                            16890, 16887, 16884,
+                            16970, 16967, 16964,
+
+                            10810, 10807, 10804,
+                            10890, 10887, 10884,
+                            10970, 10967, 10964,
+
+                             4810,  4807,  4804,
+                             4890,  4887,  4884,
+                             4970,  4967,  4964})
+                   .reshape({4, 3, 3}));
+
+        ASSERT_EQ(y_cpy.base().use_count(), 1);
         ASSERT_FALSE(y_cpy.equals(y));
         ASSERT_TRUE(y_cpy.is_contiguous());
         ASSERT_EQ(y_cpy.shape(), shape_t({4, 3, 3}));
-        auto y_cpy_iter = y_cpy.begin();
-        std::vector<TypeParam> correct_y({static_cast<TypeParam>(22810),
-                                          static_cast<TypeParam>(22807),
-                                          static_cast<TypeParam>(22804),
-                                          static_cast<TypeParam>(22890),
-                                          static_cast<TypeParam>(22887),
-                                          static_cast<TypeParam>(22884),
-                                          static_cast<TypeParam>(22970),
-                                          static_cast<TypeParam>(22967),
-                                          static_cast<TypeParam>(22964),
-                                          static_cast<TypeParam>(16810),
-                                          static_cast<TypeParam>(16807),
-                                          static_cast<TypeParam>(16804),
-                                          static_cast<TypeParam>(16890),
-                                          static_cast<TypeParam>(16887),
-                                          static_cast<TypeParam>(16884),
-                                          static_cast<TypeParam>(16970),
-                                          static_cast<TypeParam>(16967),
-                                          static_cast<TypeParam>(16964),
-                                          static_cast<TypeParam>(10810),
-                                          static_cast<TypeParam>(10807),
-                                          static_cast<TypeParam>(10804),
-                                          static_cast<TypeParam>(10890),
-                                          static_cast<TypeParam>(10887),
-                                          static_cast<TypeParam>(10884),
-                                          static_cast<TypeParam>(10970),
-                                          static_cast<TypeParam>(10967),
-                                          static_cast<TypeParam>(10964),
-                                          static_cast<TypeParam>( 4810),
-                                          static_cast<TypeParam>( 4807),
-                                          static_cast<TypeParam>( 4804),
-                                          static_cast<TypeParam>( 4890),
-                                          static_cast<TypeParam>( 4887),
-                                          static_cast<TypeParam>( 4884),
-                                          static_cast<TypeParam>( 4970),
-                                          static_cast<TypeParam>( 4967),
-                                          static_cast<TypeParam>( 4964)});
-        for(size_t i = 0; i < correct_y.size(); ++i, ++y_cpy_iter) {
-            ASSERT_EQ(*y_cpy_iter, correct_y[i]);
-        }
+        ASSERT_TRUE(all((gt == y_cpy).ravel(), 0)[{0}]);}
     }
 
-    TYPED_TEST_P(TestNdArrayManipulation, TestAsContiguousArray) {
+    TEST(TestNdArray, TestAsContiguousArray) {
         // Contiguous array
-        ndarray<TypeParam> x(shape_t({20, 30, 40}));
-        ndarray<TypeParam> x_cont = ascontiguousarray(x);
+        ndarray<int> x({20, 30, 40});
+        auto x_cont = ascontiguousarray(x);
         ASSERT_TRUE(x.equals(x_cont));
 
-        ndarray<TypeParam> y = x({util::slice(50, -1, -2)});
-        ndarray<TypeParam> y_cont = ascontiguousarray(y);
+        // Strided array
+        auto y = x({util::slice(50, -1, -2)});
+        auto y_cont = ascontiguousarray(y);
         ASSERT_FALSE(y.is_contiguous());
         ASSERT_TRUE(y_cont.is_contiguous());
-        for(auto it_y = y.begin(), it_y_cont = y_cont.begin();
-            it_y != y.end(); ++it_y, ++it_y_cont) {
-            ASSERT_EQ(*it_y, *it_y_cont);
-        }
+        ASSERT_TRUE(all((y == y_cont).ravel(), 0)[{0}]);
     }
 
-    TYPED_TEST_P(TestNdArrayManipulation, TestSqueeze) {
-       {ndarray<TypeParam> x(1);
-        ndarray<TypeParam> y = x.squeeze();
+    TEST(TestNdArray, TestSqueeze) {
+       {ndarray<int> x(1);
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({1}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(5);
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x(5);
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({1}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 3}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({5, 3});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({5, 3}));
-        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({1, 3});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({3}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3}));
-        ndarray<TypeParam> y = x.squeeze({0});
+       {ndarray<int> x({1, 3});
+        auto y = x.squeeze({0});
         ASSERT_EQ(y.shape(), shape_t({3}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 1}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({5, 1});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({5}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 1}));
-        ndarray<TypeParam> y = x.squeeze({1});
+       {ndarray<int> x({5, 1});
+        auto y = x.squeeze({1});
         ASSERT_EQ(y.shape(), shape_t({5}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 3, 4}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({5, 3, 4});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({5, 3, 4}));
-        ASSERT_EQ(y.strides(), stride_t({12 * sizeof(TypeParam),
-                                          4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({12 * sizeof(int),
+                                          4 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3, 4}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({1, 3, 4});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({3, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3, 4}));
-        ndarray<TypeParam> y = x.squeeze({0});
+       {ndarray<int> x({1, 3, 4});
+        auto y = x.squeeze({0});
         ASSERT_EQ(y.shape(), shape_t({3, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 1, 4}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({5, 1, 4});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({5, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 1, 4}));
-        ndarray<TypeParam> y = x.squeeze({1});
+       {ndarray<int> x({5, 1, 4});
+        auto y = x.squeeze({1});
         ASSERT_EQ(y.shape(), shape_t({5, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 3, 1}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({5, 3, 1});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({5, 3}));
-        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({5, 3, 1}));
-        ndarray<TypeParam> y = x.squeeze({2});
+       {ndarray<int> x({5, 3, 1});
+        auto y = x.squeeze({2});
         ASSERT_EQ(y.shape(), shape_t({5, 3}));
-        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 4}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({1, 1, 4});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({4}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 4}));
-        ndarray<TypeParam> y = x.squeeze({0});
+       {ndarray<int> x({1, 1, 4});
+        auto y = x.squeeze({0});
         ASSERT_EQ(y.shape(), shape_t({1, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 4}));
-        ndarray<TypeParam> y = x.squeeze({1});
+       {ndarray<int> x({1, 1, 4});
+        auto y = x.squeeze({1});
         ASSERT_EQ(y.shape(), shape_t({1, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 4 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 4}));
-        ndarray<TypeParam> y = x.squeeze({0, 1});
+       {ndarray<int> x({1, 1, 4});
+        auto y = x.squeeze({0, 1});
         ASSERT_EQ(y.shape(), shape_t({4}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3, 1}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({1, 3, 1});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({3}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3, 1}));
-        ndarray<TypeParam> y = x.squeeze({0});
+       {ndarray<int> x({1, 3, 1});
+        auto y = x.squeeze({0});
         ASSERT_EQ(y.shape(), shape_t({3, 1}));
-        ASSERT_EQ(y.strides(), stride_t({ 1 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 1 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3, 1}));
-        ndarray<TypeParam> y = x.squeeze({0});
+       {ndarray<int> x({1, 3, 1});
+        auto y = x.squeeze({0});
         ASSERT_EQ(y.shape(), shape_t({3, 1}));
-        ASSERT_EQ(y.strides(), stride_t({ 1 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 1 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3, 1}));
-        ndarray<TypeParam> y = x.squeeze({2});
+       {ndarray<int> x({1, 3, 1});
+        auto y = x.squeeze({2});
         ASSERT_EQ(y.shape(), shape_t({1, 3}));
-        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 3 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 3, 1}));
-        ndarray<TypeParam> y = x.squeeze({0, 2});
+       {ndarray<int> x({1, 3, 1});
+        auto y = x.squeeze({0, 2});
         ASSERT_EQ(y.shape(), shape_t({3}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 1}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({1, 1, 1});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({1}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 1}));
-        ndarray<TypeParam> y = x.squeeze({0});
+       {ndarray<int> x({1, 1, 1});
+        auto y = x.squeeze({0});
         ASSERT_EQ(y.shape(), shape_t({1, 1}));
-        ASSERT_EQ(y.strides(), stride_t({ 1 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 1 * sizeof(int),
+                                              sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 1}));
-        ndarray<TypeParam> y = x.squeeze({0, 1});
+       {ndarray<int> x({1, 1, 1});
+        auto y = x.squeeze({0, 1});
         ASSERT_EQ(y.shape(), shape_t({1}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<TypeParam> x(shape_t({1, 1, 1}));
-        ndarray<TypeParam> y = x.squeeze();
+       {ndarray<int> x({1, 1, 1});
+        auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({1}));
-        ASSERT_EQ(y.strides(), stride_t({sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
     }
 
-    TYPED_TEST_P(TestNdArrayManipulation, TestReshape) {
+    TEST(TestNdArray, TestReshape) {
         // Contiguous array
-       {ndarray<TypeParam> x = (arange<int>(0, 10 * 10 * 5, 1)
-                                . template cast<TypeParam>());
-        ndarray<TypeParam> y = x.reshape(shape_t({10, 10, 5}));
+       {auto x = arange<int>(0, 10 * 10 * 5, 1);
+        auto y = x.reshape({10, 10, 5});
         ASSERT_EQ(x.base(), y.base());
         ASSERT_EQ(y.shape(), shape_t({10, 10, 5}));
-        ASSERT_EQ(y.strides(), stride_t({10 * 5 * static_cast<int>(sizeof(TypeParam)),
-                                              5 * static_cast<int>(sizeof(TypeParam)),
-                                                  static_cast<int>(sizeof(TypeParam))}));
+        ASSERT_EQ(y.strides(), stride_t({10 * 5 * sizeof(int),
+                                              5 * sizeof(int),
+                                                  sizeof(int)}));
         for(auto it_x = x.begin(), it_y = y.begin();
             it_x != x.end();
             ++it_x, ++it_y) {
@@ -889,18 +683,14 @@ namespace nd {
         }}
 
         // Strided Array
-       {ndarray<TypeParam> _x(shape_t({10, 20, 30}));
-        ndarray<TypeParam> x = _x({util::slice(10, -1, -2)});
-        auto it = x.begin();
-        for(size_t i = 0; it != x.end(); ++i, ++it) {
-            *it = static_cast<TypeParam>(i);
-        }
-        ndarray<TypeParam> y = x.reshape(shape_t({5, 10, 60}));
+       {auto x = zeros<int>({10, 20, 30})({util::slice(10, -1, -2)});
+        std::iota(x.begin(), x.end(), 0);
+        auto y = x.reshape({5, 10, 60});
         ASSERT_NE(x.base(), y.base());
         ASSERT_EQ(y.shape(), shape_t({5, 10, 60}));
-        ASSERT_EQ(y.strides(), stride_t({10 * 60 * static_cast<int>(sizeof(TypeParam)),
-                                              60 * static_cast<int>(sizeof(TypeParam)),
-                                                   static_cast<int>(sizeof(TypeParam))}));
+        ASSERT_EQ(y.strides(), stride_t({10 * 60 * sizeof(int),
+                                              60 * sizeof(int),
+                                                   sizeof(int)}));
         for(auto it_x = x.begin(), it_y = y.begin();
             it_x != x.end();
             ++it_x, ++it_y) {
@@ -908,16 +698,15 @@ namespace nd {
         }}
     }
 
-    TYPED_TEST_P(TestNdArrayManipulation, TestRavel) {
+    TEST(TestNdArray, TestRavel) {
         // Contiguous array
-       {ndarray<TypeParam> x = (arange<int>(0, 10 * 20 * 30, 1)
-                                .reshape(shape_t({10, 20, 30}))
-                                .template cast<TypeParam>());
+       {auto x = (arange<int>(0, 10 * 20 * 30, 1)
+                  .reshape({10, 20, 30}));
 
-        ndarray<TypeParam> y = x.ravel();
+        auto y = x.ravel();
         ASSERT_EQ(x.base(), y.base());
         ASSERT_EQ(y.shape(), shape_t({10 * 20 * 30}));
-        ASSERT_EQ(y.strides(), stride_t({static_cast<int>(sizeof(TypeParam))}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         for(auto it_x = x.begin(), it_y = y.begin();
             it_x != x.end();
             ++it_x, ++it_y) {
@@ -925,17 +714,13 @@ namespace nd {
         }}
 
         // Strided array
-       {ndarray<TypeParam> _x(shape_t({10, 20, 30}));
-        ndarray<TypeParam> x = _x({util::slice(10, -1, -2)});
-        auto it = x.begin();
-        for(size_t i = 0; it != x.end(); ++i, ++it) {
-            *it = static_cast<TypeParam>(i);
-        }
+       {auto x = zeros<int>({10, 20, 30})({util::slice(10, -1, -2)});
+        std::iota(x.begin(), x.end(), 0);
 
-        ndarray<TypeParam> y = x.ravel();
+        auto y = x.ravel();
         ASSERT_NE(x.base(), y.base());
         ASSERT_EQ(y.shape(), shape_t({5 * 20 * 30}));
-        ASSERT_EQ(y.strides(), stride_t({static_cast<int>(sizeof(TypeParam))}));
+        ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         for(auto it_x = x.begin(), it_y = y.begin();
             it_x != x.end();
             ++it_x, ++it_y) {
@@ -943,28 +728,26 @@ namespace nd {
         }}
     }
 
-    TYPED_TEST_P(TestNdArrayManipulation, TestBroadcastTo) {
+    TEST(TestNdArray, TestBroadcastTo) {
         // Contiguous Array
-       {ndarray<TypeParam> x = (arange<int>(0, 2 * 3 * 4, 1)
-                                .reshape(shape_t({2, 3, 4}))
-                                .template cast<TypeParam>());
-
-        ndarray<TypeParam> y = x.broadcast_to(shape_t({5, 6, 2, 3, 4}));
+       {auto x = (arange<int>(0, 2 * 3 * 4, 1)
+                  .reshape({2, 3, 4}));
+        auto y = x.broadcast_to({5, 6, 2, 3, 4});
         ASSERT_EQ(x.base(), y.base());
         ASSERT_EQ(x.data(), y.data());
         ASSERT_EQ(y.shape(), shape_t({5, 6, 2, 3, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 0 * sizeof(TypeParam),
-                                          0 * sizeof(TypeParam),
-                                         12 * sizeof(TypeParam),
-                                          4 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 0 * sizeof(int),
+                                          0 * sizeof(int),
+                                         12 * sizeof(int),
+                                          4 * sizeof(int),
+                                              sizeof(int)}));
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {
                 for(size_t k = 0; k < y.shape()[2]; ++k) {
                     for(size_t l = 0; l < y.shape()[3]; ++l) {
                         for(size_t m = 0; m < y.shape()[4]; ++m) {
-                            TypeParam const& tested_elem = y[{i,j,k,l,m}];
-                            TypeParam const& correct_elem = x[{k, l, m}];
+                            auto const& tested_elem = y[{i, j, k, l, m}];
+                            auto const& correct_elem = x[{k, l, m}];
 
                             ASSERT_EQ(tested_elem, correct_elem);
                         }
@@ -973,26 +756,24 @@ namespace nd {
             }
         }}
 
-       {ndarray<TypeParam> x = (arange<int>(0, 2 * 1 * 4, 1)
-                                .reshape(shape_t({2, 1, 4}))
-                                .template cast<TypeParam>());
-
-        ndarray<TypeParam> y = x.broadcast_to(shape_t({5, 6, 2, 3, 4}));
+       {auto x = (arange<int>(0, 2 * 1 * 4, 1)
+                  .reshape({2, 1, 4}));
+        auto y = x.broadcast_to({5, 6, 2, 3, 4});
         ASSERT_EQ(x.base(), y.base());
         ASSERT_EQ(x.data(), y.data());
         ASSERT_EQ(y.shape(), shape_t({5, 6, 2, 3, 4}));
-        ASSERT_EQ(y.strides(), stride_t({ 0 * sizeof(TypeParam),
-                                          0 * sizeof(TypeParam),
-                                          4 * sizeof(TypeParam),
-                                          0 * sizeof(TypeParam),
-                                              sizeof(TypeParam)}));
+        ASSERT_EQ(y.strides(), stride_t({ 0 * sizeof(int),
+                                          0 * sizeof(int),
+                                          4 * sizeof(int),
+                                          0 * sizeof(int),
+                                              sizeof(int)}));
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {
                 for(size_t k = 0; k < y.shape()[2]; ++k) {
                     for(size_t l = 0; l < y.shape()[3]; ++l) {
                         for(size_t m = 0; m < y.shape()[4]; ++m) {
-                            TypeParam const& tested_elem = y[{i,j,k,l,m}];
-                            TypeParam const& correct_elem = x[{k, 0, m}];
+                            int const& tested_elem = y[{i, j, k, l, m}];
+                            int const& correct_elem = x[{k, 0, m}];
 
                             ASSERT_EQ(tested_elem, correct_elem);
                         }
@@ -1001,18 +782,16 @@ namespace nd {
             }
         }}
 
-       {ndarray<TypeParam> x = (arange<int>(0, 2 * 1 * 4, 1)
-                                .reshape(shape_t({2, 1, 4}))
-                                .template cast<TypeParam>());
-
-        ndarray<TypeParam> y = x.broadcast_to(shape_t({2, 1, 4}));
+       {auto x = (arange<int>(0, 2 * 1 * 4, 1)
+                  .reshape({2, 1, 4}));
+        auto y = x.broadcast_to({2, 1, 4});
         ASSERT_TRUE(x.equals(y));}
     }
 
-    TEST(TestNdArrayManipulation, TestTranspose) {
+    TEST(TestNdArray, TestTranspose) {
        { // Initially contiguous arrays
         auto x = (arange<int>(0, 2 * 3 * 4, 1)
-                  .reshape(shape_t({2, 3, 4})));
+                  .reshape({2, 3, 4}));
         auto gt012 = x.copy();
         auto gt120 = (r_<int>({ 0, 12,
                                 1, 13,
@@ -1028,7 +807,7 @@ namespace nd {
                                 9, 21,
                                10, 22,
                                11, 23})
-                      .reshape(shape_t({3, 4, 2})));
+                      .reshape({3, 4, 2}));
         auto gt201 = (r_<int>({ 0,  4,  8,
                                12, 16, 20,
 
@@ -1040,7 +819,7 @@ namespace nd {
 
                                 3,  7, 11,
                                15, 19, 23})
-                      .reshape(shape_t({4, 2, 3})));
+                      .reshape({4, 2, 3}));
         auto gt102 = (r_<int>({ 0,  1,  2,  3,
                                12, 13, 14, 15,
 
@@ -1049,7 +828,7 @@ namespace nd {
 
                                 8,  9, 10, 11,
                                20, 21, 22, 23})
-                      .reshape(shape_t({3, 2, 4})));
+                      .reshape({3, 2, 4}));
         auto gt021 = (r_<int>({ 0,  4,  8,
                                 1,  5,  9,
                                 2,  6, 10,
@@ -1059,7 +838,7 @@ namespace nd {
                                13, 17, 21,
                                14, 18, 22,
                                15, 19, 23})
-                      .reshape(shape_t({2, 4, 3})));
+                      .reshape({2, 4, 3}));
         auto gt210 = (r_<int>({ 0, 12,
                                 4, 16,
                                 8, 20,
@@ -1075,7 +854,7 @@ namespace nd {
                                 3, 15,
                                 7, 19,
                                11, 23})
-                      .reshape(shape_t({4, 3, 2})));
+                      .reshape({4, 3, 2}));
 
         ASSERT_NO_THROW(x.transpose());
         ASSERT_NO_THROW(x.transpose({0, 1, 2}));
@@ -1097,7 +876,7 @@ namespace nd {
 
        { // Initially non-contiguous arrays
         auto x = (arange<int>(0, 2 * 3 * 4, 1)
-                  .reshape(shape_t({2, 3, 4}))
+                  .reshape({2, 3, 4})
                   .operator()(std::vector({util::slice(), util::slice(), util::slice(3, -1, -2)})));
         ASSERT_EQ(x.shape(), shape_t({2, 3, 2}));
         ASSERT_FALSE(x.is_contiguous());
@@ -1110,13 +889,13 @@ namespace nd {
 
                                11, 23,
                                 9, 21})
-                      .reshape(shape_t({3, 2, 2})));
+                      .reshape({3, 2, 2}));
         auto gt201 = (r_<int>({ 3,  7, 11,
                                15, 19, 23,
 
                                 1,  5,  9,
                                13, 17, 21})
-                      .reshape(shape_t({2, 2, 3})));
+                      .reshape({2, 2, 3}));
         auto gt102 = (r_<int>({ 3,  1,
                                15, 13,
 
@@ -1125,13 +904,13 @@ namespace nd {
 
                                11,  9,
                                23, 21})
-                      .reshape(shape_t({3, 2, 2})));
+                      .reshape({3, 2, 2}));
         auto gt021 = (r_<int>({ 3,  7, 11,
                                 1,  5,  9,
 
                                15, 19, 23,
                                13, 17, 21})
-                      .reshape(shape_t({2, 2, 3})));
+                      .reshape({2, 2, 3}));
         auto gt210 = (r_<int>({ 3, 15,
                                 7, 19,
                                11, 23,
@@ -1139,7 +918,7 @@ namespace nd {
                                 1, 13,
                                 5, 17,
                                 9, 21})
-                      .reshape(shape_t({2, 3, 2})));
+                      .reshape({2, 3, 2}));
 
         ASSERT_NO_THROW(x.transpose());
         ASSERT_NO_THROW(x.transpose({0, 1, 2}));
@@ -1160,37 +939,25 @@ namespace nd {
         ASSERT_TRUE(all((x.transpose()          == gt210).ravel(), 0)[{0}]);}
     }
 
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayManipulation,
-                               //TestTranspose,
-                               TestCopy,
-                               TestAsContiguousArray,
-                               TestSqueeze,
-                               TestReshape,
-                               TestRavel,
-                               TestBroadcastTo);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayManipulation, MyIntFloatComplexTypes);
-
-    template <typename T>
-    class TestNdArrayCast : public ::testing::Test {};
-    TYPED_TEST_CASE_P(TestNdArrayCast);
-
-    TYPED_TEST_P(TestNdArrayCast, TestCast) {
-        using T = float;
-
-        ndarray<TypeParam> x = zeros<TypeParam>({5, 3, 4});
-        ndarray<T> y = x.template cast<T>();
-
-        auto it_x = x.begin();
-        for(auto it_y = y.begin(); it_y != y.end(); ++it_x, ++it_y) {
-            TypeParam const& correct_elem = static_cast<T>(*it_x);
-            T         const& tested_elem  = *it_y;
-            ASSERT_EQ(tested_elem, correct_elem);
-        }
+    TEST(TestNdArray, TestCast) {
+        auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4}));
+        auto y = x.template cast<float>();
+        auto gt = (arange<float>(0, 5 * 3 * 4, 1)
+                   .reshape({5, 3, 4}));
+        ASSERT_TRUE(allclose(y, gt));
     }
 
-    REGISTER_TYPED_TEST_CASE_P(TestNdArrayCast,
-                               TestCast);
-    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayCast, MyIntFloatTypes);
+
+
+    REGISTER_TYPED_TEST_CASE_P(TestNdArrayArithmetic,
+                               TestConstructorScalar,
+                               TestConstructorShape,
+                               TestConstructorCopyExplicit,
+                               TestConstructorCopy,
+                               TestConstructorPointerAndShape,
+                               TestConstructorPointerAndShapeAndStride);
+    INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayArithmetic, MyArithmeticTypes);
 }
 
 #endif // TEST_NDARRAY_CPP
