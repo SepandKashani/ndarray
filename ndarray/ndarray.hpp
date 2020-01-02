@@ -18,6 +18,5 @@
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
 #include "_ndlinalg.hpp"
-#include "_ndvector.hpp"
 
 #endif // NDARRAY_HPP
