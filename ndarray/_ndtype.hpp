@@ -19,18 +19,32 @@
 #include "_ndvector.hpp"
 
 namespace nd {
+    /*
+     * Convenience types.
+     */
+    using cfloat = std::complex<float>;
+    using cdouble = std::complex<double>;
+    using cldouble = std::complex<long double>;
     using byte_t = uint8_t;
+
+
+
     /*
      * byte alignment: must be one of {2**k, k > 0}.
      *
      * Must set nd::byte_alignment to sizeof(<largest type you want to use>).
      */
-    constexpr size_t byte_alignment = sizeof(std::complex<long double>);
+    constexpr size_t byte_alignment = sizeof(cldouble);
     // using shape_t  = nd::vector<size_t>;
     // using stride_t = nd::vector<int>;
     using shape_t = std::vector<size_t>;
     using stride_t = std::vector<int>;
 
+
+
+    /*
+     * Static type checks helpers.
+     */
     template <typename T>
     constexpr bool is_bool() {
         return std::is_same<T, bool>::value;
@@ -53,9 +67,9 @@ namespace nd {
 
     template <typename T>
     constexpr bool is_complex() {
-        return (std::is_same<T, std::complex<float>>::value ||
-                std::is_same<T, std::complex<double>>::value ||
-                std::is_same<T, std::complex<long double>>::value);
+        return (std::is_same<T, cfloat>::value ||
+                std::is_same<T, cdouble>::value ||
+                std::is_same<T, cldouble>::value);
     }
 
     template <typename T>
@@ -63,12 +77,7 @@ namespace nd {
         return is_bool<T>() || is_int<T>() || is_float<T>() || is_complex<T>();
     }
 
-    /*
-     * Convenience types.
-     */
-    using cfloat = std::complex<float>;
-    using cdouble = std::complex<double>;
-    using cldouble = std::complex<long double>;
+
 
     /*
      * Interoperability types.
