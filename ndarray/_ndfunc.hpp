@@ -378,10 +378,18 @@ namespace nd {
     }
 
     /*
-     * Element-wise closeness check for floating point types.
+     * Element-wise closeness check.
      *
      * Parameters
      * ----------
+     * x : ndarray<T> const&
+     * y : ndarray<T> const&
+     * rtol : double const
+     *     Relative tolerance for float comparisons.
+     *     This parameter is meaningless for {bool, int} types.
+     * atol : double const
+     *     Absolute tolerance for float comparisons.
+     *     This parameter is meaningless for {bool, int} types.
      * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -389,7 +397,8 @@ namespace nd {
      * Returns
      * -------
      * close_enough: ndarray<bool>
-     *     |x - y| <= (atol + rtol * |y|)
+     *     (bool, int) -> x == y
+     *     (float, complex) -> |x - y| <= (atol + rtol * |y|)
      */
     template <typename T, typename BOOL = bool>
     ndarray<BOOL> isclose(ndarray<T> const& x,
@@ -404,12 +413,17 @@ namespace nd {
          *
          * Don't know how to solve the issue using forward-declaration.
          */
-        static_assert(is_float<T>() || is_complex<T>() , "Only {float, complex} types allowed.");
+        static_assert(is_arithmetic<T>() , "Only {bool, int, float, complex} types allowed.");
 
         auto ufunc = [atol, rtol](T const& _x, T const& _y) -> bool {
-            auto lhs = std::abs(_x - _y);
-            auto rhs = atol + rtol * std::abs(_y);
-            return lhs <= rhs;
+            if constexpr (is_float<T>() || is_complex<T>()) {
+                auto lhs = std::abs(_x - _y);
+                auto rhs = atol + rtol * std::abs(_y);
+                return lhs <= rhs;
+            } else {
+                // {bool, int} case
+                return _x == _y;
+            }
         };
         if(out == nullptr) {
             shape_t const& shape_out = util::predict_shape_broadcast(x.shape(), y.shape());
@@ -430,12 +444,24 @@ namespace nd {
     }
 
     /*
-     * Element-wise closeness check for floating point types.
+     * Element-wise closeness check.
+     *
+     * Parameters
+     * ----------
+     * x : ndarray<T> const&
+     * y : ndarray<T> const&
+     * rtol : double const
+     *     Relative tolerance for float comparisons.
+     *     This parameter is meaningless for {bool, int} types.
+     * atol : double const
+     *     Absolute tolerance for float comparisons.
+     *     This parameter is meaningless for {bool, int} types.
      *
      * Returns
      * -------
      * all_close_enough: bool
-     *     all(|x - y| <= (atol + rtol * |y|))
+     *     (bool, int) -> all(x == y)
+     *     (float, complex) -> all(|x - y| <= (atol + rtol * |y|))
      */
     template <typename T, typename BOOL = bool>
     BOOL allclose(ndarray<T> const& x,
@@ -449,7 +475,7 @@ namespace nd {
          *
          * Don't know how to solve the issue using forward-declaration.
          */
-        static_assert(is_float<T>() || is_complex<T>() , "Only {float, complex} types allowed.");
+        static_assert(is_arithmetic<T>() , "Only {bool, int, float, complex} types allowed.");
 
         ndarray<BOOL> closeness = isclose(x, y, nullptr, rtol, atol).ravel();
         return all(closeness, 0, true).data()[0];

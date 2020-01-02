@@ -860,7 +860,7 @@ namespace nd {
         }}
     }
 
-    TYPED_TEST_P(TestNdFuncFloatComplex, TestIsClose) {
+    TYPED_TEST_P(TestNdFuncArithmetic, TestIsClose) {
         // No buffer provided
        {auto x = (arange<int>(0, 5 * 3 * 4, 1)
                   .reshape({5, 3, 4})
@@ -885,7 +885,7 @@ namespace nd {
         }}
     }
 
-    TYPED_TEST_P(TestNdFuncFloatComplex, TestAllClose) {
+    TYPED_TEST_P(TestNdFuncArithmetic, TestAllClose) {
         auto x = (arange<int>(0, 5 * 3 * 4, 1)
                   .reshape({5, 3, 4})
                   .template cast<TypeParam>());
@@ -1568,9 +1568,7 @@ namespace nd {
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncFloatComplex,
                                TestExp,
-                               TestMean,
-                               TestIsClose,
-                               TestAllClose);
+                               TestMean);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncFloatComplex, MyFloatComplexTypes);
 
     REGISTER_TYPED_TEST_CASE_P(TestNdFuncArithmetic,
@@ -1578,7 +1576,9 @@ namespace nd {
                                TestZeros,
                                TestOnes,
                                TestFull,
-                               TestEye);
+                               TestEye,
+                               TestIsClose,
+                               TestAllClose);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdFuncArithmetic, MyArithmeticTypes);
 }
 
