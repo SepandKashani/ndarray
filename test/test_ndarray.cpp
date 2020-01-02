@@ -32,18 +32,6 @@ namespace nd {
 
 
 
-    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorScalar) {
-        TypeParam scalar = TypeParam(1.0);
-        ndarray<TypeParam> x(scalar);
-
-        ASSERT_EQ(x.data()[0], scalar);
-        ASSERT_EQ(x.shape(), shape_t({1}));
-
-        using stride_tt = stride_t::value_type;
-        auto expected_strides = stride_t({static_cast<stride_tt>(sizeof(TypeParam))});
-        ASSERT_EQ(x.strides(), expected_strides);
-    }
-
     TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorShape) {
         shape_t const shape({1, 2, 3});
         ndarray<TypeParam> x(shape);
@@ -76,7 +64,7 @@ namespace nd {
 
     TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorCopy) {
         size_t const nelem = 50;
-        auto x = new ndarray<TypeParam>(shape_t({nelem}));
+        auto x = new ndarray<TypeParam>({nelem});
         ASSERT_EQ((x->base()).use_count(), 1);
         for(size_t i = 0; i < nelem; ++i) {
             x->data()[i] = static_cast<TypeParam>(i);
@@ -158,7 +146,7 @@ namespace nd {
     }
 
     TEST(TestNdArray, TestNDim) {
-       {ndarray<int> x(shape_t({5}));
+       {ndarray<int> x({5});
         ASSERT_EQ(x.ndim(), 1u);}
 
        {ndarray<int> x({2, 3, 4});
@@ -166,7 +154,7 @@ namespace nd {
     }
 
     TEST(TestNdArray, TestNBytes) {
-       {ndarray<int> x(shape_t({5}));
+       {ndarray<int> x({5});
         ASSERT_EQ(x.nbytes(), 5 * sizeof(int));}
 
        {ndarray<int> x({2, 3, 4});
@@ -174,7 +162,7 @@ namespace nd {
     }
 
     TEST(TestNdArray, TestEquals) {
-        ndarray<int> w(shape_t({5}));
+        ndarray<int> w({5});
         ndarray<int> x({2, 3, 4});
         ndarray<int> y({2, 3, 4});
         ndarray<int> z(y);
@@ -489,13 +477,13 @@ namespace nd {
     }
 
     TEST(TestNdArray, TestSqueeze) {
-       {ndarray<int> x(1);
+       {auto x = r_<int>({1});
         auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({1}));
         ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
         ASSERT_EQ(x.base().use_count(), 2);}
 
-       {ndarray<int> x(5);
+       {auto x = r_<int>({5});
         auto y = x.squeeze();
         ASSERT_EQ(y.shape(), shape_t({1}));
         ASSERT_EQ(y.strides(), stride_t({sizeof(int)}));
@@ -951,7 +939,6 @@ namespace nd {
 
 
     REGISTER_TYPED_TEST_CASE_P(TestNdArrayArithmetic,
-                               TestConstructorScalar,
                                TestConstructorShape,
                                TestConstructorCopyExplicit,
                                TestConstructorCopy,

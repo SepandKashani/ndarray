@@ -304,7 +304,7 @@ namespace nd::util {
     TEST(TestNdUtil, TestReduce1D) {
         auto const x = arange<int>(0, 10, 1);
 
-       {ndarray<int> y(shape_t({1}));
+       {ndarray<int> y({1});
         reduce(std::plus<int>(), const_cast<ndarray<int>*>(&x), &y, 0, 0);
         auto gt = r_<int>({45});
         ASSERT_TRUE(allclose(y, gt));}

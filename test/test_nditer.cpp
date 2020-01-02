@@ -16,7 +16,7 @@
 
 namespace nd {
     TEST(TestNdArrayIter, TestOperatorEqualEqual) {
-        ndarray<int> x(shape_t({5}));
+        ndarray<int> x({5});
         ndarray_iterator<int> x_iter1(&x);
         ndarray_iterator<int> x_iter2(&x);
         ndarray_iterator<int> x_iter3(x_iter1);
@@ -31,7 +31,7 @@ namespace nd {
     }
 
     TEST(TestNdArrayIter, TestOperatorEqual) {
-        ndarray<int> x(shape_t({5}));
+        ndarray<int> x({5});
         ndarray_iterator<int> x_iter(&x);
         ndarray<int> y({5, 3, 4});
         ndarray_iterator<int> y_iter(&y);
@@ -108,7 +108,7 @@ namespace nd {
         // check if ndarray_iterator<T> is compatible with STL libraries.
        {auto x = (arange<int>(0, 5 * 3 * 4, 1)
                   .reshape({5, 3, 4}));
-        auto y = ndarray<int>(shape_t{x.size()});
+        auto y = ndarray<int>({x.size()});
         std::copy(x.begin(), x.end(), y.begin());
 
         for(auto it_x = x.begin(), it_y = y.begin(); it_x != x.end(); ++it_x, ++it_y) {

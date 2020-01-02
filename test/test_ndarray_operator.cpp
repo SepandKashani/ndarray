@@ -193,7 +193,7 @@ namespace nd {
 
     TYPED_TEST_P(TestNdOperatorIntFloatComplex, TestDivideEqual) {
         // shape(LHS) == shape(RHS)
-       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 30, 40}, 2.0);
@@ -204,7 +204,7 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(3))
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * 3)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(3.0);
@@ -215,7 +215,7 @@ namespace nd {
         }}
 
         // RHS broadcasts
-       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(4))
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * 4)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
         ndarray<TypeParam> rhs = full<TypeParam>({20, 1, 40}, 4.0);
@@ -241,7 +241,7 @@ namespace nd {
         }}
 
         // shape(RHS) == 1
-       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(7))
+       {ndarray<TypeParam> lhs = ((arange<int>(0, 20 * 30 * 40, 1) * 7)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
         TypeParam const rhs = static_cast<TypeParam>(7.0);
@@ -515,7 +515,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -567,7 +567,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -619,7 +619,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -671,7 +671,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((ndarray<int>(2) * arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2 + 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -699,7 +699,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
                                   .reshape({20, 30, 1})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 1 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 1 * 40, 1) + 1)
                                   .reshape({20, 1, 40})
                                   .template cast<TypeParam>());
 
@@ -723,7 +723,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((ndarray<int>(2) * arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2 + 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -751,7 +751,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 1, 1)
                                   .reshape({20, 30, 1})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 1 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 1 * 40, 1) + 1)
                                   .reshape({20, 1, 40})
                                   .template cast<TypeParam>());
 
@@ -775,7 +775,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -827,7 +827,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -879,7 +879,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -931,7 +931,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -983,7 +983,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * ndarray<int>(2))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) * 2)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -1243,7 +1243,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -1295,7 +1295,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -1347,7 +1347,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 
@@ -1399,7 +1399,7 @@ namespace nd {
        {ndarray<TypeParam> lhs = (arange<int>(0, 20 * 30 * 40, 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
-        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + ndarray<int>(1))
+        ndarray<TypeParam> rhs = ((arange<int>(0, 20 * 30 * 40, 1) + 1)
                                   .reshape({20, 30, 40})
                                   .template cast<TypeParam>());
 

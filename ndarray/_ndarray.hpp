@@ -56,18 +56,6 @@ namespace nd {
             ndarray() = delete;
 
             /*
-             * Create (1,) array initialized with `scalar`.
-             */
-            ndarray(T const& scalar):
-                m_base(std::make_shared<ndcontainer>(sizeof(T))),
-                m_data(m_base->data()),
-                m_shape({1}),
-                m_strides({sizeof(T)}),
-                m_contiguous(true) {
-                    reinterpret_cast<T*>(m_data)[0] = scalar;
-                }
-
-            /*
              * Create array of dimensions `shape`.
              */
             ndarray(shape_t const& shape):
@@ -424,6 +412,11 @@ namespace nd {
 
                 return *this;
             }
+            ndarray<T>& filter(ndarray<bool> const& mask, T const& x) {
+                ndarray<T> _x({1});
+                _x.data()[0] = x;
+                return filter(mask, _x);
+            }
 
             /* Manipulation ================================================ */
             /*
@@ -678,6 +671,11 @@ namespace nd {
 
                 return *this;
             }
+            ndarray<T>& operator=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator=(_other);
+            }
 
             ndarray<T>& operator+=(ndarray<T> const& other) {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
@@ -686,6 +684,11 @@ namespace nd {
                 util::apply(std::plus<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
+            }
+            ndarray<T>& operator+=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator+=(_other);
             }
 
             ndarray<T>& operator-=(ndarray<T> const& other) {
@@ -696,6 +699,11 @@ namespace nd {
 
                 return *this;
             }
+            ndarray<T>& operator-=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator-=(_other);
+            }
 
             ndarray<T>& operator*=(ndarray<T> const& other) {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
@@ -704,6 +712,11 @@ namespace nd {
                 util::apply(std::multiplies<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
+            }
+            ndarray<T>& operator*=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator*=(_other);
             }
 
             ndarray<T>& operator/=(ndarray<T> const& other) {
@@ -714,6 +727,11 @@ namespace nd {
 
                 return *this;
             }
+            ndarray<T>& operator/=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator/=(_other);
+            }
 
             ndarray<T>& operator%=(ndarray<T> const& other) {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -721,6 +739,11 @@ namespace nd {
                 util::apply(std::modulus<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
+            }
+            ndarray<T>& operator%=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator%=(_other);
             }
 
             ndarray<T>& operator&=(ndarray<T> const& other) {
@@ -730,6 +753,11 @@ namespace nd {
 
                 return *this;
             }
+            ndarray<T>& operator&=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator&=(_other);
+            }
 
             ndarray<T>& operator|=(ndarray<T> const& other) {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -738,6 +766,11 @@ namespace nd {
 
                 return *this;
             }
+            ndarray<T>& operator|=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator|=(_other);
+            }
 
             ndarray<T>& operator^=(ndarray<T> const& other) {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -745,6 +778,11 @@ namespace nd {
                 util::apply(std::bit_xor<T>(), this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
+            }
+            ndarray<T>& operator^=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator^=(_other);
             }
 
             ndarray<T>& operator<<=(ndarray<T> const& other) {
@@ -755,6 +793,11 @@ namespace nd {
 
                 return *this;
             }
+            ndarray<T>& operator<<=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator<<=(_other);
+            }
 
             ndarray<T>& operator>>=(ndarray<T> const& other) {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -763,6 +806,11 @@ namespace nd {
                 util::apply(ufunc, this, const_cast<ndarray<T>*>(&other), this);
 
                 return *this;
+            }
+            ndarray<T>& operator>>=(T const& other) {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator>>=(_other);
             }
 
             ndarray<T>& operator++() {
@@ -824,6 +872,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<T> operator+(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator+(_other);
+            }
 
             ndarray<T> operator-(ndarray<T> const& other) const {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
@@ -837,6 +890,11 @@ namespace nd {
                             &out);
 
                 return out;
+            }
+            ndarray<T> operator-(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator-(_other);
             }
 
             ndarray<T> operator*(ndarray<T> const& other) const {
@@ -852,6 +910,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<T> operator*(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator*(_other);
+            }
 
             ndarray<T> operator/(ndarray<T> const& other) const {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
@@ -866,6 +929,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<T> operator/(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator/(_other);
+            }
 
             ndarray<T> operator%(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -878,6 +946,11 @@ namespace nd {
                             &out);
 
                 return out;
+            }
+            ndarray<T> operator%(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator%(_other);
             }
 
             ndarray<T> operator&(ndarray<T> const& other) const {
@@ -892,6 +965,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<T> operator&(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator&(_other);
+            }
 
             ndarray<T> operator|(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -905,6 +983,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<T> operator|(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator|(_other);
+            }
 
             ndarray<T> operator^(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -917,6 +1000,11 @@ namespace nd {
                             &out);
 
                 return out;
+            }
+            ndarray<T> operator^(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator^(_other);
             }
 
             ndarray<T> operator<<(ndarray<T> const& other) const {
@@ -933,6 +1021,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<T> operator<<(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator<<(_other);
+            }
 
             ndarray<T> operator>>(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
@@ -948,6 +1041,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<T> operator>>(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator>>(_other);
+            }
 
             ndarray<bool> operator&&(ndarray<bool> const& other) const {
                 static_assert(is_bool<T>(), "Only {bool} type allowed.");
@@ -960,6 +1058,11 @@ namespace nd {
                             &out);
 
                 return out;
+            }
+            ndarray<bool> operator&&(bool const& other) const {
+                ndarray<bool> _other({1});
+                _other.data()[0] = other;
+                return operator&&(_other);
             }
 
             ndarray<bool> operator||(ndarray<bool> const& other) const {
@@ -974,6 +1077,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<bool> operator||(bool const& other) const {
+                ndarray<bool> _other({1});
+                _other.data()[0] = other;
+                return operator||(_other);
+            }
 
             ndarray<bool> operator==(ndarray<T> const& other) const {
                 static_assert(is_bool<T>() || is_int<T>(), "Only {bool, int} types allowed.");
@@ -987,6 +1095,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<bool> operator==(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator==(_other);
+            }
 
             ndarray<bool> operator!=(ndarray<T> const& other) const {
                 static_assert(is_bool<T>() || is_int<T>(), "Only {bool, int} types allowed.");
@@ -999,6 +1112,11 @@ namespace nd {
                             &out);
 
                 return out;
+            }
+            ndarray<bool> operator!=(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator!=(_other);
             }
 
             ndarray<bool> operator<(ndarray<T> const& other) const {
@@ -1014,6 +1132,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<bool> operator<(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator<(_other);
+            }
 
             ndarray<bool> operator<=(ndarray<T> const& other) const {
                 static_assert(is_int<T>() || is_float<T>(),
@@ -1027,6 +1150,11 @@ namespace nd {
                             &out);
 
                 return out;
+            }
+            ndarray<bool> operator<=(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator<=(_other);
             }
 
             ndarray<bool> operator>(ndarray<T> const& other) const {
@@ -1042,6 +1170,11 @@ namespace nd {
 
                 return out;
             }
+            ndarray<bool> operator>(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator>(_other);
+            }
 
             ndarray<bool> operator>=(ndarray<T> const& other) const {
                 static_assert(is_int<T>() || is_float<T>(),
@@ -1055,6 +1188,11 @@ namespace nd {
                             &out);
 
                 return out;
+            }
+            ndarray<bool> operator>=(T const& other) const {
+                ndarray<T> _other({1});
+                _other.data()[0] = other;
+                return operator>=(_other);
             }
     };
 }

@@ -22,18 +22,18 @@ namespace nd::linalg {
         using ndT = ndarray<TypeParam>;
 
         // Valid shapes
-        ASSERT_NO_THROW(mm(ndT(shape_t({1,})),      ndT(shape_t({1,}))));
-        ASSERT_NO_THROW(mm(ndT(shape_t({3,})),      ndT(shape_t({3,}))));
-        ASSERT_NO_THROW(mm(ndT(shape_t({2, 3})),    ndT(shape_t({3,}))));
-        ASSERT_NO_THROW(mm(ndT(shape_t({4, 2, 3})), ndT(shape_t({3,}))));
-        ASSERT_NO_THROW(mm(ndT(shape_t({2, 3})),    ndT(shape_t({3, 3}))));
-        ASSERT_NO_THROW(mm(ndT(shape_t({1, 2, 3})), ndT(shape_t({3, 1, 3}))));
-        ASSERT_NO_THROW(mm(ndT(shape_t({3,})),      ndT(shape_t({3, 2}))));
+        ASSERT_NO_THROW(mm(ndT({1,}),      ndT({1,})));
+        ASSERT_NO_THROW(mm(ndT({3,}),      ndT({3,})));
+        ASSERT_NO_THROW(mm(ndT({2, 3}),    ndT({3,})));
+        ASSERT_NO_THROW(mm(ndT({4, 2, 3}), ndT({3,})));
+        ASSERT_NO_THROW(mm(ndT({2, 3}),    ndT({3, 3})));
+        ASSERT_NO_THROW(mm(ndT({1, 2, 3}), ndT({3, 1, 3})));
+        ASSERT_NO_THROW(mm(ndT({3,}),      ndT({3, 2})));
 
         // Wrong shapes
-        ASSERT_THROW(mm(ndT(shape_t({2,})),   ndT(shape_t({1,}))), std::runtime_error);
-        ASSERT_THROW(mm(ndT(shape_t({1,})),   ndT(shape_t({2,}))), std::runtime_error);
-        ASSERT_THROW(mm(ndT(shape_t({3, 3})), ndT(shape_t({2, 4}))), std::runtime_error);
+        ASSERT_THROW(mm(ndT({2,}),   ndT({1,})), std::runtime_error);
+        ASSERT_THROW(mm(ndT({1,}),   ndT({2,})), std::runtime_error);
+        ASSERT_THROW(mm(ndT({3, 3}), ndT({2, 4})), std::runtime_error);
 
         // Valid output
         {   // (1,) x (1,) -> (1,)
@@ -216,13 +216,13 @@ namespace nd::linalg {
         using ndT = ndarray<TypeParam>;
 
         // Wrong shapes
-        ASSERT_THROW(bmm(ndT(shape_t({2, 3})), ndT(shape_t({4, 5}))), std::runtime_error);
-        ASSERT_THROW(bmm(ndT(shape_t({1, 2, 3, 4})), ndT(shape_t({3,}))), std::runtime_error);
+        ASSERT_THROW(bmm(ndT({2, 3}),       ndT({4, 5})), std::runtime_error);
+        ASSERT_THROW(bmm(ndT({1, 2, 3, 4}), ndT({3,})), std::runtime_error);
 
         { // Non-contiguous buffers
-            auto C = ndarray<TypeParam>(shape_t({4, 10}))({util::slice(0, 4, 2),
-                                                           util::slice(0, 10, 2)});
-            ASSERT_THROW(bmm(ndT(shape_t({2, 3})), ndT(shape_t({3, 5})), &C), std::runtime_error);
+            auto C = ndarray<TypeParam>({4, 10})({util::slice(0, 4, 2),
+                                                  util::slice(0, 10, 2)});
+            ASSERT_THROW(bmm(ndT({2, 3}), ndT({3, 5}), &C), std::runtime_error);
         }
 
         // Valid Output

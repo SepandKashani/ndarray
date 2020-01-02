@@ -1122,7 +1122,7 @@ namespace nd {
        {auto x = zeros<bool>({2, 3});
         x[{1, 1}] = true;
 
-        ndarray<bool> y(shape_t({1, 3}));
+        ndarray<bool> y({1, 3});
         auto z = any(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_EQ(y.shape(), shape_t({1, 3}));
@@ -1145,7 +1145,7 @@ namespace nd {
        {auto x = zeros<bool>({2, 3});
         x[{1, 1}] = true;
 
-        ndarray<bool> y(shape_t({1, 3}));
+        ndarray<bool> y({1, 3});
         auto z = all(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
         ASSERT_EQ(y.shape(), shape_t({1, 3}));
@@ -1318,7 +1318,7 @@ namespace nd {
         ASSERT_TRUE(allclose(res, gt));}
 
         // Buffer provided
-       {ndarray<TypeParam> res(shape_t({2, 4}));
+       {ndarray<TypeParam> res({2, 4});
         auto z = arctan2(y, x, &res);
         ASSERT_TRUE(res.equals(z));
         ASSERT_TRUE(allclose(res, gt));}
@@ -1335,8 +1335,8 @@ namespace nd {
 
     TYPED_TEST_P(TestNdFuncFloat, TestDeg2Rad) {
         auto ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
-        auto deg = ratio * ndarray<TypeParam>(180.0);
-        auto rad_gt = ratio * ndarray<TypeParam>(M_PI);
+        auto deg = ratio * static_cast<TypeParam>(180.0);
+        auto rad_gt = ratio * static_cast<TypeParam>(M_PI);
 
         // No buffer provided
        {auto rad = deg2rad<TypeParam>(deg);
@@ -1351,8 +1351,8 @@ namespace nd {
 
     TYPED_TEST_P(TestNdFuncFloat, TestRad2Deg) {
         auto ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
-        auto rad = ratio * ndarray<TypeParam>(M_PI);
-        auto deg_gt = ratio * ndarray<TypeParam>(180.0);
+        auto rad = ratio * static_cast<TypeParam>(M_PI);
+        auto deg_gt = ratio * static_cast<TypeParam>(180.0);
 
         // No buffer provided
        {auto deg = rad2deg<TypeParam>(rad);
