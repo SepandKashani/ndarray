@@ -42,24 +42,14 @@ namespace nd::linalg {
             auto C_gt = r_<int>({15,}).template cast<TypeParam>();
             auto C = mm(A, B);
             ASSERT_EQ(C.shape(), shape_t({1,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (3,) x (3,) -> (1,)
             auto A = r_<int>({5, 3, 4}).template cast<TypeParam>();
             auto B = r_<int>({3, 1, 2}).template cast<TypeParam>();
             auto C_gt = r_<int>({26,}).template cast<TypeParam>();
             auto C = mm(A, B);
             ASSERT_EQ(C.shape(), shape_t({1,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (2, 3) x (3,) -> (2,)
             auto A = (r_<int>({1, 2, 3,
                                4, 5, 6})
@@ -69,12 +59,7 @@ namespace nd::linalg {
             auto C_gt = r_<int>({25, 67}).template cast<TypeParam>();
             auto C = mm(A, B);
             ASSERT_EQ(C.shape(), shape_t({2,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (4, 2, 3) x (3,) -> (4, 2)
             auto A = ((arange<int>(0, 4 * 2 * 3, 1) + 1)
                       .reshape({4, 2, 3})
@@ -88,12 +73,7 @@ namespace nd::linalg {
                          .template cast<TypeParam>());
             auto C = mm(A, B);
             ASSERT_EQ(C.shape(), shape_t({4, 2}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (2, 3) x (3, 3) -> (2, 3)
             auto A = ((arange<int>(0, 2 * 3, 1) + 1)
                       .reshape({2, 3})
@@ -107,12 +87,7 @@ namespace nd::linalg {
                          .template cast<TypeParam>());
             auto C = mm(A, B);
             ASSERT_EQ(C.shape(), shape_t({2, 3}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (1, 2, 3) x (3, 1, 3) -> (1, 2, 1, 3)
             auto A = ((arange<int>(0, 2 * 3, 1) + 1)
                       .reshape({1, 2, 3})
@@ -126,12 +101,7 @@ namespace nd::linalg {
                          .template cast<TypeParam>());
             auto C = mm(A, B);
             ASSERT_EQ(C.shape(), shape_t({1, 2, 1, 3}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (3,) x (3, 2) -> (2,)
             auto A = (r_<int>({5, 3, 4})
                       .template cast<TypeParam>());
@@ -144,12 +114,7 @@ namespace nd::linalg {
                          .template cast<TypeParam>());
             auto C = mm(A, B);
             ASSERT_EQ(C.shape(), shape_t({2,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
 
         // Valid output (buffer provided)
         {   // (1,) x (1,) -> (1,)
@@ -160,12 +125,7 @@ namespace nd::linalg {
             auto Z = mm(A, B, &C);
             ASSERT_TRUE(Z.equals(C));
             ASSERT_EQ(C.shape(), shape_t({1,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (3,) x (3,) -> (1,)
             auto A = r_<int>({5, 3, 4}).template cast<TypeParam>();
             auto B = r_<int>({3, 1, 2}).template cast<TypeParam>();
@@ -174,12 +134,7 @@ namespace nd::linalg {
             auto Z = mm(A, B, &C);
             ASSERT_TRUE(Z.equals(C));
             ASSERT_EQ(C.shape(), shape_t({1,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (2, 3) x (3,) -> (2,)
             auto A = (r_<int>({1, 2, 3,
                                4, 5, 6})
@@ -191,12 +146,7 @@ namespace nd::linalg {
             auto Z = mm(A, B, &C);
             ASSERT_TRUE(Z.equals(C));
             ASSERT_EQ(C.shape(), shape_t({2,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (4, 2, 3) x (3,) -> (4, 2)
             auto A = ((arange<int>(0, 4 * 2 * 3, 1) + 1)
                       .reshape({4, 2, 3})
@@ -212,12 +162,7 @@ namespace nd::linalg {
             auto Z = mm(A, B, &C);
             ASSERT_TRUE(Z.equals(C));
             ASSERT_EQ(C.shape(), shape_t({4, 2}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (2, 3) x (3, 3) -> (2, 3)
             auto A = ((arange<int>(0, 2 * 3, 1) + 1)
                       .reshape({2, 3})
@@ -233,12 +178,7 @@ namespace nd::linalg {
             auto Z = mm(A, B, &C);
             ASSERT_TRUE(Z.equals(C));
             ASSERT_EQ(C.shape(), shape_t({2, 3}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (1, 2, 3) x (3, 1, 3) -> (1, 2, 1, 3)
             auto A = ((arange<int>(0, 2 * 3, 1) + 1)
                       .reshape({1, 2, 3})
@@ -254,12 +194,7 @@ namespace nd::linalg {
             auto Z = mm(A, B, &C);
             ASSERT_TRUE(Z.equals(C));
             ASSERT_EQ(C.shape(), shape_t({1, 2, 1, 3}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (3,) x (3, 2) -> (2,)
             auto A = (r_<int>({5, 3, 4})
                       .template cast<TypeParam>());
@@ -274,12 +209,7 @@ namespace nd::linalg {
             auto Z = mm(A, B, &C);
             ASSERT_TRUE(Z.equals(C));
             ASSERT_EQ(C.shape(), shape_t({2,}));
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
     }
 
     TYPED_TEST_P(TestNdLinalgIntFloatComplex, TestBMM) {
@@ -312,12 +242,7 @@ namespace nd::linalg {
                          .template cast<TypeParam>());
             auto C = bmm(A, B);
             ASSERT_EQ(C.shape(), C_gt.shape());
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (3, 1, 4) x (1, 4, 1) -> (3, 1, 1)
             auto A = (r_<int>({2, 1, 1, 0,
                                4, 1, 0, 4,
@@ -332,12 +257,7 @@ namespace nd::linalg {
                          .template cast<TypeParam>());
             auto C = bmm(A, B);
             ASSERT_EQ(C.shape(), C_gt.shape());
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (1, 2, 3) x (3, 3, 2) -> (3, 2, 2)
             auto A = (r_<int>({2, 0, 5,
                                0, 4, 0})
@@ -368,12 +288,7 @@ namespace nd::linalg {
                          .template cast<TypeParam>());
             auto C = bmm(A, B);
             ASSERT_EQ(C.shape(), C_gt.shape());
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
 
         // Valid Output (buffer)
         {   // (2, 3) x (3, 4) -> (1, 2, 4)
@@ -395,12 +310,7 @@ namespace nd::linalg {
             ASSERT_TRUE(C.equals(Z));
 
             ASSERT_EQ(C.shape(), C_gt.shape());
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (3, 1, 4) x (1, 4, 1) -> (3, 1, 1)
             auto A = (r_<int>({2, 1, 1, 0,
                                4, 1, 0, 4,
@@ -418,12 +328,7 @@ namespace nd::linalg {
             ASSERT_TRUE(C.equals(Z));
 
             ASSERT_EQ(C.shape(), C_gt.shape());
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
         {   // (1, 2, 3) x (3, 3, 2) -> (3, 2, 2)
             auto A = (r_<int>({2, 0, 5,
                                0, 4, 0})
@@ -457,12 +362,7 @@ namespace nd::linalg {
             ASSERT_TRUE(C.equals(Z));
 
             ASSERT_EQ(C.shape(), C_gt.shape());
-            if constexpr (is_int<TypeParam>()) {
-                ASSERT_TRUE(all((C == C_gt).ravel(), 0)[{0}]);
-            } else {
-                ASSERT_TRUE(allclose(C, C_gt));
-            }
-        }
+            ASSERT_TRUE(allclose(C, C_gt));}
     }
 
     // Initialize tests ====================================================

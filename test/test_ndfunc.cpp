@@ -217,8 +217,8 @@ namespace nd {
         ASSERT_EQ(y.size(), 2u);
         ASSERT_EQ(y[0].shape(), shape_t({3, 1}));
         ASSERT_EQ(y[1].shape(), shape_t({1, 4}));
-        ASSERT_TRUE(all(y[0].ravel() == x1, 0)[{0}]);
-        ASSERT_TRUE(all(y[1].ravel() == x2, 0)[{0}]);
+        ASSERT_TRUE(allclose(y[0].ravel(), x1));
+        ASSERT_TRUE(allclose(y[1].ravel(), x2));
         ASSERT_TRUE(!y[0].equals(x1));
         ASSERT_TRUE(!y[1].equals(x2));}
     }
@@ -555,13 +555,13 @@ namespace nd {
 
         // No buffer provided, keepdims
        {auto y = min(x, 0);
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
        {ndarray<size_t> y({1, 3, 4});
         auto z = min(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
     }
 
     TYPED_TEST_P(TestNdFuncSignedInt, TestMinSignedInt) {
@@ -594,13 +594,13 @@ namespace nd {
 
         // No buffer provided, keepdims
        {auto y = min(x, 0);
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
        {ndarray<TypeParam> y({1, 3, 4});
         auto z = min(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestMinFloat) {
@@ -670,13 +670,13 @@ namespace nd {
 
         // No buffer provided, keepdims
        {auto y = max(x, 0);
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
        {ndarray<size_t> y({1, 3, 4});
         auto z = max(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
     }
 
     TYPED_TEST_P(TestNdFuncSignedInt, TestMaxSignedInt) {
@@ -709,13 +709,13 @@ namespace nd {
 
         // No buffer provided, keepdims
        {auto y = max(x, 0);
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
 
         // Buffer provided, dropdims
        {ndarray<TypeParam> y({1, 3, 4});
         auto z = max(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);};
+        ASSERT_TRUE(allclose(y, gt));};
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestMaxFloat) {
@@ -939,21 +939,13 @@ namespace nd {
 
         // No buffer provided, keepdims
        {auto y = prod(x, 0);
-        if constexpr (is_float<TypeParam>() || is_complex<TypeParam>()) {
-            ASSERT_TRUE(allclose(y, gt));
-        } else {
-            ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);
-        }}
+        ASSERT_TRUE(allclose(y, gt));}
 
         // Buffer provided, dropdims
        {ndarray<TypeParam> y({1, 3, 4});
         auto z = prod(x, 0, true, &y);
         ASSERT_TRUE(y.equals(z));
-        if constexpr (is_float<TypeParam>() || is_complex<TypeParam>()) {
-            ASSERT_TRUE(allclose(y, gt));
-        } else {
-            ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);
-        }}
+        ASSERT_TRUE(allclose(y, gt));}
     }
 
     TEST(TestNdFunc, TestStack) {
@@ -996,7 +988,7 @@ namespace nd {
                                 72, 76, 80, 84, 88, 92})
                        .reshape({4, 6}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 0);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+            ASSERT_TRUE( allclose(gt, y));}
            {auto gt = (r_<int>({ 0, 12, 36, 72,
                                  1, 14, 39, 76,
                                  2, 16, 42, 80,
@@ -1005,7 +997,7 @@ namespace nd {
                                  5, 22, 51, 92})
                                .reshape({6, 4}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 1);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}}
+            ASSERT_TRUE( allclose(gt, y));}}
 
            { // output array provided
             auto gt = (r_<int>({ 0,  1,  2,  3,  4,  5,
@@ -1016,7 +1008,7 @@ namespace nd {
             ndarray<int> y(gt.shape());
             auto z = stack(std::vector({x1, x2, x3, x4}), 0, &y);
             ASSERT_TRUE(y.equals(z));
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);
+            ASSERT_TRUE(allclose(gt, y));
            }
         }
 
@@ -1050,13 +1042,13 @@ namespace nd {
            { // correct output (single)
            {auto gt = x1.reshape({1, 2, 3});
             auto y = stack(std::vector({x1,}), 0);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+            ASSERT_TRUE( allclose(gt, y));}
            {auto gt = x1.reshape({2, 1, 3});
             auto y = stack(std::vector({x1,}), 1);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+            ASSERT_TRUE( allclose(gt, y));}
            {auto gt = x1.reshape({2, 3, 1});
             auto y = stack(std::vector({x1,}), 2);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}}
+            ASSERT_TRUE( allclose(gt, y));}}
 
            { // correct output (multi)
            {auto gt = (r_<int>({ 0,  1,  2,
@@ -1072,7 +1064,7 @@ namespace nd {
                                 84, 88, 92})
                        .reshape({4, 2, 3}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 0);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+            ASSERT_TRUE( allclose(gt, y));}
            {auto gt = (r_<int>({ 0,  1,  2,
                                 12, 14, 16,
                                 36, 39, 42,
@@ -1084,7 +1076,7 @@ namespace nd {
                                 84, 88, 92})
                        .reshape({2, 4, 3}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 1);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+            ASSERT_TRUE( allclose(gt, y));}
            {auto gt = (r_<int>({ 0, 12, 36, 72,
                                  1, 14, 39, 76,
                                  2, 16, 42, 80,
@@ -1094,7 +1086,7 @@ namespace nd {
                                  5, 22, 51, 92})
                        .reshape({2, 3, 4}));
             auto y = stack(std::vector({x1, x2, x3, x4}), 2);
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}}
+            ASSERT_TRUE( allclose(gt, y));}}
 
            { // output array provided
             auto gt = (r_<int>({ 0,  1,  2,
@@ -1112,7 +1104,7 @@ namespace nd {
             ndarray<int> y(gt.shape());
             auto z = stack(std::vector({x1, x2, x3, x4}), 0, &y);
             ASSERT_TRUE(y.equals(z));
-            ASSERT_TRUE(all((gt == y).ravel(), 0)[{0}]);}
+            ASSERT_TRUE( allclose(gt, y));}
         }
     }
 

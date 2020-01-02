@@ -264,7 +264,7 @@ namespace nd {
                               42, 43, 44, 45, 46, 47, 48,
                               63, 64, 65, 66, 67, 68, 69})
                      .reshape({2, 2, 7}));
-        ASSERT_TRUE(all((y == gt_y).ravel(), 0)[{0}]);
+        ASSERT_TRUE(allclose(y, gt_y));
 
         // Slice into a non-contiguous array ==================================
         std::vector<util::slice> s2({util::slice(1, 2),
@@ -284,7 +284,7 @@ namespace nd {
         auto gt_z = (r_<int>({44, 47,
                               65, 68})
                      .reshape({1, 2, 2}));
-        ASSERT_TRUE(all((z == gt_z).ravel(), 0)[{0}]);
+        ASSERT_TRUE(allclose(z, gt_z));
     }
 
     TEST(TestNdArray, TestOperatorParenthesis2) {
@@ -314,7 +314,7 @@ namespace nd {
                               67, 66, 65, 64,
                               53, 52, 51, 50})
                      .reshape({2, 3, 4}));
-        ASSERT_TRUE(all((y == gt_y).ravel(), 0)[{0}]);
+        ASSERT_TRUE(allclose(y, gt_y));
 
         // Slice into a non-contiguous array ==================================
         std::vector<util::slice> s2({util::slice(2, -1, -1),
@@ -333,7 +333,7 @@ namespace nd {
 
         auto gt_z = (r_<int>({65, 23})
                      .reshape({2, 1, 1}));
-        ASSERT_TRUE(all((z == gt_z).ravel(), 0)[{0}]);
+        ASSERT_TRUE(allclose(z, gt_z));
     }
 
     TEST(TestNdArray, TestWhere) {
@@ -344,7 +344,7 @@ namespace nd {
                   .reshape({2, 2}));
         auto y = x.where(mask);
         auto gt = r_<int>({0, 2});
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
 
         // shape(mask) broadcasts
        {ndarray<bool> mask = nd::r_<bool>({true, false});
@@ -352,7 +352,7 @@ namespace nd {
                   .reshape({2, 2}));
         auto y = x.where(mask);
         auto gt = r_<int>({0, 2});
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
     }
 
     TEST(TestNdArray, TestFilter) {
@@ -367,7 +367,7 @@ namespace nd {
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(ar, gt));}
 
         // shape(mask) == shape(array), vector x
        {ndarray<bool> mask = (r_<bool>({true, false, true, false})
@@ -380,7 +380,7 @@ namespace nd {
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(ar, gt));}
 
         // shape(mask) broadcasts, scalar x
        {ndarray<bool> mask = r_<bool>({true, false});
@@ -392,7 +392,7 @@ namespace nd {
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(ar, gt));}
 
         // shape(mask) broadcasts, vector x
        {ndarray<bool> mask = r_<bool>({true, false});
@@ -404,7 +404,7 @@ namespace nd {
 
         auto const& ar2 = ar.filter(mask, x);
         ASSERT_TRUE(ar2.equals(ar));
-        ASSERT_TRUE(all((ar == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(ar, gt));}
     }
 
     TEST(TestNdArray, TestBeginEnd) {
@@ -442,7 +442,7 @@ namespace nd {
         ASSERT_FALSE(x_cpy.equals(x));
         ASSERT_TRUE(x_cpy.is_contiguous());
         ASSERT_EQ(x_cpy.shape(), shape_t({20, 30, 40}));
-        ASSERT_TRUE(all((x == x_cpy).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(x, x_cpy));}
 
 
         // Strided array
@@ -471,7 +471,7 @@ namespace nd {
         ASSERT_FALSE(y_cpy.equals(y));
         ASSERT_TRUE(y_cpy.is_contiguous());
         ASSERT_EQ(y_cpy.shape(), shape_t({4, 3, 3}));
-        ASSERT_TRUE(all((gt == y_cpy).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(gt, y_cpy));}
     }
 
     TEST(TestNdArray, TestAsContiguousArray) {
@@ -485,7 +485,7 @@ namespace nd {
         auto y_cont = ascontiguousarray(y);
         ASSERT_FALSE(y.is_contiguous());
         ASSERT_TRUE(y_cont.is_contiguous());
-        ASSERT_TRUE(all((y == y_cont).ravel(), 0)[{0}]);
+        ASSERT_TRUE(allclose(y, y_cont));
     }
 
     TEST(TestNdArray, TestSqueeze) {
@@ -866,13 +866,13 @@ namespace nd {
         ASSERT_THROW(x.transpose({0, 1, 3}), std::runtime_error);
         ASSERT_THROW(x.transpose({1, 0, 0}), std::runtime_error);
 
-        ASSERT_TRUE(all((x.transpose({0, 1, 2}) == gt012).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({1, 2, 0}) == gt120).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({2, 0, 1}) == gt201).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({1, 0, 2}) == gt102).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({0, 2, 1}) == gt021).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({2, 1, 0}) == gt210).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose()          == gt210).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(x.transpose({0, 1, 2}), gt012));
+        ASSERT_TRUE(allclose(x.transpose({1, 2, 0}), gt120));
+        ASSERT_TRUE(allclose(x.transpose({2, 0, 1}), gt201));
+        ASSERT_TRUE(allclose(x.transpose({1, 0, 2}), gt102));
+        ASSERT_TRUE(allclose(x.transpose({0, 2, 1}), gt021));
+        ASSERT_TRUE(allclose(x.transpose({2, 1, 0}), gt210));
+        ASSERT_TRUE(allclose(x.transpose()         , gt210));}
 
        { // Initially non-contiguous arrays
         auto x = (arange<int>(0, 2 * 3 * 4, 1)
@@ -930,13 +930,13 @@ namespace nd {
         ASSERT_THROW(x.transpose({0, 1, 3}), std::runtime_error);
         ASSERT_THROW(x.transpose({1, 0, 0}), std::runtime_error);
 
-        ASSERT_TRUE(all((x.transpose({0, 1, 2}) == gt012).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({1, 2, 0}) == gt120).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({2, 0, 1}) == gt201).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({1, 0, 2}) == gt102).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({0, 2, 1}) == gt021).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose({2, 1, 0}) == gt210).ravel(), 0)[{0}]);
-        ASSERT_TRUE(all((x.transpose()          == gt210).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(x.transpose({0, 1, 2}), gt012));
+        ASSERT_TRUE(allclose(x.transpose({1, 2, 0}), gt120));
+        ASSERT_TRUE(allclose(x.transpose({2, 0, 1}), gt201));
+        ASSERT_TRUE(allclose(x.transpose({1, 0, 2}), gt102));
+        ASSERT_TRUE(allclose(x.transpose({0, 2, 1}), gt021));
+        ASSERT_TRUE(allclose(x.transpose({2, 1, 0}), gt210));
+        ASSERT_TRUE(allclose(x.transpose()         , gt210));}
     }
 
     TEST(TestNdArray, TestCast) {

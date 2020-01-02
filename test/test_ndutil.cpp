@@ -212,7 +212,7 @@ namespace nd::util {
         ndarray<int> gt = ones<int>({5, 3, 4});
         auto ufunc = [](int const& _x) -> int { return _x + 1; };
         apply(ufunc, &in, &out);
-        ASSERT_TRUE(all((out == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(out, gt));}
     }
 
     TEST(TestNdUtil, TestApplyBinary) {
@@ -221,14 +221,14 @@ namespace nd::util {
         ndarray<int> in_2  = ones<int>({5, 3, 4});
         ndarray<int> out = zeros<int>({5, 3, 4});
         apply(std::plus<int>(), &in_1, &in_2, &out);
-        ASSERT_TRUE(all((out == in_2).ravel(),0)[{0}]);}
+        ASSERT_TRUE(allclose(out, in_2));}
 
        // Broadcasting case
        {ndarray<int> in_1  = zeros<int>({5, 1, 4});
         ndarray<int> in_2  = ones<int>({3, 1});
         ndarray<int> out = zeros<int>({5, 3, 4});
         apply(std::plus<int>(), &in_1, &in_2, &out);
-        ASSERT_TRUE(all((out == (in_1 + in_2)).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(out, in_1 + in_2));}
     }
 
     TEST(TestNdUtil, TestReduce3D) {
@@ -242,7 +242,7 @@ namespace nd::util {
                             90,  93,  96,  99, 102,
                            105, 108, 111, 114, 117})
                    .reshape({1, 4, 5}));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
 
         // axis = 1
        {auto x = (arange<int>(0, 3 * 4 * 5, 1)
@@ -253,7 +253,7 @@ namespace nd::util {
                             110, 114, 118, 122, 126,
                             190, 194, 198, 202, 206})
                    .reshape({3, 1, 5}));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
 
         // axis = 2
        {auto x = (arange<int>(0, 3 * 4 * 5, 1)
@@ -264,7 +264,7 @@ namespace nd::util {
                             110, 135, 160, 185,
                             210, 235, 260, 285})
                    .reshape({3, 4, 1}));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
     }
 
     TEST(TestNdUtil, TestReduce) {
@@ -277,28 +277,28 @@ namespace nd::util {
         reduce(std::plus<int>(), const_cast<ndarray<int>*>(&x), &y, 0, 0);
         auto gt = (r_<int>({8, 10, 12, 14, 16, 18, 20, 22})
                    .reshape({1, 2, 2, 2}));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
 
         // axis = 1
        {ndarray<int> y({2, 1, 2, 2});
         reduce(std::plus<int>(), const_cast<ndarray<int>*>(&x), &y, 1, 0);
         auto gt = (r_<int>({4, 6, 8, 10, 20, 22, 24, 26})
                    .reshape({2, 1, 2, 2}));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
 
         // axis = 2
        {ndarray<int> y({2, 2, 1, 2});
         reduce(std::plus<int>(), const_cast<ndarray<int>*>(&x), &y, 2, 0);
         auto gt = (r_<int>({2, 4, 10, 12, 18, 20, 26, 28})
                    .reshape({2, 2, 1, 2}));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
 
         // axis = 3
        {ndarray<int> y({2, 2, 2, 1});
         reduce(std::plus<int>(), const_cast<ndarray<int>*>(&x), &y, 3, 0);
         auto gt = (r_<int>({1, 5, 9, 13, 17, 21, 25, 29})
                    .reshape({2, 2, 2, 1}));
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
     }
 
     TEST(TestNdUtil, TestReduce1D) {
@@ -307,7 +307,7 @@ namespace nd::util {
        {ndarray<int> y(shape_t({1}));
         reduce(std::plus<int>(), const_cast<ndarray<int>*>(&x), &y, 0, 0);
         auto gt = r_<int>({45});
-        ASSERT_TRUE(all((y == gt).ravel(), 0)[{0}]);}
+        ASSERT_TRUE(allclose(y, gt));}
     }
 }
 
@@ -442,11 +442,7 @@ namespace nd::util::interop {
         ASSERT_FALSE(z.equals(x));
         ASSERT_EQ(z.base().use_count(), 1);
         ASSERT_EQ(z.shape(), shape_t({1, N}));
-        if constexpr (is_float<TypeParam>() || is_complex<TypeParam>()) {
-            ASSERT_TRUE(allclose(z, x));
-        } else {
-            ASSERT_TRUE(all((z == x).ravel(), 0)[{0}]);
-        }}
+        ASSERT_TRUE(allclose(z, x));}
 
         // 2d: output ndarray is independent of input ndarray.
        {size_t const N(5), M(3);
@@ -459,11 +455,7 @@ namespace nd::util::interop {
         ASSERT_FALSE(z.equals(x));
         ASSERT_EQ(z.base().use_count(), 1);
         ASSERT_EQ(z.shape(), shape_t({N, M}));
-        if constexpr (is_float<TypeParam>() || is_complex<TypeParam>()) {
-            ASSERT_TRUE(allclose(z, x));
-        } else {
-            ASSERT_TRUE(all((z == x).ravel(), 0)[{0}]);
-        }}
+        ASSERT_TRUE(allclose(z, x));}
 
         // Transforms possible with expressions.
        {size_t const N(5), M(3);
@@ -479,11 +471,7 @@ namespace nd::util::interop {
         ASSERT_FALSE(z.equals(x));
         ASSERT_EQ(z.base().use_count(), 1);
         ASSERT_EQ(z.shape(), shape_t({N, M}));
-        if constexpr (is_float<TypeParam>() || is_complex<TypeParam>()) {
-            ASSERT_TRUE(allclose(z, gt));
-        } else {
-            ASSERT_TRUE(all((z == gt).ravel(), 0)[{0}]);
-        }}
+        ASSERT_TRUE(allclose(z, gt));}
     }
 
     REGISTER_TYPED_TEST_CASE_P(TestNdUtilInteropArithmetic,
