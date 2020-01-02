@@ -1416,18 +1416,9 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> real(ndarray<std::complex<T>> const& x) {
-        // TODO: implement using asfloat()
         static_assert(is_float<T>(), "Only {complex} types are supported.");
 
-        stride_t str_f(x.ndim() + 1, sizeof(T));
-        std::copy_n(x.strides().begin(), x.ndim(), str_f.begin());
-
-        shape_t sh_f(x.ndim() + 1, 2);
-        std::copy_n(x.shape().begin(), x.ndim(), sh_f.begin());
-
-        byte_t* const data_f = reinterpret_cast<byte_t*>(x.data());
-        ndarray<T> x_f(x.base(), data_f, sh_f, str_f);
-
+        auto x_f = asfloat(x);
         std::vector selection(x_f.ndim(), util::slice());
         selection[x_f.ndim() - 1] = util::slice(0, 1);
         auto out = x_f(selection).squeeze({x_f.ndim() - 1});
@@ -1448,18 +1439,9 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> imag(ndarray<std::complex<T>> const& x) {
-		// TODO: implement using asfloat()
         static_assert(is_float<T>(), "Only {complex} types are supported.");
 
-        stride_t str_f(x.ndim() + 1, sizeof(T));
-        std::copy_n(x.strides().begin(), x.ndim(), str_f.begin());
-
-        shape_t sh_f(x.ndim() + 1, 2);
-        std::copy_n(x.shape().begin(), x.ndim(), sh_f.begin());
-
-        byte_t* const data_f = reinterpret_cast<byte_t*>(x.data());
-        ndarray<T> x_f(x.base(), data_f, sh_f, str_f);
-
+        auto x_f = asfloat(x);
         std::vector selection(x_f.ndim(), util::slice());
         selection[x_f.ndim() - 1] = util::slice(1, 2);
         auto out = x_f(selection).squeeze({x_f.ndim() - 1});
