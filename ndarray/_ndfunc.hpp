@@ -11,9 +11,10 @@
 #include <cmath>
 #include <complex>
 #include <functional>
+#include <initializer_list>
 #include <set>
 #include <sstream>
-#include <vector> // todo
+#include <vector>
 
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
@@ -88,18 +89,18 @@ namespace nd {
      *
      * Parameters
      * ----------
-     * x : std::vector<T> const&
+     * ilist : std::initializer_list<T>
      *
      * Returns
      * -------
      * y : ndarray<T>
-     *     1-D array containing elements from `x`.
+     *     1-D array containing elements from `ilist`.
      */
     template <typename T>
-    ndarray<T> r_(std::vector<T> const& x) {
-        ndarray<T> y(shape_t({x.size()}));
+    ndarray<T> r_(std::initializer_list<T> ilist) {
+        ndarray<T> y({ilist.size()});
 
-        std::copy_n(x.cbegin(), x.size(), y.data());
+        std::copy_n(ilist.begin(), ilist.size(), y.data());
         return y;
     }
 

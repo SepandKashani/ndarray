@@ -77,25 +77,16 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncArithmetic, TestRUnderscore) {
-       {std::vector<TypeParam> const x;
-        auto y = r_(x);
-        ASSERT_EQ(y.shape(), shape_t({x.size()}));
-        for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& tested_elem = y[{i}];
-            TypeParam const& correct_elem = x[i];
-            ASSERT_EQ(tested_elem, correct_elem);
-        }}
+        ASSERT_THROW(r_<TypeParam>({}), std::runtime_error);
 
-       {std::vector<TypeParam> const x({static_cast<TypeParam>(1),
-                                        static_cast<TypeParam>(2),
-                                        static_cast<TypeParam>(3)});
-        auto y = r_(x);
-        ASSERT_EQ(y.shape(), shape_t({x.size()}));
-        for(size_t i = 0; i < x.size(); ++i) {
-            TypeParam const& tested_elem = y[{i}];
-            TypeParam const& correct_elem = x[i];
-            ASSERT_EQ(tested_elem, correct_elem);
-        }}
+       {auto y = r_<TypeParam>({static_cast<TypeParam>(1),
+                                static_cast<TypeParam>(2),
+                                static_cast<TypeParam>(3)});
+        ndarray<TypeParam> gt({3});
+        gt[{0}] = static_cast<TypeParam>(1);
+        gt[{1}] = static_cast<TypeParam>(2);
+        gt[{2}] = static_cast<TypeParam>(3);
+        ASSERT_TRUE(allclose(y, gt));}
     }
 
     TYPED_TEST_P(TestNdFuncArithmetic, TestZeros) {
@@ -760,7 +751,7 @@ namespace nd {
     TYPED_TEST_P(TestNdFuncFloat, TestCeil) {
         auto x = (arange<TypeParam>(-3.1, 3.9, 0.5)
                   .reshape({2, 7}));
-        auto gt = (r_(std::vector<TypeParam> {-3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4})
+        auto gt = (r_<TypeParam>({-3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4})
                    .reshape({2, 7}));
 
         // No buffer provided
@@ -785,7 +776,7 @@ namespace nd {
     TYPED_TEST_P(TestNdFuncFloat, TestFloor) {
         auto x = (arange<TypeParam>(-3.1, 3.9, 0.5)
                   .reshape({2, 7}));
-        auto gt = (r_(std::vector<TypeParam> {-4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3})
+        auto gt = (r_<TypeParam>({-4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3})
                    .reshape({2, 7}));
 
         // No buffer provided
@@ -813,7 +804,7 @@ namespace nd {
                   .template cast<TypeParam>());
         TypeParam const down = static_cast<TypeParam>(5);
         TypeParam const up = static_cast<TypeParam>(7);
-        auto gt = (r_(std::vector<TypeParam> {5, 5, 5, 6, 7, 7})
+        auto gt = (r_<TypeParam>({5, 5, 5, 6, 7, 7})
                    .reshape({2, 3}));
 
         // No buffer provided
@@ -838,7 +829,7 @@ namespace nd {
     TYPED_TEST_P(TestNdFuncSignedIntFloat, TestSign) {
         auto x = (arange<TypeParam>(-3, 3, 1)
                   .reshape({2, 3}));
-        auto gt = (r_(std::vector<TypeParam> {-1, -1, -1, 0, 1, 1})
+        auto gt = (r_<TypeParam>({-1, -1, -1, 0, 1, 1})
                    .reshape({2, 3}));
 
         // No buffer provided
@@ -1334,7 +1325,7 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestDeg2Rad) {
-        auto ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
+        auto ratio = r_<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75});
         auto deg = ratio * static_cast<TypeParam>(180.0);
         auto rad_gt = ratio * static_cast<TypeParam>(M_PI);
 
@@ -1350,7 +1341,7 @@ namespace nd {
     }
 
     TYPED_TEST_P(TestNdFuncFloat, TestRad2Deg) {
-        auto ratio = r_(std::vector<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75}));
+        auto ratio = r_<TypeParam>({0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75});
         auto rad = ratio * static_cast<TypeParam>(M_PI);
         auto deg_gt = ratio * static_cast<TypeParam>(180.0);
 

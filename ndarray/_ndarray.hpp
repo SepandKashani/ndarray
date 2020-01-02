@@ -361,7 +361,8 @@ namespace nd {
                     }
                 }
 
-                ndarray<T> const out = r_(buffer);
+                ndarray<T> out({buffer.size()});
+                std::copy_n(buffer.begin(), buffer.size(), out.begin());
                 return out;
             }
 
