@@ -98,8 +98,9 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> r_(std::initializer_list<T> ilist) {
-        ndarray<T> y({ilist.size()});
+        util::NDARRAY_ASSERT(ilist.size() > 0, "r_() requires at least one element.");
 
+        ndarray<T> y({ilist.size()});
         std::copy_n(ilist.begin(), ilist.size(), y.data());
         return y;
     }
@@ -133,11 +134,12 @@ namespace nd {
         static_assert(is_signed_int<T>() || is_float<T>(),
                       "Only {signed_int, float} types allowed." );
         util::NDARRAY_ASSERT(std::abs(step) > 0, "Parameter[step] cannot be 0.");
-        util::NDARRAY_ASSERT(((start <= stop) && (step > 0)) || ((start >= stop) && (step < 0)),
+        util::NDARRAY_ASSERT(((start <= stop) && (step > 0)) ||
+                             ((start >= stop) && (step < 0)),
                              "Impossible start/stop/step combination provided.");
 
         size_t N = std::ceil((stop - start) / step);
-        ndarray<T> y(shape_t({N}));
+        ndarray<T> y({N});
 
         y.data()[0] = start;
         for(size_t i = 1; i < N; ++i) {
@@ -174,7 +176,7 @@ namespace nd {
         static_assert(is_float<T>(), "Only {float} types allowed.");
         util::NDARRAY_ASSERT(N > 1, "Parameter[N] must be at least 2.");
 
-        ndarray<T> y(shape_t({N}));
+        ndarray<T> y({N});
         T step = (stop - start) / static_cast<T>(endpoint ? (N - 1) : N);
 
         y.data()[0] = start;
@@ -210,12 +212,12 @@ namespace nd {
 
         std::vector<ndarray<T>> mesh;
         for(size_t i = 0, N = x.size(); i < N; ++i) {
-            ndarray<T> const& _x = x[i];
+            auto const& _x = x[i];
 
-            shape_t shape(N, 1);
-            shape[i] = _x.size();
+            shape_t sh(N, 1);
+            sh[i] = _x.size();
 
-            mesh.push_back(_x.copy().reshape(shape));
+            mesh.push_back(_x.copy().reshape(sh));
         }
 
         return mesh;
@@ -268,7 +270,8 @@ namespace nd {
      * Returns
      * -------
      * I : ndarray<T>
-     *     (N, N) array where all elements are 0, except on the main diagonal where they are 1.
+     *     (N, N) array where all elements are 0, except on the main diagonal
+     *     where they are 1.
      */
     template <typename T>
     ndarray<T> eye(size_t const N) {
@@ -293,7 +296,8 @@ namespace nd {
      * axis : size_t const
      *     Dimension along which to reduce.
      * keepdims : bool const
-     *     If true, the axis which is reduced is left in the result as dimension of size 1.
+     *     If true, the axis which is reduced is left in the result as dimension
+     *      of size 1.
      * out : ndarray<bool>* const
      *     Optional buffer to store result.
      *     Must have the same dimensions as the output.
@@ -320,8 +324,8 @@ namespace nd {
         static_assert(is_bool<T>(), "Only {bool} types allowed.");
 
         if(out == nullptr) {
-            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
-            ndarray<T> y(shape_y);
+            auto const& sh_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(sh_y);
             util::reduce(std::logical_or<T>(), const_cast<ndarray<T>*>(&x), &y, axis, false);
             return (keepdims ? y : y.squeeze({axis}));
         } else {
@@ -368,8 +372,8 @@ namespace nd {
         static_assert(is_bool<T>(), "Only {bool} types allowed.");
 
         if(out == nullptr) {
-            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
-            ndarray<T> y(shape_y);
+            auto const& sh_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(sh_y);
             util::reduce(std::logical_and<T>(), const_cast<ndarray<T>*>(&x), &y, axis, true);
             return (keepdims ? y : y.squeeze({axis}));
         } else {
@@ -427,8 +431,8 @@ namespace nd {
             }
         };
         if(out == nullptr) {
-            shape_t const& shape_out = util::predict_shape_broadcast(x.shape(), y.shape());
-            ndarray<bool> close_enough(shape_out);
+            auto const& sh_out = util::predict_shape_broadcast(x.shape(), y.shape());
+            ndarray<bool> close_enough(sh_out);
 
             util::apply(ufunc,
                         const_cast<ndarray<T>*>(&x),
@@ -514,8 +518,8 @@ namespace nd {
                       "Only {int, float, complex} types allowed.");
 
         if(out == nullptr) {
-            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
-            ndarray<T> y(shape_y);
+            auto const& sh_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(sh_y);
             util::reduce(std::plus<T>(), const_cast<ndarray<T>*>(&x), &y, axis, static_cast<T>(0.0));
             return (keepdims ? y : y.squeeze({axis}));
         } else {
@@ -549,15 +553,15 @@ namespace nd {
      */
     template <typename T>
     ndarray<T> prod(ndarray<T> const& x,
-                   size_t const axis,
-                   bool const keepdims = false,
-                   ndarray<T>* const out = nullptr) {
+                    size_t const axis,
+                    bool const keepdims = false,
+                    ndarray<T>* const out = nullptr) {
         static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                       "Only {int, float, complex} types allowed.");
 
         if(out == nullptr) {
-            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
-            ndarray<T> y(shape_y);
+            auto const& sh_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(sh_y);
             util::reduce(std::multiplies<T>(), const_cast<ndarray<T>*>(&x), &y, axis, static_cast<T>(1.0));
             return (keepdims ? y : y.squeeze({axis}));
         } else {
@@ -587,7 +591,9 @@ namespace nd {
      *     Stacked array with one more dimension (at position=axis) than input arrays.
      */
     template <typename T>
-    ndarray<T> stack(std::vector<ndarray<T>> const& x, size_t const axis, ndarray<T>* const out = nullptr) {
+    ndarray<T> stack(std::vector<ndarray<T>> const& x,
+                     size_t const axis,
+                     ndarray<T>* const out = nullptr) {
         static_assert(is_arithmetic<T>(), "Only {bool, int, float, complex} types allowed.");
 
         {   // Validate shapes
@@ -601,9 +607,9 @@ namespace nd {
             error_msg << "}. \n";
 
             auto same_shape = [&x](ndarray<T> const& _x) -> bool {
-                shape_t const& shape_1 = x[0].shape();
-                shape_t const& shape_2 = _x.shape();
-                return shape_1 == shape_2;
+                auto const& sh_1 = x[0].shape();
+                auto const& sh_2 = _x.shape();
+                return sh_1 == sh_2;
             };
             util::NDARRAY_ASSERT(std::all_of(x.begin(), x.end(), same_shape), error_msg.str());
         }
@@ -613,17 +619,17 @@ namespace nd {
             util::NDARRAY_ASSERT(axis <= N_axis, "Parameter[axis] is out of bounds.");
         }
 
-        auto shape_y = x[0].shape();
-        shape_y.insert(shape_y.begin() + axis, x.size());
-        ndarray<T> y((out == nullptr) ? shape_y : *out);
+        auto sh_y = x[0].shape();
+        sh_y.insert(sh_y.begin() + axis, x.size());
+        ndarray<T> y((out == nullptr) ? sh_y : *out);
 
-        auto shape_x = shape_y;
-        shape_x[axis] = 1;
+        auto sh_x = sh_y;
+        sh_x[axis] = 1;
 
-        auto slicer = std::vector(shape_y.size(), util::slice());
+        auto selection = std::vector(sh_y.size(), util::slice());
         for(int i = 0, N = x.size(); i < N; ++i) {
-            slicer[axis] = util::slice(i, i + 1);
-            y(slicer) = x[i].reshape(shape_x);
+            selection[axis] = util::slice(i, i + 1);
+            y(selection) = x[i].reshape(sh_x);
         }
 
         return y;
@@ -815,7 +821,8 @@ namespace nd {
     }
 
     /*
-     * Element-wise trigonometric inverse tangent of x1 / x2, choosing the quadrant correctly.
+     * Element-wise trigonometric inverse tangent of x1 / x2, choosing the
+     * quadrant correctly.
      *
      * Parameters
      * ----------
@@ -831,7 +838,9 @@ namespace nd {
      *     arctan(x1 / x2) \in [-\pi, \pi]
      */
     template <typename T>
-    ndarray<T> arctan2(ndarray<T> const& x1, ndarray<T> const& x2, ndarray<T>* const out = nullptr) {
+    ndarray<T> arctan2(ndarray<T> const& x1,
+                       ndarray<T> const& x2,
+                       ndarray<T>* const out = nullptr) {
         static_assert(is_float<T>(), "Only {float} types allowed.");
 
         auto ufunc = [](T const& _x1, T const& _x2) -> T { return std::atan2(_x1, _x2); };
@@ -1053,7 +1062,7 @@ namespace nd {
         std::set<T> _unique(x.begin(), x.end());
         size_t const N = _unique.size();
 
-        ndarray<T> y(shape_t({N,}));
+        ndarray<T> y({N});
         std::copy(_unique.cbegin(), _unique.cend(), y.begin());
         return y;
     }
@@ -1132,7 +1141,7 @@ namespace nd {
         static_assert(is_float<T>() || is_complex<T>(),
                       "Only {float, complex} types allowed.");
 
-        ndarray<T> y = sum(x, axis, true, out);
+        auto y = sum(x, axis, true, out);
         T const N = static_cast<T>(x.shape()[axis]);
         y /= N;
 
@@ -1173,8 +1182,8 @@ namespace nd {
         T constexpr init = std::numeric_limits<T>::max();
 
         if(out == nullptr) {
-            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
-            ndarray<T> y(shape_y);
+            auto const& sh_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(sh_y);
             util::reduce(f_min, const_cast<ndarray<T>*>(&x), &y, axis, init);
             return (keepdims ? y : y.squeeze({axis}));
         } else {
@@ -1217,8 +1226,8 @@ namespace nd {
         T constexpr init = std::numeric_limits<T>::lowest();
 
         if(out == nullptr) {
-            shape_t const& shape_y = util::predict_shape_reduction(x.shape(), axis);
-            ndarray<T> y(shape_y);
+            auto const& sh_y = util::predict_shape_reduction(x.shape(), axis);
+            ndarray<T> y(sh_y);
             util::reduce(f_max, const_cast<ndarray<T>*>(&x), &y, axis, init);
             return (keepdims ? y : y.squeeze({axis}));
         } else {
@@ -1303,7 +1312,10 @@ namespace nd {
      *     Saturate `x` to lie in [down, up].
      */
     template <typename T>
-    ndarray<T> clip(ndarray<T> const& x, T const down, T const up, ndarray<T>* const out = nullptr) {
+    ndarray<T> clip(ndarray<T> const& x,
+                    T const down,
+                    T const up,
+                    ndarray<T>* const out = nullptr) {
         static_assert(is_int<T>() || is_float<T>(), "Only {int, float} types allowed.");
         util::NDARRAY_ASSERT(down <= up, "Parameter[down] must be \\le Parameter[up].");
 
@@ -1360,6 +1372,8 @@ namespace nd {
         }
     }
 
+    // TODO: introduce asfloats() to simplify real/imag()
+
     /*
      * Element-wise real-part extraction.
      *
@@ -1376,18 +1390,18 @@ namespace nd {
     ndarray<T> real(ndarray<std::complex<T>> const& x) {
         static_assert(is_float<T>(), "Only {complex} types are supported.");
 
-        stride_t float_strides(x.ndim() + 1, sizeof(T));
-        std::copy_n(x.strides().begin(), x.ndim(), float_strides.begin());
+        stride_t str_f(x.ndim() + 1, sizeof(T));
+        std::copy_n(x.strides().begin(), x.ndim(), str_f.begin());
 
-        shape_t float_shape(x.ndim() + 1, 2);
-        std::copy_n(x.shape().begin(), x.ndim(), float_shape.begin());
+        shape_t sh_f(x.ndim() + 1, 2);
+        std::copy_n(x.shape().begin(), x.ndim(), sh_f.begin());
 
-        byte_t* const float_data = reinterpret_cast<byte_t*>(x.data());
-        ndarray<T> float_x(x.base(), float_data, float_shape, float_strides);
+        byte_t* const data_f = reinterpret_cast<byte_t*>(x.data());
+        ndarray<T> x_f(x.base(), data_f, sh_f, str_f);
 
-        std::vector<util::slice> selection(float_x.ndim(), util::slice());
-        selection[float_x.ndim() - 1] = util::slice(0, 1);
-        ndarray<T> out = float_x(selection).squeeze({float_x.ndim() - 1});
+        std::vector selection(x_f.ndim(), util::slice());
+        selection[x_f.ndim() - 1] = util::slice(0, 1);
+        auto out = x_f(selection).squeeze({x_f.ndim() - 1});
         return out;
     }
 
@@ -1407,18 +1421,18 @@ namespace nd {
     ndarray<T> imag(ndarray<std::complex<T>> const& x) {
         static_assert(is_float<T>(), "Only {complex} types are supported.");
 
-        stride_t float_strides(x.ndim() + 1, sizeof(T));
-        std::copy_n(x.strides().begin(), x.ndim(), float_strides.begin());
+        stride_t str_f(x.ndim() + 1, sizeof(T));
+        std::copy_n(x.strides().begin(), x.ndim(), str_f.begin());
 
-        shape_t float_shape(x.ndim() + 1, 2);
-        std::copy_n(x.shape().begin(), x.ndim(), float_shape.begin());
+        shape_t sh_f(x.ndim() + 1, 2);
+        std::copy_n(x.shape().begin(), x.ndim(), sh_f.begin());
 
-        byte_t* const float_data = reinterpret_cast<byte_t*>(x.data());
-        ndarray<T> float_x(x.base(), float_data, float_shape, float_strides);
+        byte_t* const data_f = reinterpret_cast<byte_t*>(x.data());
+        ndarray<T> x_f(x.base(), data_f, sh_f, str_f);
 
-        std::vector<util::slice> selection(float_x.ndim(), util::slice());
-        selection[float_x.ndim() - 1] = util::slice(1, 2);
-        ndarray<T> out = float_x(selection).squeeze({float_x.ndim() - 1});
+        std::vector selection(x_f.ndim(), util::slice());
+        selection[x_f.ndim() - 1] = util::slice(1, 2);
+        auto out = x_f(selection).squeeze({x_f.ndim() - 1});
         return out;
     }
 

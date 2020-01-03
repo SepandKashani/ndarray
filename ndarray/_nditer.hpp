@@ -9,7 +9,6 @@
 
 #include <iterator>
 #include <numeric>
-#include <vector> // todo: remove after transition
 
 #include "_ndtype.hpp"
 
@@ -33,16 +32,17 @@ namespace nd {
             typedef T&                                reference;
 
         private:
-            ndarray<T>*         m_iterable = nullptr;
-            std::vector<size_t> m_index;  // todo: shape_t/stride_t transition
-            int                 m_offset = 0;
+            ndarray<T>* m_iterable = nullptr;
+            index_t     m_index;
+            int         m_offset = 0;
 
             /*
              * Move iterator forward.
              *
              * Example
              * -------
-             * Let `x` be an ndarray_iterator<T> on a (5, 3, 4) array, with `m_index = {2, 0, 1}`::
+             * Let `x` be an ndarray_iterator<T> on a (5, 3, 4) array,
+             * with `m_index = {2, 0, 1}`::
              *
              *     x.advance();   // m_index == {2, 0, 2}
              *     x.advance();   // m_index == {2, 0, 3}
@@ -87,7 +87,7 @@ namespace nd {
                 m_index(x->ndim(), 0),
                 m_offset(0) {}
 
-            ndarray_iterator(ndarray<T>* const x, std::vector<size_t> index):
+            ndarray_iterator(ndarray<T>* const x, index_t const& index):
                 m_iterable(x),
                 m_index(index) {
                     util::NDARRAY_ASSERT(index.size() == x->ndim(),

@@ -10,7 +10,6 @@
 #include <complex>
 #include <numeric>
 #include <stdexcept>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "test_type.hpp"
@@ -52,7 +51,10 @@ namespace nd {
         ndarray<TypeParam> x(shape);
         ASSERT_EQ(x.base().use_count(), 1);
 
-        ndarray<TypeParam> y(x.base(), reinterpret_cast<byte_t*>(x.data()), x.shape(), x.strides());
+        ndarray<TypeParam> y(x.base(),
+                             reinterpret_cast<byte_t*>(x.data()),
+                             x.shape(),
+                             x.strides());
 
         ASSERT_EQ(x.base(), y.base());
         ASSERT_EQ(x.data(), y.data());
@@ -234,8 +236,7 @@ namespace nd {
         ASSERT_EQ(x.base().use_count(), 1);
 
         // Slice into a contiguous array. =====================================
-        std::vector<util::slice> s1({util::slice(),
-                                     util::slice(0, 20, 3)});
+        std::vector<util::slice> s1({{}, {0, 20, 3}});
         auto y = x(s1);
 
         ASSERT_EQ(y.base(), x.base());
@@ -255,9 +256,7 @@ namespace nd {
         ASSERT_TRUE(allclose(y, gt_y));
 
         // Slice into a non-contiguous array ==================================
-        std::vector<util::slice> s2({util::slice(1, 2),
-                                     util::slice(),
-                                     util::slice(2, 6, 3)});
+        std::vector<util::slice> s2({{1, 2}, {}, {2, 6, 3}});
         auto z = y(s2);
 
         ASSERT_EQ(z.base(), x.base());
@@ -281,9 +280,7 @@ namespace nd {
         ASSERT_EQ(x.base().use_count(), 1);
 
         // Slice into a contiguous array. =====================================
-        std::vector<util::slice> s1({util::slice(),
-                                     util::slice(10, 0, -2), // try degenerate(0, -1, -2)
-                                     util::slice(4, 0, -1)});
+        std::vector<util::slice> s1({{}, {10, 0, -2}, {4, 0, -1}});
         auto y = x(s1);
 
         ASSERT_EQ(y.base(), x.base());
@@ -305,9 +302,7 @@ namespace nd {
         ASSERT_TRUE(allclose(y, gt_y));
 
         // Slice into a non-contiguous array ==================================
-        std::vector<util::slice> s2({util::slice(2, -1, -1),
-                                     util::slice(1, 2),
-                                     util::slice(2, 0, -2)});
+        std::vector<util::slice> s2({{2, -1, -1}, {1, 2}, {2, 0, -2}});
         auto z = y(s2);
 
         ASSERT_EQ(z.base(), x.base());
@@ -406,7 +401,7 @@ namespace nd {
             ASSERT_EQ(tested_elem, correct_elem);
         }
 
-        auto y = x({util::slice(5, -1, -2)});
+        auto y = x({{5, -1, -2}});
         auto it = y.begin();
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {
@@ -434,9 +429,7 @@ namespace nd {
 
 
         // Strided array
-       {auto y = x({util::slice(20, 0, -5),
-                    util::slice(0, 5, 2),
-                    util::slice(10, 2, -3)});
+       {auto y = x({{20, 0, -5}, {0, 5, 2}, {10, 2, -3}});
         auto y_cpy = y.copy();
         auto gt = (r_<int>({22810, 22807, 22804,
                             22890, 22887, 22884,
@@ -469,7 +462,7 @@ namespace nd {
         ASSERT_TRUE(x.equals(x_cont));
 
         // Strided array
-        auto y = x({util::slice(50, -1, -2)});
+        auto y = x({{50, -1, -2}});
         auto y_cont = ascontiguousarray(y);
         ASSERT_FALSE(y.is_contiguous());
         ASSERT_TRUE(y_cont.is_contiguous());
@@ -671,7 +664,7 @@ namespace nd {
         }}
 
         // Strided Array
-       {auto x = zeros<int>({10, 20, 30})({util::slice(10, -1, -2)});
+       {auto x = zeros<int>({10, 20, 30})({{10, -1, -2}});
         std::iota(x.begin(), x.end(), 0);
         auto y = x.reshape({5, 10, 60});
         ASSERT_NE(x.base(), y.base());
@@ -702,7 +695,7 @@ namespace nd {
         }}
 
         // Strided array
-       {auto x = zeros<int>({10, 20, 30})({util::slice(10, -1, -2)});
+       {auto x = zeros<int>({10, 20, 30})({{10, -1, -2}});
         std::iota(x.begin(), x.end(), 0);
 
         auto y = x.ravel();
@@ -865,7 +858,7 @@ namespace nd {
        { // Initially non-contiguous arrays
         auto x = (arange<int>(0, 2 * 3 * 4, 1)
                   .reshape({2, 3, 4})
-                  .operator()(std::vector({util::slice(), util::slice(), util::slice(3, -1, -2)})));
+                  .operator()({{}, {}, {3, -1, -2}}));
         ASSERT_EQ(x.shape(), shape_t({2, 3, 2}));
         ASSERT_FALSE(x.is_contiguous());
         auto gt012 = x.copy();

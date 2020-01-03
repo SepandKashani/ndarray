@@ -15,7 +15,7 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <vector>  // todo
+#include <vector>
 
 #include "_ndcontainer.hpp"
 #include "_ndfunc.hpp"
@@ -41,18 +41,17 @@ namespace nd {
             bool                         m_contiguous = true;
 
             bool verify_contiguous() const {
-                stride_t contiguous_strides(m_shape.size(), 1);
+                stride_t str_cont(m_shape.size(), 1);
                 std::partial_sum(m_shape.rbegin(), m_shape.rend() - 1,
-                                 contiguous_strides.rbegin() + 1, std::multiplies<int>());
-                for(auto& s : contiguous_strides) {
+                                 str_cont.rbegin() + 1, std::multiplies<int>());
+                for(auto& s : str_cont) {
                     s *= sizeof(T);
                 }
 
-                return m_strides == contiguous_strides;
+                return m_strides == str_cont;
             }
 
         public:
-            /* Constructor ================================================= */
             ndarray() = delete;
 
             /*
@@ -156,7 +155,6 @@ namespace nd {
 
             ~ndarray() {}
 
-            /* Property ==================================================== */
             std::shared_ptr<ndcontainer> const& base() const { return m_base; }
 
             /*
@@ -198,8 +196,7 @@ namespace nd {
              * Returns
              * -------
              * strides : nd::stride_t const&
-             *     Number of bytes to skip per dimension to reach
-             *     the next element.
+             *     Number of bytes to skip per dimension to reach the next element.
              */
             stride_t const& strides() const { return m_strides; }
 
@@ -238,13 +235,12 @@ namespace nd {
 
             bool is_contiguous() const { return m_contiguous; }
 
-            /* Index / Filter / Iterate ==================================== */
             /*
              * Select a specific entry in the array.
              *
              * Parameters
              * ----------
-             * idx : std::vector<size_t> const&
+             * idx : nd::index_t const&
              *     Index of element to extract.
              *
              * Returns
@@ -252,7 +248,7 @@ namespace nd {
              * elem : T&
              *     Extracted entry.
              */
-            T& operator[](std::vector<size_t> const& idx) const {
+            T& operator[](index_t const& idx) const {
                 util::NDARRAY_ASSERT(idx.size() == this->ndim(),
                                      "Incomplete index: cannot select unique element.");
 
@@ -275,8 +271,8 @@ namespace nd {
              * ----------
              * spec : std::vector<nd::util::slice> const&
              *     Slice specification per dimension.
-             *     If less entries than input-dimensions are given,
-             *     then the trailing specifiers are set to `slice()`.
+             *     If less entries than input-dimensions are given, then the
+             *     trailing specifiers are set to `slice()`.
              *
              * Returns
              * -------
@@ -291,16 +287,16 @@ namespace nd {
 
                 shape_t shape = m_shape;
                 for(size_t i = 0; i < spec.size(); ++i) {
-                    util::slice s = spec[i].map_limits(m_shape[i]);
+                    auto s = spec[i].map_limits(m_shape[i]);
                     int const length = (std::abs(static_cast<int>(s.stop()) -
                                                  static_cast<int>(s.start())) - 1);
                     shape[i] = ((s.start() != s.stop()) *
                                 (1 + std::abs(length / s.step())));
                 }
 
-                std::vector<int> idx(m_shape.size(), 0);
+                index_t idx(m_shape.size(), 0);
                 for(size_t i = 0; i < spec.size(); ++i) {
-                    util::slice s = spec[i].map_limits(m_shape[i]);
+                    auto s = spec[i].map_limits(m_shape[i]);
                     idx[i] = static_cast<int>(s.start());
                 }
                 int const offset = std::inner_product(idx.begin(), idx.end(),
@@ -347,10 +343,11 @@ namespace nd {
              */
             ndarray<T> where(ndarray<bool> const& mask) const {
                 /*
-                 * Suboptimal solution: use a vector to store the extracted elements,
-                 * then perform a second copy into an ndarray<T> object.
+                 * TODO: Suboptimal solution -- use a vector to store the
+                 * extracted elements, then perform a second copy into an
+                 * ndarray<T> object.
                  */
-                ndarray<bool> const mask_bcast = mask.broadcast_to(m_shape);
+                auto const mask_bcast = mask.broadcast_to(m_shape);
                 auto it_this = begin();
                 std::vector<T> buffer;
                 for(auto it_mask = mask_bcast.begin();
@@ -372,7 +369,8 @@ namespace nd {
              * Parameters
              * ----------
              * mask : ndarray<bool> const&
-             *     Boolean mask. Broadcasting rules apply.
+             *     Boolean mask containing `N` true-valued cells.
+             *     Broadcasting rules apply.
              * x : ndarray<T> const&
              *     Two possibilities:
              *     * (1,) value broadcasted to places where `mask` is :cpp:obj:`true`;
@@ -381,10 +379,11 @@ namespace nd {
             ndarray<T>& filter(ndarray<bool> const& mask, ndarray<T> const& x) {
                 util::NDARRAY_ASSERT(x.ndim() == 1, "Parameter[x] must be 1-D.");
 
-                ndarray<bool> const mask_bcast = mask.broadcast_to(m_shape);
+                auto const mask_bcast = mask.broadcast_to(m_shape);
                 auto it_mask = mask_bcast.begin();
                 auto it_this = begin();
 
+                // TODO: can be made more efficient with std::inserter?
                 bool const broadcast_mode = (x.size() == 1);
                 if(broadcast_mode) {
                     T const& xx = x.data()[0];
@@ -419,7 +418,6 @@ namespace nd {
                 return filter(mask, _x);
             }
 
-            /* Manipulation ================================================ */
             /*
              * Returns
              * -------
@@ -489,14 +487,14 @@ namespace nd {
                                         dropped_axes.begin(), dropped_axes.end(),
                                         std::inserter(kept_axes, kept_axes.begin()));
 
-                    shape_t shape_squeezed;
-                    stride_t strides_squeezed;
+                    shape_t sh_squeezed;
+                    stride_t str_squeezed;
                     for(size_t const& axis : kept_axes) {
-                        shape_squeezed.push_back(m_shape[axis]);
-                        strides_squeezed.push_back(m_strides[axis]);
+                        sh_squeezed.push_back(m_shape[axis]);
+                        str_squeezed.push_back(m_strides[axis]);
                     }
 
-                    ndarray<T> squeezed(m_base, m_data, shape_squeezed, strides_squeezed);
+                    ndarray<T> squeezed(m_base, m_data, sh_squeezed, str_squeezed);
                     return squeezed;
                 }
             }
@@ -526,7 +524,7 @@ namespace nd {
                     s *= sizeof(T);
                 }
 
-                ndarray<T> reshaped = ascontiguousarray(*this);
+                auto reshaped = ascontiguousarray(*this);
                 reshaped.m_shape = shape;
                 reshaped.m_strides = new_strides;
 
@@ -562,23 +560,23 @@ namespace nd {
                 error_msg << "Cannot broadcast array of shape " << m_shape
                           << " to " << shape << ".\n";
 
-                shape_t out_shape = util::predict_shape_broadcast(m_shape, shape);
-                util::NDARRAY_ASSERT(out_shape == shape, error_msg.str());
+                shape_t sh_out = util::predict_shape_broadcast(m_shape, shape);
+                util::NDARRAY_ASSERT(sh_out == shape, error_msg.str());
 
-                if(out_shape == m_shape) {
+                if(sh_out == m_shape) {
                     return *this;
                 } else {
-                    stride_t bcast_stride(shape.size(), 0);
+                    stride_t str_bcast(shape.size(), 0);
                     for(size_t i = 0; i < m_shape.size(); ++i) {
                         size_t const new_idx = (shape.size() - 1) - i;
                         size_t const old_idx = (m_shape.size() - 1) - i;
 
                         if(m_shape[old_idx] > 1) {
-                            bcast_stride[new_idx] = m_strides[old_idx];
+                            str_bcast[new_idx] = m_strides[old_idx];
                         }
                     }
 
-                    ndarray<T> bcast(m_base, m_data, shape, bcast_stride);
+                    ndarray<T> bcast(m_base, m_data, shape, str_bcast);
                     return bcast;
                 }
             }
@@ -595,8 +593,7 @@ namespace nd {
                 std::vector<size_t> axes(ndim());
                 std::iota(axes.rbegin(), axes.rend(), 0);
 
-                ndarray<T> tr = transpose(axes);
-                return tr;
+                return transpose(axes);
             }
 
             /*
@@ -615,17 +612,18 @@ namespace nd {
             ndarray<T> transpose(std::vector<size_t> const& axes) const {
                 std::set<size_t> const _axes(axes.begin(), axes.end());
                 size_t const max_axes = *_axes.crbegin();
-                util::NDARRAY_ASSERT((_axes.size() == ndim()) && (max_axes == (ndim() - 1)),
+                util::NDARRAY_ASSERT((_axes.size() == ndim()) &&
+                                     (max_axes == (ndim() - 1)),
                                      "Parameter[axes] don't match array.");
 
-                shape_t shape;
-                stride_t strides;
+                shape_t sh;
+                stride_t str;
                 for(size_t const& ax : axes) {
-                    shape.push_back(m_shape[ax]);
-                    strides.push_back(m_strides[ax]);
+                    sh.push_back(m_shape[ax]);
+                    str.push_back(m_strides[ax]);
                 }
 
-                ndarray<T> tr(m_base, m_data, shape, strides);
+                ndarray<T> tr(m_base, m_data, sh, str);
                 return tr;
             }
 
@@ -635,7 +633,8 @@ namespace nd {
              * Returns
              * -------
              * casted : ndarray<U>
-             *     Copy of :cpp:ptr:`this` with element-wise static_cast<U>() of the input.
+             *     Copy of :cpp:ptr:`this` with element-wise static_cast<U>()
+             *     of the input.
              *
              * Notes
              * -----
@@ -647,29 +646,19 @@ namespace nd {
             ndarray<U> cast() const {
                 ndarray<U> casted(m_shape);
 
-                auto it_this = begin();
-                for(auto it_cast = casted.begin();
-                    it_cast != casted.end();
-                    ++it_cast, ++it_this) {
-                    *it_cast = static_cast<U>(*it_this);
-                }
+                auto ufunc = [](T const& x) -> U { return static_cast<U>(x); };
+                std::transform(begin(), end(), casted.begin(), ufunc);
 
                 return casted;
             }
 
-            /* Operator ==================================================== */
             /*
              * Copy RHS array contents into LHS array.
              * Broadcasting rules apply.
              */
             ndarray<T>& operator=(ndarray<T> const& other) {
-                ndarray<T> const other_bcast = other.broadcast_to(m_shape);
-                for(auto it = begin(), it_other = other_bcast.begin();
-                    it != end();
-                    ++it, ++it_other) {
-                    *it = *it_other;
-                }
-
+                auto const other_bcast = other.broadcast_to(m_shape);
+                std::copy_n(other_bcast.begin(), size(), begin());
                 return *this;
             }
             ndarray<T>& operator=(T const& other) {
@@ -864,8 +853,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::plus<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -883,8 +872,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::minus<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -902,8 +891,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::multiplies<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -921,8 +910,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                               "Only {int, float, complex} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::divides<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -939,8 +928,8 @@ namespace nd {
             ndarray<T> operator%(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::modulus<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -957,8 +946,8 @@ namespace nd {
             ndarray<T> operator&(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::bit_and<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -975,8 +964,8 @@ namespace nd {
             ndarray<T> operator|(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::bit_or<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -993,8 +982,8 @@ namespace nd {
             ndarray<T> operator^(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
                 util::apply(std::bit_xor<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1011,8 +1000,8 @@ namespace nd {
             ndarray<T> operator<<(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
 
                 auto ufunc = [](T const& _x, T const& _y) -> T { return _x << _y; };
                 util::apply(ufunc,
@@ -1031,8 +1020,8 @@ namespace nd {
             ndarray<T> operator>>(ndarray<T> const& other) const {
                 static_assert(is_int<T>(), "Only {int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<T> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<T> out(sh_out);
 
                 auto ufunc = [](T const& _x, T const& _y) -> T { return _x >> _y; };
                 util::apply(ufunc,
@@ -1051,8 +1040,8 @@ namespace nd {
             ndarray<bool> operator&&(ndarray<bool> const& other) const {
                 static_assert(is_bool<T>(), "Only {bool} type allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::logical_and<bool>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1069,8 +1058,8 @@ namespace nd {
             ndarray<bool> operator||(ndarray<bool> const& other) const {
                 static_assert(is_bool<T>(), "Only {bool} type allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::logical_or<bool>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1087,8 +1076,8 @@ namespace nd {
             ndarray<bool> operator==(ndarray<T> const& other) const {
                 static_assert(is_bool<T>() || is_int<T>(), "Only {bool, int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::equal_to<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1105,8 +1094,8 @@ namespace nd {
             ndarray<bool> operator!=(ndarray<T> const& other) const {
                 static_assert(is_bool<T>() || is_int<T>(), "Only {bool, int} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::not_equal_to<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1124,8 +1113,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::less<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1143,8 +1132,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::less_equal<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1162,8 +1151,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::greater<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),
@@ -1181,8 +1170,8 @@ namespace nd {
                 static_assert(is_int<T>() || is_float<T>(),
                               "Only {int, float} types allowed.");
 
-                shape_t const& shape_out = util::predict_shape_broadcast(m_shape, other.m_shape);
-                ndarray<bool> out(shape_out);
+                auto const& sh_out = util::predict_shape_broadcast(m_shape, other.m_shape);
+                ndarray<bool> out(sh_out);
                 util::apply(std::greater_equal<T>(),
                             const_cast<ndarray<T>*>(this),
                             const_cast<ndarray<T>*>(&other),

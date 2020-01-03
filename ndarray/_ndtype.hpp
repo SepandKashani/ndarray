@@ -13,10 +13,9 @@
 
 #include <complex>
 #include <type_traits>
+#include <vector>
 
 #include "Eigen/Eigen"
-
-#include "_ndvector.hpp"
 
 namespace nd {
     /*
@@ -35,11 +34,9 @@ namespace nd {
      * Must set nd::byte_alignment to sizeof(<largest type you want to use>).
      */
     constexpr size_t byte_alignment = sizeof(cldouble);
-    // using shape_t  = nd::vector<size_t>;
-    // using stride_t = nd::vector<int>;
-    using shape_t = std::vector<size_t>;
+    using shape_t  = std::vector<size_t>;
+    using index_t = std::vector<size_t>;
     using stride_t = std::vector<int>;
-
 
 
     /*

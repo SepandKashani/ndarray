@@ -14,7 +14,7 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
-#include <vector> // todo
+#include <vector>
 
 #include "Eigen/Eigen"
 
@@ -101,7 +101,7 @@ namespace nd::util {
     inline shape_t predict_shape_reduction(shape_t const& shape, size_t const axis) {
         NDARRAY_ASSERT(axis < shape.size(), "Parameter[axis] is out of bounds.");
 
-        shape_t out = shape;
+        shape_t out(shape);
         out[axis] = 1;
 
         return out;
@@ -223,10 +223,7 @@ namespace nd::util {
         NDARRAY_ASSERT(in->shape() == out->shape(),
                        "Parameter[out] must have same dimensions as Parameter[in].");
 
-        auto it_out = out->begin();
-        for(auto it_in = in->begin(); it_in != in->end(); ++it_in, ++it_out) {
-            *it_out = ufunc(*it_in);
-        }
+        std::transform(in->begin(), in->end(), out->begin(), ufunc);
     }
 
     /*
@@ -260,15 +257,11 @@ namespace nd::util {
         NDARRAY_ASSERT(out->shape() == correct_out_shape,
                        "Parameter[in_1, in_2] do not broadcast to Parameter[out] dimensions.");
 
-        ndarray<T1> in_1_bcast = in_1->broadcast_to(correct_out_shape);
-        ndarray<T1> in_2_bcast = in_2->broadcast_to(correct_out_shape);
-        auto it_out = out->begin();
-        for(auto it_in_1 = in_1_bcast.begin(),
-                 it_in_2 = in_2_bcast.begin();
-            it_out != out->end();
-            ++it_in_1, ++it_in_2, ++it_out) {
-            *it_out = ufunc(*it_in_1, *it_in_2);
-        }
+        auto in_1_bcast = in_1->broadcast_to(correct_out_shape);
+        auto in_2_bcast = in_2->broadcast_to(correct_out_shape);
+        std::transform(in_1_bcast.begin(), in_1_bcast.end(),
+                       in_2_bcast.begin(), out->begin(),
+                       ufunc);
     }
 
     /*
@@ -318,9 +311,9 @@ namespace nd::util {
         NDARRAY_ASSERT(in->is_contiguous(), "Parameter[in] must be contiguous.");
         NDARRAY_ASSERT(out->is_contiguous(), "Parameter[out] must be contiguous.");
 
-        std::vector<size_t> idx_out(3);  /* How to index the output. */
-        std::vector<slice> selection(3); /* How to subsample the input. */
-        std::vector<size_t> fix_axes;    /* Axes that are not reduced. */
+        std::vector<size_t> idx_out(3); /* How to index the output. */
+        std::vector<slice> select(3);   /* How to subsample the input. */
+        std::vector<size_t> fix_axes;   /* Axes that are not reduced. */
         for(size_t i = 0; i < in->ndim(); ++i) {
             if(i != axis) {
                 fix_axes.push_back(i);
@@ -333,34 +326,34 @@ namespace nd::util {
             for(size_t j = 0; j < size_rhs; ++j) {
                 switch(axis) {
                     case 0:
-                        selection[0] = slice();
-                        selection[1] = slice(i, i + 1);
-                        selection[2] = slice(j, j + 1);
+                        select[0] = slice();
+                        select[1] = slice(i, i + 1);
+                        select[2] = slice(j, j + 1);
                         idx_out[0] = 0;
                         idx_out[1] = i;
                         idx_out[2] = j;
                         break;
 
                     case 1:
-                        selection[0] = slice(i, i + 1);
-                        selection[1] = slice();
-                        selection[2] = slice(j, j + 1);
+                        select[0] = slice(i, i + 1);
+                        select[1] = slice();
+                        select[2] = slice(j, j + 1);
                         idx_out[0] = i;
                         idx_out[1] = 0;
                         idx_out[2] = j;
                         break;
 
                     case 2:
-                        selection[0] = slice(i, i + 1);
-                        selection[1] = slice(j, j + 1);
-                        selection[2] = slice();
+                        select[0] = slice(i, i + 1);
+                        select[1] = slice(j, j + 1);
+                        select[2] = slice();
                         idx_out[0] = i;
                         idx_out[1] = j;
                         idx_out[2] = 0;
                         break;
                 }
 
-                ndarray<T> sub_in = in->operator()(selection);
+                auto sub_in = in->operator()(select);
                 out->operator[](idx_out) =
                     std::accumulate(sub_in.begin(), sub_in.end(), init, ufunc);
             }
@@ -411,46 +404,46 @@ namespace nd::util {
 
         // 3D-equivalent axis/shape parameterization
         size_t axis3D;
-        shape_t shape_in3D(3);
-        shape_t shape_out3D(3);
+        shape_t sh_in3D(3);
+        shape_t sh_out3D(3);
         if(axis == 0) {
             // in(a, b, c) -> in3D(a, 1, b*c)
             // out(1, b, c) -> out3D(1, 1, b*c)
             axis3D = 0;
-            shape_in3D[0] = in->shape()[0];
-            shape_in3D[1] = 1;
-            shape_in3D[2] = std::accumulate(in->shape().begin() + 1, in->shape().end(),
-                                            1, std::multiplies<size_t>());
-            shape_out3D[0] = 1;
-            shape_out3D[1] = 1;
-            shape_out3D[2] = shape_in3D[2];
+            sh_in3D[0] = in->shape()[0];
+            sh_in3D[1] = 1;
+            sh_in3D[2] = std::accumulate(in->shape().begin() + 1, in->shape().end(),
+                                         1, std::multiplies<size_t>());
+            sh_out3D[0] = 1;
+            sh_out3D[1] = 1;
+            sh_out3D[2] = sh_in3D[2];
         } else if(axis == in->ndim() - 1) {
             // in(a, b, c) -> in3D(a*b, 1, c)
             // out(a, b, 1) -> out3D(a*b, 1, 1)
             axis3D = 2;
-            shape_in3D[0] = std::accumulate(in->shape().begin(), in->shape().end() - 1,
-                                            1, std::multiplies<size_t>());
-            shape_in3D[1] = 1;
-            shape_in3D[2] = in->shape()[in->ndim() - 1];
-            shape_out3D[0] = shape_in3D[0];
-            shape_out3D[1] = 1;
-            shape_out3D[2] = 1;
+            sh_in3D[0] = std::accumulate(in->shape().begin(), in->shape().end() - 1,
+                                         1, std::multiplies<size_t>());
+            sh_in3D[1] = 1;
+            sh_in3D[2] = in->shape()[in->ndim() - 1];
+            sh_out3D[0] = sh_in3D[0];
+            sh_out3D[1] = 1;
+            sh_out3D[2] = 1;
         } else {
             // in(a, b, c, d, e) -> in3D(a*b, c, d*e)
             // out(a, b, 1, d, e) -> out3D(a*b, 1, d*e)
             axis3D = 1;
-            shape_in3D[0] = std::accumulate(in->shape().begin(), in->shape().begin() + axis,
-                                            1, std::multiplies<size_t>());;
-            shape_in3D[1] = in->shape()[axis];
-            shape_in3D[2] = std::accumulate(in->shape().end() - (in->ndim() - 1 - axis), in->shape().end(),
-                                            1, std::multiplies<size_t>());;
-            shape_out3D[0] = shape_in3D[0];
-            shape_out3D[1] = 1;
-            shape_out3D[2] = shape_in3D[2];
+            sh_in3D[0] = std::accumulate(in->shape().begin(), in->shape().begin() + axis,
+                                         1, std::multiplies<size_t>());;
+            sh_in3D[1] = in->shape()[axis];
+            sh_in3D[2] = std::accumulate(in->shape().end() - (in->ndim() - 1 - axis), in->shape().end(),
+                                         1, std::multiplies<size_t>());;
+            sh_out3D[0] = sh_in3D[0];
+            sh_out3D[1] = 1;
+            sh_out3D[2] = sh_in3D[2];
         }
 
-        ndarray<T> in3D  = in->reshape(shape_in3D);
-        ndarray<T> out3D = out->reshape(shape_out3D);
+        auto in3D  = in->reshape(sh_in3D);
+        auto out3D = out->reshape(sh_out3D);
         reduce3D(ufunc, &in3D, &out3D, axis3D, init);
         // At this point `out` contains the result.
     }
@@ -596,7 +589,7 @@ namespace {
     std::ostream& operator<<(std::ostream& os, std::vector<T> const& v) {
         os << "{";
         for(size_t i = 0, N = v.size(); i < N; ++i) {
-            os << v[i] << ((i < N - 1) ? ", " : "}");
+            os << v[i] << ((i != N-1) ? ", " : "}");
         }
         return os;
     }

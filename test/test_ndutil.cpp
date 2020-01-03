@@ -338,7 +338,7 @@ namespace nd::util::interop {
        {auto x = (arange<int>(0, 10 * 10, 1)
                   .reshape({10, 10})
                   .template cast<TypeParam>());
-        auto y = x({slice(1, 6, 2), slice(2, 10, 3)});
+        auto y = x({{1, 6, 2}, {2, 10, 3}});
         ASSERT_TRUE(is_eigen_mappable(&y));}
 
         // Strided, overlapping
@@ -353,7 +353,7 @@ namespace nd::util::interop {
        {auto x = (arange<int>(0, 10 * 10, 1)
                   .reshape({10, 10})
                   .template cast<TypeParam>());
-        auto y = x({slice(10, -1, -1), slice(2, 10, 3)});
+        auto y = x({{10, -1, -1}, {2, 10, 3}});
 
         ASSERT_TRUE(y.size() > 0);
         ASSERT_FALSE(is_eigen_mappable(&y));}
@@ -416,7 +416,7 @@ namespace nd::util::interop {
         auto x = (arange<int>(0, N * M, 1)
                   .reshape({N, M})
                   .template cast<TypeParam>()
-                  .operator()({slice(1, 6, 2), slice(2, 10, 3)}));
+                  .operator()({{1, 6, 2}, {2, 10, 3}}));
         auto y = aseigenarray<TypeParam, mapA_t<TypeParam>>(&x);
 
         ASSERT_EQ(size_t(y->rows()), size_t(x.shape()[0]));

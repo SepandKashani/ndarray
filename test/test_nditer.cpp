@@ -24,8 +24,8 @@ namespace nd {
         ASSERT_TRUE(x_iter1 == x_iter3);
 
         int* data_y = new int[5*3*4];
-        shape_t const shape_y({5, 3, 4});
-        ndarray<int> y(reinterpret_cast<byte_t*>(data_y), shape_y);
+        shape_t const sh_y({5, 3, 4});
+        ndarray<int> y(reinterpret_cast<byte_t*>(data_y), sh_y);
         ndarray_iterator<int> y_iter(&y);
         ASSERT_FALSE(x_iter1 == y_iter);
     }
@@ -70,9 +70,7 @@ namespace nd {
         ndarray_iterator<int> expected_x_iter(&x, x.shape());
         ASSERT_TRUE(x_iter == expected_x_iter);
 
-        ndarray<int> y = x({util::slice(),
-                            util::slice(0, 30, 2),
-                            util::slice(20, 13, -3)});
+        auto y = x({{}, {0, 30, 2}, {20, 13, -3}});
         ndarray_iterator<int> y_iter(&y);
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {

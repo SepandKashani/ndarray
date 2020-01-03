@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <vector>
 
 #include "_ndtype.hpp"
 #include "_ndutil.hpp"
@@ -39,6 +40,10 @@ namespace nd::linalg {
      * Let A \in \bR^{5, 3, 4} and B \in \bR^{4, 7, 2}.
      * Then C = mm(A, B) \in \bR^{5, 3, 7, 2} such that
      *     C[i,j,k,l] = \sum_{q = 0}^{3} A[i,j,q] B[q,k,l]
+     *
+     * Let A \in \bR^{5} and B \in \bR^{5}.
+     * Then C = mm(A, B) \in \bR^{1} such that
+     *     C[0] = \sum_{q = 0}^{4} A[q] B[q]
      */
     template <typename T>
     ndarray<T> mm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr) {
@@ -47,41 +52,57 @@ namespace nd::linalg {
 
         shape_t const& sh_A = A.shape();
         shape_t const& sh_B = B.shape();
-
-        { // Validate shapes
-            bool const correct_shape = sh_A[A.ndim() - 1] == sh_B[0];
-            std::stringstream error_msg;
-            error_msg << "Cannon multiply arrays of shape {"
-                      << sh_A << ", " << sh_B << "}. \n";
-            util::NDARRAY_ASSERT(correct_shape, error_msg.str());
-        }
-
-        size_t const sh_Ar0 = std::accumulate(sh_A.begin(), sh_A.end() - 1, size_t(1), std::multiplies<size_t>());
-        size_t const sh_Ar1 = sh_A[A.ndim() - 1];
-        auto Ar = A.reshape({sh_Ar0, sh_Ar1});
-        auto const eAr = util::interop::aseigenarray<T, mapM_t<T>>(&Ar);
-
-        size_t const sh_Br0 = sh_B[0];
-        size_t const sh_Br1 = std::accumulate(sh_B.begin() + 1, sh_B.end(), size_t(1), std::multiplies<size_t>());
-        auto Br = B.reshape({sh_Br0, sh_Br1});
-        auto const eBr = util::interop::aseigenarray<T, mapM_t<T>>(&Br);
-
         shape_t sh_C(std::max<size_t>(A.ndim() + B.ndim() - 2, 1), 1);
         std::copy_n(sh_A.begin(), A.ndim() - 1, sh_C.begin());
         std::copy_n(sh_B.rbegin(), B.ndim() - 1, sh_C.rbegin());
-        if(out != nullptr) {
-            std::stringstream error_msg;
-            error_msg << "Parameter[out]: Expected " << sh_C << " array, "
-                      << "got " << out->shape() << ".\n";
-            util::NDARRAY_ASSERT(sh_C == out->shape(), error_msg.str());
-            util::NDARRAY_ASSERT(out->is_contiguous(), "Parameter[out] must point to a contiguous array.");
-        }
-        ndarray<T> C = (out == nullptr) ? ndarray<T>(sh_C) : *out;
-        auto Cr = C.reshape({sh_Ar0, sh_Br1});
-        auto eCr = util::interop::aseigenarray<T, mapM_t<T>>(&Cr);
 
-        (*eCr) = (*eAr) * (*eBr);
-        // At this point the result is already in C.
+        { // Validate parameters
+           {bool const correct_shape = sh_A[A.ndim() - 1] == sh_B[0];
+            std::stringstream error_msg;
+            error_msg << "Cannon multiply arrays of shape {"
+                      << sh_A << ", " << sh_B << "}. \n";
+            util::NDARRAY_ASSERT(correct_shape, error_msg.str());}
+
+            if(out != nullptr) {
+                std::stringstream error_msg;
+                error_msg << "Parameter[out]: Expected " << sh_C << " array, "
+                          << "got " << out->shape() << ".\n";
+                util::NDARRAY_ASSERT(sh_C == out->shape(), error_msg.str());
+                util::NDARRAY_ASSERT(out->is_contiguous(),
+                                     "Parameter[out] must point to a contiguous array.");
+            }
+        }
+
+        /*
+         * TODO: [A,B].reshape() forces a copy if arrays are non-contiguous,
+         * but this is not mandatory to do matmul() through Eigen.
+         *
+         * Possible solution to get (A2, B2)::
+         *
+         *     if is_eigen_mappable([A,B]) && 2d:
+         *         A2 = A
+         *         B2 = B
+         *     elif is_eigen_mappable([A,B]) && 1d:
+         *         A2 = A(A.data(), {1, sh_A2_c}, {sizeof(T), A.strides()[0]})
+         *         B2 = B(B.data(), {sh_B2_r, 1}, {B.strides()[0], sizeof(T)})
+         *     else:
+         *         A2 = A.reshape({sh_A2_r, sh_A2_c})
+         *         B2 = B.reshape({sh_B2_r, sh_B2_c})
+         */
+        size_t const sh_A2_r = std::accumulate(sh_A.begin(), sh_A.end() - 1, size_t(1), std::multiplies<size_t>());
+        size_t const sh_A2_c = sh_A[A.ndim() - 1];
+        size_t const sh_B2_r = sh_B[0];
+        size_t const sh_B2_c = std::accumulate(sh_B.begin() + 1, sh_B.end(), size_t(1), std::multiplies<size_t>());
+
+        auto A2 = A.reshape({sh_A2_r, sh_A2_c});
+        auto B2 = B.reshape({sh_B2_r, sh_B2_c});
+        auto C = (out == nullptr) ? ndarray<T>(sh_C) : *out;
+        auto C2 = C.reshape({sh_A2_r, sh_B2_c});
+
+        auto const eA2 = util::interop::aseigenarray<T, mapM_t<T>>(&A2);
+        auto const eB2 = util::interop::aseigenarray<T, mapM_t<T>>(&B2);
+        auto       eC2 = util::interop::aseigenarray<T, mapM_t<T>>(&C2);
+        (*eC2) = (*eA2) * (*eB2);  // C now contains the correct result.
         return C;
     }
 
@@ -102,6 +123,7 @@ namespace nd::linalg {
      * -------
      * C : ndarray<T>
      *     (M, N, Q) layer-wise matrix product of `A` and `B`.
+     *     Broadcasting rules apply along upper dimensions.
      *
      * Examples
      * --------
@@ -162,17 +184,17 @@ namespace nd::linalg {
         }
         ndarray<T> C = (out == nullptr) ? ndarray<T>(sh_C) : *out;
 
-        std::vector<util::slice> subset(3, util::slice());
+        auto select = std::vector(3, util::slice());
         for(size_t i = 0; i < M; ++i) {
-            subset[0] = util::slice(i, i + 1);
+            select[0] = util::slice(i, i + 1);
 
             /*
              * TODO: .reshape() will cause a copy if (A, B) are not contiguous.
              * Call ndarray<T>(byte_t* const, shape_t const&, stride_t const&) instead.
              */
-            auto const& _A = bcast_AA(subset).reshape({N, P});
-            auto const& _B = bcast_BB(subset).reshape({P, Q});
-            auto _C = C(subset).reshape({N, Q});
+            auto const& _A = bcast_AA(select).reshape({N, P});
+            auto const& _B = bcast_BB(select).reshape({P, Q});
+            auto _C = C(select).reshape({N, Q});
 
             mm(_A, _B, &_C);
         }

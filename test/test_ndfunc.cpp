@@ -1400,7 +1400,7 @@ namespace nd {
             _x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                   -static_cast<TypeParam>(i + 1.0));
         }
-        auto x = _x({util::slice(), util::slice(), util::slice(0, 8, 2)});
+        auto x = _x({{}, {}, {0, 8, 2}});
 
         auto y = real(x);
         ASSERT_EQ(y.shape(), x.shape());
@@ -1433,7 +1433,7 @@ namespace nd {
             _x.data()[i] = std::complex<TypeParam>(static_cast<TypeParam>(i),
                                                   -static_cast<TypeParam>(i + 1.0));
         }
-        auto x = _x({util::slice(), util::slice(), util::slice(0, 8, 2)});
+        auto x = _x({{}, {}, {0, 8, 2}});
 
         auto y = imag(x);
         ASSERT_EQ(y.shape(), x.shape());
