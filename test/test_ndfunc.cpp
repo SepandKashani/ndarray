@@ -1378,6 +1378,47 @@ namespace nd {
         ASSERT_TRUE(allclose(y, gt, 1e-5, 1e-7));}
     }
 
+    TYPED_TEST_P(TestNdFuncFloat, TestAsFloat) {
+        using cT = std::complex<TypeParam>;
+
+        // Contiguous array
+       {auto x = (arange<int>(0, 5 * 3 * 4, 1)
+                  .reshape({5, 3, 4}));
+        auto y = ((arange<int>(0, 5 * 3 * 4, 1) + 1)
+                  .reshape({5, 3, 4}));
+        auto z = (x.template cast<cT>()) + (y.template cast<cT>()) * j<cT>();
+        auto gt_f = (stack<int>({x, y}, 3)
+                     .template cast<TypeParam>());
+
+        auto z_f = asfloat(z);
+
+        ASSERT_EQ(z_f.shape(), shape_t({5, 3, 4, 2}));
+        ASSERT_EQ(z_f.base(), z.base());
+        ASSERT_EQ(z_f.base().use_count(), 2);
+        ASSERT_TRUE(z_f.is_contiguous());
+        ASSERT_TRUE(allclose(z_f, gt_f));}
+
+        // Strided array
+       {auto x = (arange<int>(0, (2 * 5) * (3 * 3) * (4 * 4), 1)
+                  .reshape({2 * 5, 3 * 3, 4 * 4}));
+        auto y = ((arange<int>(0, (2 * 5) * (3 * 3) * (4 * 4), 1) + 1)
+                  .reshape({2 * 5, 3 * 3, 4 * 4}));
+        auto z = (((x.template cast<cT>()) + (y.template cast<cT>()) * j<cT>())
+                  .operator()({{0, 10, 2}, {8, -1, -3}, {0, 16, 4}}));
+        auto gt_f = (stack<int>({x, y}, 3)
+                     .operator()({{0, 10, 2}, {8, -1, -3}, {0, 16, 4}, {}})
+                     .template cast<TypeParam>());
+
+        auto z_f = asfloat(z);
+
+        ASSERT_FALSE(z.is_contiguous());
+        ASSERT_FALSE(z_f.is_contiguous());
+        ASSERT_EQ(z_f.shape(), shape_t({5, 3, 4, 2}));
+        ASSERT_EQ(z_f.base(), z.base());
+        ASSERT_EQ(z_f.base().use_count(), 2);
+        ASSERT_TRUE(allclose(z_f, gt_f));}
+    }
+
     TYPED_TEST_P(TestNdFuncFloat, TestReal) {
         // Contiguous array
        {ndarray<std::complex<TypeParam>> x({5, 3, 4});
@@ -1521,6 +1562,7 @@ namespace nd {
                                TestRad2Deg,
                                TestSinc,
                                TestStd,
+                               TestAsFloat,
                                TestReal,
                                TestImag,
                                TestConj);
