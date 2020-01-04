@@ -204,6 +204,14 @@ namespace nd {
             }
         }
 
+        // Out of bounds access
+        ASSERT_NO_THROW((x[{0, 0, 0, 0}]));
+        ASSERT_NO_THROW((x[{2, 0, 3, 4}]));
+        ASSERT_THROW((x[{3, 0, 3, 4}]), std::runtime_error);
+        ASSERT_THROW((x[{2, 1, 3, 4}]), std::runtime_error);
+        ASSERT_THROW((x[{2, 0, 4, 4}]), std::runtime_error);
+        ASSERT_THROW((x[{2, 0, 3, 5}]), std::runtime_error);
+
         /* Can update entries. */
         int& tested_elem = x[{2, 0, 3, 4}];
         int const correct_elem = 500;

@@ -11,12 +11,17 @@
 #ifndef NDARRAY_HPP
 #define NDARRAY_HPP
 
-#include "_ndarray.hpp"
-#include "_ndcontainer.hpp"
-#include "_ndfunc.hpp"
-#include "_nditer.hpp"
+/*
+ * Read this for docstrings and to discover available functionality.
+ */
+#include "_ndforward.hpp"
+
 #include "_ndtype.hpp"
+#include "_ndcontainer.hpp"
 #include "_ndutil.hpp"
+#include "_nditer.hpp"
+#include "_ndarray.hpp"
+#include "_ndfunc.hpp"
 #include "_ndlinalg.hpp"
 
 #endif // NDARRAY_HPP

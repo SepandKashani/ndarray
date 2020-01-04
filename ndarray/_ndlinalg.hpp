@@ -11,42 +11,13 @@
 #include <sstream>
 #include <vector>
 
-#include "_ndtype.hpp"
-#include "_ndutil.hpp"
-
-namespace nd { template <typename T> class ndarray; }
+#include "_ndforward.hpp"
 
 namespace nd::linalg {
-    /*
-     * Matrix-Multiplication extended to ND-arrays.
-     *
-     * Parameters
-     * ----------
-     * A : ndarray<T> const&
-     *     (a[0], ..., a[N-2], d) array.
-     * B : ndarray<T> const&
-     *     (d, b[1], ..., b[M-1]) array.
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the output, and be contiguous.
-     *
-     * Returns
-     * -------
-     * C : ndarray<T>
-     *     (a[0], ..., a[N-2], b[1], ..., b[M-1]) array.
-     *
-     * Examples
-     * --------
-     * Let A \in \bR^{5, 3, 4} and B \in \bR^{4, 7, 2}.
-     * Then C = mm(A, B) \in \bR^{5, 3, 7, 2} such that
-     *     C[i,j,k,l] = \sum_{q = 0}^{3} A[i,j,q] B[q,k,l]
-     *
-     * Let A \in \bR^{5} and B \in \bR^{5}.
-     * Then C = mm(A, B) \in \bR^{1} such that
-     *     C[0] = \sum_{q = 0}^{4} A[q] B[q]
-     */
     template <typename T>
-    ndarray<T> mm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr) {
+    ndarray<T> mm(ndarray<T> const& A,
+                  ndarray<T> const& B,
+                  ndarray<T>* const out) {
         static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                       "Only {int, float, complex} types allowed.");
 
@@ -106,41 +77,10 @@ namespace nd::linalg {
         return C;
     }
 
-    /*
-     * Batch Matrix-Multiplication.
-     *
-     * Parameters
-     * ----------
-     * A : ndarray<T> const&
-     *     ([M,] N, P) array.
-     * B : ndarray<T> const&
-     *     ([M,] P, Q) array.
-     * out : ndarray<T>* const
-     *     Optional buffer to store result.
-     *     Must have the same dimensions as the output.
-     *
-     * Returns
-     * -------
-     * C : ndarray<T>
-     *     (M, N, Q) layer-wise matrix product of `A` and `B`.
-     *     Broadcasting rules apply along upper dimensions.
-     *
-     * Examples
-     * --------
-     * Let A \in \bR^{M, N, P} and B \in \bR^{M, P, Q}.
-     * Then C = bmm(A, B) \in \bR^{M, N, Q} such that
-     *     C[i, :, :] = mm(A[i, :, :], B[i, :, :])
-     *
-     * Let A \in \bR^{M, N, P} and B \in \bR^{P, Q}.
-     * Then C = bmm(A, B) \in \bR^{M, N, Q} such that
-     *     C[i, :, :] = mm(A[i, :, :], B[:, :])
-     *
-     * Notes
-     * -----
-     * This is a convenience function that calls nd::linalg::mm() under the hood.
-     */
     template <typename T>
-    ndarray<T> bmm(ndarray<T> const& A, ndarray<T> const& B, ndarray<T>* const out = nullptr) {
+    ndarray<T> bmm(ndarray<T> const& A,
+                   ndarray<T> const& B,
+                   ndarray<T>* const out) {
         static_assert(is_int<T>() || is_float<T>() || is_complex<T>(),
                       "Only {int, float, complex} types allowed.");
 

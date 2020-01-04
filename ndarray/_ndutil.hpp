@@ -8,7 +8,6 @@
 #define _NDUTIL_HPP
 
 #include <algorithm>
-#include <limits>
 #include <memory>
 #include <numeric>
 #include <ostream>
@@ -18,47 +17,53 @@
 
 #include "Eigen/Eigen"
 
-#include "_ndtype.hpp"
-
-namespace nd { template <typename T> class ndarray; }
+#include "_ndforward.hpp"
 
 namespace {
-    template <typename T> std::ostream& operator<<(std::ostream& os, std::vector<T> const& v);
-    template <typename T> std::ostream& operator<<(std::ostream& os, nd::ndarray<T> const& x);
+    template <typename T>
+    std::ostream& operator<<(std::ostream& os,
+                             std::vector<T> const& v) {
+        os << "{";
+        for(size_t i = 0, N = v.size(); i < N; ++i) {
+            os << v[i] << ((i != N-1) ? ", " : "}");
+        }
+        return os;
+    }
+
+    template <typename T>
+    std::ostream& operator<<(std::ostream& os,
+                             nd::ndarray<T> const& x) {
+        namespace ndu = nd::util;
+        namespace ndui = nd::util::interop;
+
+        auto x_ptr = const_cast<nd::ndarray<T>*>(&x);
+        ndu::NDARRAY_ASSERT(ndui::is_eigen_mappable(x_ptr),
+                            "Only 1d/2d arrays can be plotted.");
+        auto ex = ndui::aseigenarray<T, nd::mapA_t<T>>(x_ptr, false);
+
+        if(x.ndim() == 1) {
+            Eigen::IOFormat fmt(Eigen::StreamPrecision, 0, ", ", "\n", "[", "]", "", "");
+            os << ex->format(fmt);
+        } else if (x.ndim() == 2) {
+            Eigen::IOFormat fmt(Eigen::StreamPrecision, 0, ", ", "\n", "[", "]", "[", "]");
+            os << ex->format(fmt);
+        }
+
+        return os;
+    }
 }
 
 namespace nd::util {
-    /*
-     * assert()-like statement that does not deactivate in Release mode.
-     *
-     * Parameters
-     * ----------
-     * cond : bool const
-     * msg : T const&
-     */
     template <typename T>
-    void NDARRAY_ASSERT(bool const cond, T const& msg) {
+    void NDARRAY_ASSERT(bool const cond,
+                        T const& msg) {
         if(!cond) {
             throw std::runtime_error(msg);
         }
     }
 
-    /*
-     * Determine output dimensions based on broadcasting rules of binary operators.
-     *
-     * Parameters
-     * ----------
-     * lhs : shape_t const&
-     *     Shape of left operand.
-     * rhs : shape_t const&
-     *     Shape of right operand.
-     *
-     * Result
-     * ------
-     * out : shape_t
-     *     Shape of result.
-     */
-    inline shape_t predict_shape_broadcast(shape_t const& lhs, shape_t const& rhs) {
+    shape_t predict_shape_broadcast(shape_t const& lhs,
+                                    shape_t const& rhs) {
         std::stringstream error_msg;
         error_msg << "Operands could not be broadcast together with shapes "
                   << "(" << lhs << ", " << rhs << ").\n";
@@ -83,22 +88,8 @@ namespace nd::util {
         return out;
     }
 
-    /*
-     * Determine output dimensions based on reduction specification.
-     *
-     * Parameters
-     * ----------
-     * shape : shape_t const&
-     *     Shape of input.
-     * axis : size_t const
-     *     Dimension along which a reduction is made.
-     *
-     * Returns
-     * -------
-     * out : shape_t
-     *     Shape of result.
-     */
-    inline shape_t predict_shape_reduction(shape_t const& shape, size_t const axis) {
+    shape_t predict_shape_reduction(shape_t const& shape,
+                                    size_t const axis) {
         NDARRAY_ASSERT(axis < shape.size(), "Parameter[axis] is out of bounds.");
 
         shape_t out(shape);
@@ -107,183 +98,90 @@ namespace nd::util {
         return out;
     }
 
-    /*
-     * NumPy-like slice object.
-     */
-    class slice {
-        private:
-            int m_start      = 0;
-            int m_stop       = std::numeric_limits<int>::max();
-            int m_step       = 1;
+    slice::slice() {};
 
-        public:
-            slice() {};
+    slice::~slice() {};
 
-            /*
-             * Parameters
-             * ----------
-             * stop : int const
-             *     Termination index (exclusive).
-             */
-            slice(int const stop):
-                m_start(0),
-                m_stop(stop),
-                m_step(1) {}
+    slice::slice(int const stop):
+        m_start(0),
+        m_stop(stop),
+        m_step(1) {}
 
-            /*
-             * Parameters
-             * ----------
-             * start : int const
-             *     Initialisation index (inclusive).
-             * stop : int const
-             *     Termination index (exclusive).
-             */
-            slice(int const start, int const stop):
-                m_start(start),
-                m_stop(stop),
-                m_step(1) {}
+    slice::slice(int const start,
+                 int const stop):
+        m_start(start),
+        m_stop(stop),
+        m_step(1) {}
 
-            /*
-             * Parameters
-             * ----------
-             * start : int const
-             *     Initialisation index (inclusive).
-             * stop : int const
-             *     Termination index (exclusive). `-1` is a valid termination
-             *     index to include the first element of an array.
-             * step : int const
-             *     Step size (non-zero).
-             */
-            slice(int const start, int const stop, int const step):
-                m_start(start),
-                m_stop(stop),
-                m_step(step) {
-                    NDARRAY_ASSERT(step != 0, "Zero steps are not allowed.");
-                }
+    slice::slice(int const start,
+                 int const stop,
+                 int const step):
+        m_start(start),
+        m_stop(stop),
+        m_step(step) {
+        NDARRAY_ASSERT(step != 0, "Zero steps are not allowed.");
+    }
 
-            ~slice() {};
+    int slice::start() const {
+        return m_start;
+    }
 
-            int start() const { return m_start; }
+    int slice::stop() const {
+        return m_stop;
+    }
 
-            int stop() const { return m_stop; }
+    int slice::step() const {
+        return m_step;
+    }
 
-            int step() const { return m_step; }
+    slice slice::map_limits(size_t const length) const {
+        if(((m_start > m_stop) && (m_step > 0)) ||
+           ((m_stop > m_start) && (m_step < 0))) {
+            return slice(0, 0, m_step);
+        }
 
-            /*
-             * Set (ambiguous) slice limits to correct values for an array
-             * dimension of length `length`.
-             *
-             * Parameters
-             * ----------
-             * length : size_t const
-             *     Length of the dimension to which the slice is applied.
-             *
-             * Returns
-             * -------
-             * compact_slice : slice
-             *     New slice object with start/stop values correctly clipped.
-             */
-            slice map_limits(size_t const length) const {
-                if(((m_start > m_stop) && (m_step > 0)) ||
-                   ((m_stop > m_start) && (m_step < 0))) {
-                    return slice(0, 0, m_step);
-                }
+        if(m_step > 0) {
+            return slice(std::max<int>(0, m_start),
+                         std::min<int>(m_stop, length),
+                         m_step);
+        } else {
+            return slice(std::min<int>(m_start, length - 1),
+                         std::max<int>(-1, m_stop),
+                         m_step);
+        }
+    }
 
-                if(m_step > 0) {
-                    return slice(std::max<int>(0, m_start),
-                                 std::min<int>(m_stop, length),
-                                 m_step);
-                } else {
-                    return slice(std::min<int>(m_start, length - 1),
-                                 std::max<int>(-1, m_stop),
-                                 m_step);
-                }
-            }
-    };
-
-    /*
-     * Apply unary function to every element of input buffer, then place result
-     * in output buffer.
-     *
-     * Parameters
-     * ----------
-     * ufunc : F
-     *     Unary function to apply.
-     *     Must have signature "T2 f(T1 const&)".
-     * in : ndarray<T1>* const
-     *     N-D input buffer.
-     * out : ndarray<T2>* const
-     *     N-D output buffer.
-     *     Must have same dimensions as input buffer.
-     */
     template <typename F, typename T1, typename T2>
-    void apply(F ufunc, ndarray<T1>* const in, ndarray<T2>* const out) {
+    void apply(F ufunc,
+               ndarray<T1>* const in,
+               ndarray<T2>* const out) {
         NDARRAY_ASSERT(in != nullptr, "Parameter[in] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
-        NDARRAY_ASSERT(in->shape() == out->shape(),
-                       "Parameter[out] must have same dimensions as Parameter[in].");
+        NDARRAY_ASSERT(in->shape() == out->shape(), "Parameter[out] must have same dimensions as Parameter[in].");
 
         std::transform(in->begin(), in->end(), out->begin(), ufunc);
     }
 
-    /*
-     * Apply binary function to every element of input buffers, then place
-     * result in output buffer.
-     *
-     * Parameters
-     * ----------
-     * ufunc : F
-     *     Binary function to apply.
-     *     Must have signature "T2 f(T1 const&, T1 const&)".
-     * in_1 : ndarray<T1>* const
-     *     N-D input buffer (first argument).
-     * in_2 : ndarray<T1>* const
-     *     N-D input buffer (second argument).
-     * out : ndarray<T2>* const
-     *     N-D output buffer.
-     *     Must have same dimensions as input buffers.
-     *
-     * Notes
-     * -----
-     * Input buffers are broadcasted together.
-     */
     template <typename F, typename T1, typename T2>
-    void apply(F ufunc, ndarray<T1>* const in_1, ndarray<T1>* const in_2, ndarray<T2>* const out) {
+    void apply(F ufunc,
+               ndarray<T1>* const in_1,
+               ndarray<T1>* const in_2,
+               ndarray<T2>* const out) {
         NDARRAY_ASSERT(in_1 != nullptr, "Parameter[in_1] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(in_2 != nullptr, "Parameter[in_2] must point to a valid ndarray instance.");
         NDARRAY_ASSERT(out != nullptr, "Parameter[out] must point to a valid ndarray instance.");
 
-        shape_t const correct_out_shape = predict_shape_broadcast(in_1->shape(), in_2->shape());
-        NDARRAY_ASSERT(out->shape() == correct_out_shape,
+        auto const sh_out_correct = predict_shape_broadcast(in_1->shape(), in_2->shape());
+        NDARRAY_ASSERT(out->shape() == sh_out_correct,
                        "Parameter[in_1, in_2] do not broadcast to Parameter[out] dimensions.");
 
-        auto in_1_bcast = in_1->broadcast_to(correct_out_shape);
-        auto in_2_bcast = in_2->broadcast_to(correct_out_shape);
+        auto in_1_bcast = in_1->broadcast_to(sh_out_correct);
+        auto in_2_bcast = in_2->broadcast_to(sh_out_correct);
         std::transform(in_1_bcast.begin(), in_1_bcast.end(),
                        in_2_bcast.begin(), out->begin(),
                        ufunc);
     }
 
-    /*
-     * Apply reduction function along input buffer, then place result in output
-     * buffer.
-     *
-     * Parameters
-     * ----------
-     * ufunc : F
-     *     Reduction function to apply.
-     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed
-     *     commutative/associative.
-     * in : ndarray<T>* const
-     *     (in_1, in_2, in_3) contiguous input buffer.
-     * out : ndarray<T>* const
-     *     (out_1, out_2, out_3) contiguous output buffer.
-     *     Must have (out_[k] == in_[k]), except along `axis` where (out_[axis] == 1).
-     * axis : size_t const
-     *     Dimension along which to apply the reduction.
-     * init : T const
-     *     Initial reduction output.
-     */
     template <typename F, typename T>
     void reduce3D(F ufunc,
                   ndarray<T>* const in,
@@ -360,27 +258,6 @@ namespace nd::util {
         }
     }
 
-    /*
-     * Apply reduction function along input buffer, then place result in output
-     * buffer.
-     *
-     * Parameters
-     * ----------
-     * ufunc : F
-     *     Reduction function to apply.
-     *     Must have signature "T2 f(T1 const&, T1 const&)" and assumed
-     *     commutative/associative.
-     * in : ndarray<T>* const
-     *     N-D input buffer.
-     * out : ndarray<T>* const
-     *     N-D contiguous output buffer.
-     *     Must have (out->shape()[k] == in->shape()[k]), except along `axis`
-     *     where (out->shape()[axis] == 1).
-     * axis : size_t const
-     *     Dimension along which to apply the reduction.
-     * init : T const
-     *     Initial reduction output.
-     */
     template <typename F, typename T>
     void reduce(F ufunc,
                 ndarray<T>* const in,
@@ -450,26 +327,6 @@ namespace nd::util {
 }
 
 namespace nd::util::interop {
-    /*
-     * Check if array can be mapped to an Eigen structure.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T>* const
-     *
-     * Returns
-     * -------
-     * is_mappable : bool
-     *
-     * Notes
-     * -----
-     * `x` is mappable if the conditions below hold:
-     *
-     *     * `x` is 1d or 2d;
-     *     * No two elements in `x` could overlap in any way.
-     *       Overlaps may arise when using striding tricks (i.e. sliding windows, ...)
-     *     * No negative strides(). (Eigen Bug 747. Should be fixed in Eigen v3.4)
-     */
     template <typename T>
     bool is_eigen_mappable(ndarray<T>* const x) {
         NDARRAY_ASSERT(x != nullptr, "Parameter[x] must point to a valid ndarray instance.");
@@ -487,42 +344,9 @@ namespace nd::util::interop {
         return is_mappable;
     }
 
-    /*
-     * Eigen view on the data of an ndarray.
-     *
-     * Parameters
-     * ----------
-     * x : ndarray<T>* const
-     *    (N,) or (N, M) array.
-     * check_mappability : bool const
-     *     If `true`, an exception is raised if mapping is impossible.
-     * EigenFormat (template type)
-     *     Must be one of {nd::mapA_t<T>, nd::mapM_t<T>}.
-     *
-     * Returns
-     * -------
-     * map : std::unique_ptr<EigenFormat>
-     *     Eigen view on the array.
-     *     (A pointer is returned to avoid instantiation of implicit EigenFormat copy-constructors.)
-     *
-     * Notes
-     * -----
-     * * The shape of the output depends on the shape of the input::
-     *
-     *     +==================+
-     *     +    x    |  map   +
-     *     +------------------+
-     *     + (N,)    | (1, N) +
-     *     + (N, M)  | (N, M) +
-     *     +==================+
-     *
-     * * `check_mappability` may be set to `false` for performance reasons if certain a correct
-     *   mapping is achievable. (i.e. if nd::util::interop::is_eigen_mappable() was called
-     *   manually beforehand.)
-     */
     template <typename T, typename EigenFormat>
     std::unique_ptr<EigenFormat> aseigenarray(ndarray<T>* const x,
-                                              bool const check_mappability = true) {
+                                              bool const check_mappability) {
         constexpr bool ok_format = (std::is_same<EigenFormat, mapA_t<T>>::value ||
                                     std::is_same<EigenFormat, mapM_t<T>>::value);
         static_assert(ok_format, "Only {nd::mapA_t<T>, nd::mapM_t<T>} types are supported.");
@@ -552,20 +376,6 @@ namespace nd::util::interop {
         return map;
     }
 
-    /*
-     * Map Eigen result into an ndarray.
-     *
-     * Parameters
-     * ----------
-     * x : Eigen::DenseBase<Derived> const&
-     *    (N, M) Eigen expression to evaluate.
-     *
-     * Returns
-     * -------
-     * y : ndarray<Derived::Scalar>
-     *     (N, M) Ndarray containing the evaluation of `x`.
-     *     `y` owns its own memory and can be used without restriction.
-     */
     template <typename Derived>
     ndarray<typename Derived::Scalar> asndarray(Eigen::ArrayBase<Derived> const& x) {
         size_t const N_rows = x.rows();
@@ -578,46 +388,6 @@ namespace nd::util::interop {
         (*ey) = x;
 
         return y;
-    }
-}
-
-namespace {
-    /*
-     * Send a (numeric) vector to output stream.
-     */
-    template <typename T>
-    std::ostream& operator<<(std::ostream& os, std::vector<T> const& v) {
-        os << "{";
-        for(size_t i = 0, N = v.size(); i < N; ++i) {
-            os << v[i] << ((i != N-1) ? ", " : "}");
-        }
-        return os;
-    }
-
-    /*
-     * Send ndarray to output stream.
-     *
-     * Only 1d/2d arrays can be printed.
-     */
-    template <typename T>
-    std::ostream& operator<<(std::ostream& os, nd::ndarray<T> const& x) {
-        namespace ndu = nd::util;
-        namespace ndui = nd::util::interop;
-
-        auto x_ptr = const_cast<nd::ndarray<T>*>(&x);
-        ndu::NDARRAY_ASSERT(ndui::is_eigen_mappable(x_ptr),
-                            "Only 1d/2d arrays can be plotted.");
-        auto ex = ndui::aseigenarray<T, nd::mapA_t<T>>(x_ptr, false);
-
-        if(x.ndim() == 1) {
-            Eigen::IOFormat fmt(Eigen::StreamPrecision, 0, ", ", "\n", "[", "]", "", "");
-            os << ex->format(fmt);
-        } else if (x.ndim() == 2) {
-            Eigen::IOFormat fmt(Eigen::StreamPrecision, 0, ", ", "\n", "[", "]", "[", "]");
-            os << ex->format(fmt);
-        }
-
-        return os;
     }
 }
 
