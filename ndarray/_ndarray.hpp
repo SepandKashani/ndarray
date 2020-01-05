@@ -209,11 +209,6 @@ namespace nd {
 
     template <typename T>
     ndarray<T> ndarray<T>::where(ndarray<bool> const& mask) const {
-        /*
-         * TODO: Suboptimal solution -- use a vector to store the
-         * extracted elements, then perform a second copy into an
-         * ndarray<T> object.
-         */
         auto const mask_bcast = mask.broadcast_to(m_shape);
         auto it_this = begin();
         std::vector<T> buffer;
@@ -239,7 +234,6 @@ namespace nd {
         auto it_mask = mask_bcast.begin();
         auto it_this = begin();
 
-        // TODO: can be made more efficient with std::inserter?
         bool const broadcast_mode = (x.size() == 1);
         if(broadcast_mode) {
             T const& xx = x.data()[0];

@@ -44,22 +44,6 @@ namespace nd::linalg {
             }
         }
 
-        /*
-         * TODO: [A,B].reshape() forces a copy if arrays are non-contiguous,
-         * but this is not mandatory to do matmul() through Eigen.
-         *
-         * Possible solution to get (A2, B2)::
-         *
-         *     if is_eigen_mappable([A,B]) && 2d:
-         *         A2 = A
-         *         B2 = B
-         *     elif is_eigen_mappable([A,B]) && 1d:
-         *         A2 = A(A.data(), {1, sh_A2_c}, {sizeof(T), A.strides()[0]})
-         *         B2 = B(B.data(), {sh_B2_r, 1}, {B.strides()[0], sizeof(T)})
-         *     else:
-         *         A2 = A.reshape({sh_A2_r, sh_A2_c})
-         *         B2 = B.reshape({sh_B2_r, sh_B2_c})
-         */
         size_t const sh_A2_r = std::accumulate(sh_A.begin(), sh_A.end() - 1, size_t(1), std::multiplies<size_t>());
         size_t const sh_A2_c = sh_A[A.ndim() - 1];
         size_t const sh_B2_r = sh_B[0];
@@ -87,10 +71,6 @@ namespace nd::linalg {
         util::NDARRAY_ASSERT((A.ndim() == 2) || (A.ndim() == 3), "Parameter[A] must be 2D or 3D.");
         util::NDARRAY_ASSERT((B.ndim() == 2) || (B.ndim() == 3), "Parameter[B] must be 2D or 3D.");
 
-        /*
-         * TODO: .reshape() will cause a copy if (A, B) are not contiguous.
-         * Call ndarray<T>(byte_t* const, shape_t const&, stride_t const&) instead.
-         */
         auto const& AA = (A.ndim() == 3) ? A : A.reshape({1, A.shape()[0], A.shape()[1]});
         auto const& BB = (B.ndim() == 3) ? B : B.reshape({1, B.shape()[0], B.shape()[1]});
 
@@ -128,10 +108,6 @@ namespace nd::linalg {
         for(size_t i = 0; i < M; ++i) {
             select[0] = util::slice(i, i + 1);
 
-            /*
-             * TODO: .reshape() will cause a copy if (A, B) are not contiguous.
-             * Call ndarray<T>(byte_t* const, shape_t const&, stride_t const&) instead.
-             */
             auto const& _A = bcast_AA(select).reshape({N, P});
             auto const& _B = bcast_BB(select).reshape({P, Q});
             auto _C = C(select).reshape({N, Q});
