@@ -21,6 +21,7 @@ Headers
     $ cmake -DCMAKE_BUILD_TYPE=[Debug, Release] ../..
     $ [sudo] make install
     $ "${BUILD_DIR}/bin/test_ndarray"
+    $ "${BUILD_DIR}/bin/benchmark_ndarray"
 
 
 Documentation

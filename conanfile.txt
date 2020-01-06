@@ -1,6 +1,7 @@
 [requires]
 eigen/3.3.7@conan/stable
 gtest/1.8.1@bincrafters/stable
+benchmark/1.5.0
 
 [generators]
 cmake
@@ -10,3 +11,8 @@ gtest:build_gmock=True
 gtest:fPIC=True
 gtest:no_main=False
 gtest:shared=True
+
+benchmark:shared=True
+benchmark:fPIC=True
+benchmark:enable_lto=True
+benchmark:enable_exceptions=True
