@@ -6,4 +6,7 @@ gtest/1.8.1@bincrafters/stable
 cmake
 
 [options]
+gtest:build_gmock=True
+gtest:fPIC=True
+gtest:no_main=False
 gtest:shared=True

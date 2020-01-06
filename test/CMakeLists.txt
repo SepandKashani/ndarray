@@ -11,10 +11,10 @@ set(NDARRAY_TESTS
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndfunc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test_nditer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test_ndlinalg.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_ndutil.cpp)
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_ndutil.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_type.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test.cpp)  # main()
 set(NDARRAY_TARGET test_ndarray)
-
 add_executable(${NDARRAY_TARGET} ${NDARRAY_TESTS})
 target_link_libraries(${NDARRAY_TARGET} Ndarray)
 

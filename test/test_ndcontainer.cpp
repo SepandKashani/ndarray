@@ -4,8 +4,8 @@
 // Author : Sepand KASHANI [kashani.sepand@gmail.com]
 // ############################################################################
 
-#ifndef TEST_NDCONTAINER_HPP
-#define TEST_NDCONTAINER_HPP
+#ifndef TEST_NDCONTAINER_CPP
+#define TEST_NDCONTAINER_CPP
 
 #include <numeric>
 
@@ -52,4 +52,4 @@ namespace nd {
     }
 }
 
-#endif // TEST_NDCONTAINER_HPP
+#endif // TEST_NDCONTAINER_CPP
