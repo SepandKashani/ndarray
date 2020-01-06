@@ -44,11 +44,11 @@ nd::ndarray_iterator<T>
       any speed increase here has tremendous performance ramifications across
       the board.
 
-    * Add a move constructor.
+    * Add a move constructor
 
 nd::ndarray<T>
 
-    * Add a move constructor. Do not change function return types to
+    * Add a move constructor(s). Do not change function return types to
       ndarray<T>&&: the compiler will automatically move an ndarray<T> out of
       the function.
 
@@ -165,9 +165,14 @@ BENCHMARK SUITE
     improvements. This should be standardized into a small timed benchmark to
     keep track of the effect of each commit.
 
+SIMPLIFY TEST SUITE
+
+    After introduction of new function interfaces
+
 NEW_FUNCTIONS_TO_IMPLEMENT
 
     nd::ndarray<T>::expand_dims()
+    nd::ndarray<T>::operator(nd::ndarray<bool> const& mask) instead of where()?
     nd::func::angle()
     nd::func::around()
     nd::func::concatenate()
