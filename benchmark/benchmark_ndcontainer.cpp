@@ -11,13 +11,14 @@
 
 #include "ndarray/ndarray.hpp"
 
-static void ndcontainer_constructor_sized(benchmark::State& state) {
+void BM_NDCONTAINER_CONSTRUCTOR_SIZED(benchmark::State& state, size_t const nbytes) {
     for (auto _ : state) {
-        size_t const nbytes = 1024u;
-        nd::ndcontainer c(nbytes);
+        benchmark::DoNotOptimize(nd::ndcontainer(nbytes));
     }
 }
-
-BENCHMARK(ndcontainer_constructor_sized);
+BENCHMARK_CAPTURE(BM_NDCONTAINER_CONSTRUCTOR_SIZED, cd_2p00, sizeof(nd::cdouble));
+BENCHMARK_CAPTURE(BM_NDCONTAINER_CONSTRUCTOR_SIZED, cd_2p10, sizeof(nd::cdouble) * (1 << 10));
+BENCHMARK_CAPTURE(BM_NDCONTAINER_CONSTRUCTOR_SIZED, cd_2p20, sizeof(nd::cdouble) * (1 << 20));
+BENCHMARK_CAPTURE(BM_NDCONTAINER_CONSTRUCTOR_SIZED, cd_2p30, sizeof(nd::cdouble) * (1 << 30));
 
 #endif // BENCHMARK_NDCONTAINER_CPP
