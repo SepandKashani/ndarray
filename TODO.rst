@@ -43,6 +43,9 @@ nd::ndarray_iterator<T>
     * This class is used pervasively by all functions/methods of the library:
       any speed increase here has tremendous performance ramifications across
       the board.
+      As of commit f3c46be102a4f50552ebbe34a63d19f95ab2f0b4 (benchmarks
+      implemented), it seems like plain iteration of 1D arrays using a pointer
+      is 15x faster than using ndarray_iterator<T>.
 
     * Add a move constructor
 
@@ -158,12 +161,6 @@ nd::linalg::bmm()
             C3[i] = A3m[i] * B3m[i]  // suitably eigen-mapped
 
 HTML DOCUMENTATION
-
-BENCHMARK SUITE
-
-    Currently the test suite is used as a cheap proxy to estimate execution time
-    improvements. This should be standardized into a small timed benchmark to
-    keep track of the effect of each commit.
 
 SIMPLIFY TEST SUITE
 
