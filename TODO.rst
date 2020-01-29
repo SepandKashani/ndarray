@@ -88,10 +88,6 @@ nd::ndarray<T>::operator[=,
     * Don't use `ndarray<T> _other({1})`.
       Replace with `ndarray<T> _other(reinterpret_cast<byte_t*>(&other), {1})`.
 
-nd::arange()
-
-    Use std::generate_n()
-
 nd::linspace()
 
     Use std::generate_n(), with the last element written by hand for numerical

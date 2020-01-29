@@ -65,10 +65,9 @@ namespace nd {
         size_t N = std::ceil((stop - start) / step);
         ndarray<T> y({N});
 
-        y.data()[0] = start;
-        for(size_t i = 1; i < N; ++i) {
-            y.data()[i] = y.data()[i - 1] + step;
-        }
+        y[{0}] = start;
+        T x = start;
+        std::generate_n(y.data() + 1, N - 1, [&x, &step]() { return x += step; });
 
         return y;
     }
