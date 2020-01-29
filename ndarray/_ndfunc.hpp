@@ -134,12 +134,10 @@ namespace nd {
 
     template <typename T>
     ndarray<T> eye(size_t const N) {
-        ndarray<T> I = zeros<T>({N, N});
-        int const step = I.strides()[0] + I.strides()[1];
-        byte_t* data = reinterpret_cast<byte_t*>(I.data());
-        for(size_t i = 0; i < N; ++i) {
-            reinterpret_cast<T*>(data)[0] = static_cast<T>(1.0);
-            data += step;
+        auto I = zeros<T>({N, N});
+        T* it = I.data();
+        for(size_t i = 0, step = I.shape()[1] + 1; i < N; ++i, it += step) {
+            *it = static_cast<T>(1.0);
         }
 
         return I;

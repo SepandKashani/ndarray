@@ -88,10 +88,6 @@ nd::ndarray<T>::operator[=,
     * Don't use `ndarray<T> _other({1})`.
       Replace with `ndarray<T> _other(reinterpret_cast<byte_t*>(&other), {1})`.
 
-nd::eye()
-
-    Use ndarray_iterator::advance() once updated to RandomAccessIterator
-
 nd::stack()
 
     `x[i].reshape(sh_x)` will force a copy if not contiguous. Instead it is
