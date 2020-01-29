@@ -281,7 +281,7 @@ namespace nd {
     template <typename T>
     ndarray<T> ndarray<T>::copy() const {
         ndarray<T> cpy(m_shape);
-        std::copy(begin(), end(), cpy.begin());
+        std::copy(begin(), end(), cpy.data());
         return cpy;
     }
 
