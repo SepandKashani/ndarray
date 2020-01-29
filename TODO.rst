@@ -55,10 +55,6 @@ nd::ndarray<T>
       ndarray<T>&&: the compiler will automatically move an ndarray<T> out of
       the function.
 
-nd::ndarray<T>::operator[](index_t const&)
-
-    * Mimic std::vector::operator[](): don't check for out-of-bounds errors
-
 nd::ndarray<T>::where()
 
     * use std::inserter() to populate `buffer`.

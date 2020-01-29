@@ -204,14 +204,6 @@ namespace nd {
             }
         }
 
-        // Out of bounds access
-        ASSERT_NO_THROW((x[{0, 0, 0, 0}]));
-        ASSERT_NO_THROW((x[{2, 0, 3, 4}]));
-        ASSERT_THROW((x[{3, 0, 3, 4}]), std::runtime_error);
-        ASSERT_THROW((x[{2, 1, 3, 4}]), std::runtime_error);
-        ASSERT_THROW((x[{2, 0, 4, 4}]), std::runtime_error);
-        ASSERT_THROW((x[{2, 0, 3, 5}]), std::runtime_error);
-
         /* Can update entries. */
         int& tested_elem = x[{2, 0, 3, 4}];
         int const correct_elem = 500;
@@ -229,6 +221,62 @@ namespace nd {
         for(size_t i = 0; i < y.shape()[0]; ++i) {
             for(size_t j = 0; j < y.shape()[1]; ++j) {
                 int const tested_elem = y[{i, j}];
+                int const offset = ((y.strides()[0] * i) +
+                                    (y.strides()[1] * j));
+                byte_t* correct_addr = reinterpret_cast<byte_t*>(y.data()) + offset;
+                int const correct_elem = reinterpret_cast<int*>(correct_addr)[0];
+                ASSERT_EQ(tested_elem, correct_elem);
+            }
+        }
+    }
+
+    TEST(TestNdArray, TestAt) {
+        // Positive strides
+        ndarray<int> x({3, 1, 4, 5});
+        std::iota(x.begin(), x.end(), 0);
+
+        for(size_t i = 0; i < x.shape()[0]; ++i) {
+            for(size_t j = 0; j < x.shape()[1]; ++j) {
+                for(size_t k = 0; k < x.shape()[2]; ++k) {
+                    for(size_t l = 0; l < x.shape()[3]; ++l) {
+                        int const tested_elem = x.at({i, j, k, l});
+                        int const offset = ((x.strides()[0] * i) +
+                                            (x.strides()[1] * j) +
+                                            (x.strides()[2] * k) +
+                                            (x.strides()[3] * l));
+                        byte_t* correct_addr = reinterpret_cast<byte_t*>(x.data()) + offset;
+                        int const correct_elem = reinterpret_cast<int*>(correct_addr)[0];
+                        ASSERT_EQ(tested_elem, correct_elem);
+                    }
+                }
+            }
+        }
+
+        // Out of bounds access
+        ASSERT_NO_THROW((x.at({0, 0, 0, 0})));
+        ASSERT_NO_THROW((x.at({2, 0, 3, 4})));
+        ASSERT_THROW((x.at({3, 0, 3, 4})), std::runtime_error);
+        ASSERT_THROW((x.at({2, 1, 3, 4})), std::runtime_error);
+        ASSERT_THROW((x.at({2, 0, 4, 4})), std::runtime_error);
+        ASSERT_THROW((x.at({2, 0, 3, 5})), std::runtime_error);
+
+        /* Can update entries. */
+        int& tested_elem = x.at({2, 0, 3, 4});
+        int const correct_elem = 500;
+        tested_elem = correct_elem;
+        ASSERT_EQ(tested_elem, correct_elem);
+
+        // Negative strides
+        shape_t shape({5, 3});
+        stride_t strides({-3 * static_cast<int>(sizeof(int)),
+                               static_cast<int>(sizeof(int))});
+        int* data = new int[5 * 3];
+        int* data_end = data + 15;
+        std::iota(data, data_end, 0);
+        ndarray<int> y(reinterpret_cast<byte_t*>(data_end - 1), shape, strides);
+        for(size_t i = 0; i < y.shape()[0]; ++i) {
+            for(size_t j = 0; j < y.shape()[1]; ++j) {
+                int const tested_elem = y.at({i, j});
                 int const offset = ((y.strides()[0] * i) +
                                     (y.strides()[1] * j));
                 byte_t* correct_addr = reinterpret_cast<byte_t*>(y.data()) + offset;

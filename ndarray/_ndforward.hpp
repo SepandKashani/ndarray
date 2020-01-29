@@ -558,6 +558,8 @@ namespace nd {  // Classes
             /*
              * Select a specific entry in the array.
              *
+             * No bounds-checking is performed.
+             *
              * Parameters
              * ----------
              * idx : nd::index_t const&
@@ -569,6 +571,23 @@ namespace nd {  // Classes
              *     Extracted entry.
              */
             T& operator[](index_t const& idx) const;
+
+            /*
+             * Select a specific entry in the array.
+             *
+             * Bounds-checking is performed.
+             *
+             * Parameters
+             * ----------
+             * idx : nd::index_t const&
+             *     Index of element to extract.
+             *
+             * Returns
+             * -------
+             * elem : T&
+             *     Extracted entry.
+             */
+            T& at(index_t const& idx) const;
 
             /*
              * Extract a sub-array.

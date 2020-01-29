@@ -153,6 +153,14 @@ namespace nd {
 
     template <typename T>
     T& ndarray<T>::operator[](index_t const& idx) const {
+        int const offset = std::inner_product(idx.begin(), idx.end(),
+                                              m_strides.begin(), int(0));
+        byte_t* const addr = m_data + offset;
+        return reinterpret_cast<T*>(addr)[0];
+    }
+
+    template <typename T>
+    T& ndarray<T>::at(index_t const& idx) const {
         util::NDARRAY_ASSERT(idx.size() == this->ndim(),
                              "Incomplete index: cannot select unique element.");
 

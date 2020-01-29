@@ -52,6 +52,17 @@ void BM_NDARRAY_EQUALS(benchmark::State& state) {
     }
 }
 
+void BM_NDARRAY_AT(benchmark::State& state) {
+    using T = nd::cdouble;
+
+    nd::ndarray<T> x({1024,});
+    nd::index_t idx({5,});
+
+    for (auto _ : state) {
+        benchmark::DoNotOptimize(x.at(idx));
+    }
+}
+
 void BM_NDARRAY_OP_SQUARE_BRACKET(benchmark::State& state) {
     using T = nd::cdouble;
 
@@ -200,6 +211,7 @@ BENCHMARK_CAPTURE(BM_NDARRAY_CONSTRUCTOR_SHAPE, cd_2p20, {(1 << 20),});
 BENCHMARK_CAPTURE(BM_NDARRAY_CONSTRUCTOR_SHAPE, cd_2p30, {(1 << 30),});
 BENCHMARK(BM_NDARRAY_CONSTRUCTOR_COPY);
 BENCHMARK(BM_NDARRAY_EQUALS);
+BENCHMARK(BM_NDARRAY_AT);
 BENCHMARK(BM_NDARRAY_OP_SQUARE_BRACKET);
 BENCHMARK(BM_NDARRAY_OP_PARENTHESIS);
 BENCHMARK(BM_NDARRAY_WHERE);
