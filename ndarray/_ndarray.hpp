@@ -425,7 +425,7 @@ namespace nd {
         ndarray<U> casted(m_shape);
 
         auto ufunc = [](T const& x) -> U { return static_cast<U>(x); };
-        std::transform(begin(), end(), casted.begin(), ufunc);
+        std::transform(begin(), end(), casted.data(), ufunc);
 
         return casted;
     }
