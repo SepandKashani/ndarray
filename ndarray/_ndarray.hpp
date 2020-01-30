@@ -148,11 +148,9 @@ namespace nd {
 
     template <typename T>
     bool ndarray<T>::equals(ndarray<T> const& other) const {
-        bool const same_data = (m_data == other.m_data);
-        bool const same_shape = (m_shape == other.m_shape);
-        bool const same_strides = (m_strides == other.m_strides);
-
-        return same_data && same_shape && same_strides;
+        return ((m_data == other.m_data)         &&
+                (m_shape == other.m_shape)       &&
+                (m_strides == other.m_strides));
     }
 
     template <typename T>

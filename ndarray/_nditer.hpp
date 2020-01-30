@@ -94,10 +94,10 @@ namespace nd {
 
     template <typename T>
     bool ndarray_iterator<T>::operator==(ndarray_iterator<T> const& other) const {
-        bool const same_iterable = m_iterable->equals(*other.m_iterable);
-        bool const same_index    = (m_index == other.m_index);
-        bool const same_offset   = (m_offset == other.m_offset);
-        return same_iterable && same_index && same_offset;
+        // Done in this order for fast testing.
+        return ((m_offset == other.m_offset) &&
+                (m_index == other.m_index)   &&
+                m_iterable->equals(*other.m_iterable));
     }
 
     template <typename T>
