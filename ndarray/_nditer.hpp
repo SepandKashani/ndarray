@@ -8,6 +8,7 @@
 #define _NDITER_HPP
 
 #include <numeric>
+#include <utility>
 
 #include "_ndforward.hpp"
 
@@ -67,12 +68,26 @@ namespace nd {
         m_offset(other.m_offset) {}
 
     template <typename T>
+    ndarray_iterator<T>::ndarray_iterator(ndarray_iterator<T> && other):
+        m_iterable(other.m_iterable),
+        m_index(std::move(other.m_index)),
+        m_offset(other.m_offset) {}
+
+    template <typename T>
     ndarray_iterator<T>::~ndarray_iterator() {}
 
     template <typename T>
     ndarray_iterator<T>& ndarray_iterator<T>::operator=(ndarray_iterator<T> const& other) {
         m_iterable = other.m_iterable;
         m_index = other.m_index;
+        m_offset = other.m_offset;
+        return *this;
+    }
+
+    template <typename T>
+    ndarray_iterator<T>& ndarray_iterator<T>::operator=(ndarray_iterator<T> && other) {
+        m_iterable = other.m_iterable;
+        m_index = std::move(other.m_index);
         m_offset = other.m_offset;
         return *this;
     }

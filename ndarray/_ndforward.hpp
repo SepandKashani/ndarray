@@ -899,9 +899,11 @@ namespace nd {  // Classes
             ndarray_iterator(ndarray<T>* const x,
                              index_t const& index);
             ndarray_iterator(ndarray_iterator<T> const& other);
+            ndarray_iterator(ndarray_iterator<T> && other);
             ~ndarray_iterator();
 
             ndarray_iterator<T>& operator=(ndarray_iterator<T> const& other);
+            ndarray_iterator<T>& operator=(ndarray_iterator<T> && other);
             bool operator==(ndarray_iterator<T> const& other) const;
             bool operator!=(ndarray_iterator<T> const& other) const;
             T& operator*() const;
