@@ -756,37 +756,37 @@ namespace nd {  // Classes
              * Broadcasting rules apply.
              */
             ndarray<T>& operator=(ndarray<T> const& other);
-            ndarray<T>& operator=(T const& other);
+            ndarray<T>& operator=(T const other);
 
             ndarray<T>& operator+=(ndarray<T> const& other);
-            ndarray<T>& operator+=(T const& other);
+            ndarray<T>& operator+=(T const other);
 
             ndarray<T>& operator-=(ndarray<T> const& other);
-            ndarray<T>& operator-=(T const& other);
+            ndarray<T>& operator-=(T const other);
 
             ndarray<T>& operator*=(ndarray<T> const& other);
-            ndarray<T>& operator*=(T const& other);
+            ndarray<T>& operator*=(T const other);
 
             ndarray<T>& operator/=(ndarray<T> const& other);
-            ndarray<T>& operator/=(T const& other);
+            ndarray<T>& operator/=(T const other);
 
             ndarray<T>& operator%=(ndarray<T> const& other);
-            ndarray<T>& operator%=(T const& other);
+            ndarray<T>& operator%=(T const other);
 
             ndarray<T>& operator&=(ndarray<T> const& other);
-            ndarray<T>& operator&=(T const& other);
+            ndarray<T>& operator&=(T const other);
 
             ndarray<T>& operator|=(ndarray<T> const& other);
-            ndarray<T>& operator|=(T const& other);
+            ndarray<T>& operator|=(T const other);
 
             ndarray<T>& operator^=(ndarray<T> const& other);
-            ndarray<T>& operator^=(T const& other);
+            ndarray<T>& operator^=(T const other);
 
             ndarray<T>& operator<<=(ndarray<T> const& other);
-            ndarray<T>& operator<<=(T const& other);
+            ndarray<T>& operator<<=(T const other);
 
             ndarray<T>& operator>>=(ndarray<T> const& other);
-            ndarray<T>& operator>>=(T const& other);
+            ndarray<T>& operator>>=(T const other);
 
             ndarray<T>& operator++();
             ndarray<T>& operator--();
@@ -798,58 +798,58 @@ namespace nd {  // Classes
             ndarray<bool> operator!() const;
 
             ndarray<T> operator+(ndarray<T> const& other) const;
-            ndarray<T> operator+(T const& other) const;
+            ndarray<T> operator+(T const other) const;
 
             ndarray<T> operator-(ndarray<T> const& other) const;
-            ndarray<T> operator-(T const& other) const;
+            ndarray<T> operator-(T const other) const;
 
             ndarray<T> operator*(ndarray<T> const& other) const;
-            ndarray<T> operator*(T const& other) const;
+            ndarray<T> operator*(T const other) const;
 
             ndarray<T> operator/(ndarray<T> const& other) const;
-            ndarray<T> operator/(T const& other) const;
+            ndarray<T> operator/(T const other) const;
 
             ndarray<T> operator%(ndarray<T> const& other) const;
-            ndarray<T> operator%(T const& other) const;
+            ndarray<T> operator%(T const other) const;
 
             ndarray<T> operator&(ndarray<T> const& other) const;
-            ndarray<T> operator&(T const& other) const;
+            ndarray<T> operator&(T const other) const;
 
             ndarray<T> operator|(ndarray<T> const& other) const;
-            ndarray<T> operator|(T const& other) const;
+            ndarray<T> operator|(T const other) const;
 
             ndarray<T> operator^(ndarray<T> const& other) const;
-            ndarray<T> operator^(T const& other) const;
+            ndarray<T> operator^(T const other) const;
 
             ndarray<T> operator<<(ndarray<T> const& other) const;
-            ndarray<T> operator<<(T const& other) const;
+            ndarray<T> operator<<(T const other) const;
 
             ndarray<T> operator>>(ndarray<T> const& other) const;
-            ndarray<T> operator>>(T const& other) const;
+            ndarray<T> operator>>(T const other) const;
 
             ndarray<bool> operator&&(ndarray<bool> const& other) const;
-            ndarray<bool> operator&&(bool const& other) const;
+            ndarray<bool> operator&&(bool const other) const;
 
             ndarray<bool> operator||(ndarray<bool> const& other) const;
-            ndarray<bool> operator||(bool const& other) const;
+            ndarray<bool> operator||(bool const other) const;
 
             ndarray<bool> operator==(ndarray<T> const& other) const;
-            ndarray<bool> operator==(T const& other) const;
+            ndarray<bool> operator==(T const other) const;
 
             ndarray<bool> operator!=(ndarray<T> const& other) const;
-            ndarray<bool> operator!=(T const& other) const;
+            ndarray<bool> operator!=(T const other) const;
 
             ndarray<bool> operator<(ndarray<T> const& other) const;
-            ndarray<bool> operator<(T const& other) const;
+            ndarray<bool> operator<(T const other) const;
 
             ndarray<bool> operator<=(ndarray<T> const& other) const;
-            ndarray<bool> operator<=(T const& other) const;
+            ndarray<bool> operator<=(T const other) const;
 
             ndarray<bool> operator>(ndarray<T> const& other) const;
-            ndarray<bool> operator>(T const& other) const;
+            ndarray<bool> operator>(T const other) const;
 
             ndarray<bool> operator>=(ndarray<T> const& other) const;
-            ndarray<bool> operator>=(T const& other) const;
+            ndarray<bool> operator>=(T const other) const;
     };
 
 

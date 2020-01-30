@@ -437,9 +437,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator=(_other);
     }
 
@@ -452,9 +451,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator+=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator+=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator+=(_other);
     }
 
@@ -467,9 +465,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator-=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator-=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator-=(_other);
     }
 
@@ -482,9 +479,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator*=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator*=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator*=(_other);
     }
 
@@ -497,9 +493,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator/=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator/=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator/=(_other);
     }
 
@@ -511,9 +506,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator%=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator%=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator%=(_other);
     }
 
@@ -525,9 +519,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator&=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator&=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator&=(_other);
     }
 
@@ -539,9 +532,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator|=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator|=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator|=(_other);
     }
 
@@ -553,9 +545,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator^=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator^=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator^=(_other);
     }
 
@@ -568,9 +559,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator<<=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator<<=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator<<=(_other);
     }
 
@@ -583,9 +573,8 @@ namespace nd {
         return *this;
     }
     template <typename T>
-    ndarray<T>& ndarray<T>::operator>>=(T const& other) {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T>& ndarray<T>::operator>>=(T const other) {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator>>=(_other);
     }
 
@@ -650,9 +639,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator+(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator+(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator+(_other);
     }
 
@@ -671,9 +659,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator-(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator-(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator-(_other);
     }
 
@@ -692,9 +679,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator*(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator*(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator*(_other);
     }
 
@@ -713,9 +699,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator/(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator/(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator/(_other);
     }
 
@@ -733,9 +718,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator%(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator%(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator%(_other);
     }
 
@@ -753,9 +737,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator&(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator&(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator&(_other);
     }
 
@@ -773,9 +756,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator|(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator|(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator|(_other);
     }
 
@@ -793,9 +775,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator^(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator^(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator^(_other);
     }
 
@@ -815,9 +796,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator<<(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator<<(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator<<(_other);
     }
 
@@ -837,9 +817,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<T> ndarray<T>::operator>>(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<T> ndarray<T>::operator>>(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator>>(_other);
     }
 
@@ -857,9 +836,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator&&(bool const& other) const {
-        ndarray<bool> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator&&(bool const other) const {
+        ndarray<bool> _other(reinterpret_cast<byte_t*>(const_cast<bool*>(&other)), {1});
         return operator&&(_other);
     }
 
@@ -877,9 +855,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator||(bool const& other) const {
-        ndarray<bool> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator||(bool const other) const {
+        ndarray<bool> _other(reinterpret_cast<byte_t*>(const_cast<bool*>(&other)), {1});
         return operator||(_other);
     }
 
@@ -897,9 +874,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator==(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator==(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator==(_other);
     }
 
@@ -917,9 +893,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator!=(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator!=(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator!=(_other);
     }
 
@@ -938,9 +913,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator<(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator<(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator<(_other);
     }
 
@@ -959,9 +933,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator<=(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator<=(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator<=(_other);
     }
 
@@ -980,9 +953,8 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator>(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator>(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator>(_other);
     }
 
@@ -1001,11 +973,10 @@ namespace nd {
         return out;
     }
     template <typename T>
-    ndarray<bool> ndarray<T>::operator>=(T const& other) const {
-        ndarray<T> _other({1});
-        _other.data()[0] = other;
+    ndarray<bool> ndarray<T>::operator>=(T const other) const {
+        ndarray<T> _other(reinterpret_cast<byte_t*>(const_cast<T*>(&other)), {1});
         return operator>=(_other);
-        }
+    }
 }
 
 #endif // _NDARRAY_HPP

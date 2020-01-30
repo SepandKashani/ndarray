@@ -78,16 +78,6 @@ nd::ndarray<T>::filter(ndarray<bool> const& mask, T const& x)
     * Don't use `ndarray<T> _x({1})`.
       Replace with `ndarray<T> _x(reinterpret_cast<byte_t*>(&x), {1})`.
 
-nd::ndarray<T>::operator[=,
-                         +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=,
-                         +,  -,  *,  /,  %,  &,  |,  ^,  <<,  >>,
-                         &&, ||, ==, !=, <, <=, >, >=](T const&)
-
-    * Change interface to operator[op](T const other).
-
-    * Don't use `ndarray<T> _other({1})`.
-      Replace with `ndarray<T> _other(reinterpret_cast<byte_t*>(&other), {1})`.
-
 nd::stack()
 
     `x[i].reshape(sh_x)` will force a copy if not contiguous. Instead it is
