@@ -83,6 +83,22 @@ namespace nd {
         }
     }
 
+    TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorMove) {
+        ndarray<TypeParam> x({5, 3, 4});
+        ASSERT_FALSE(x.shape().empty());
+        ASSERT_FALSE(x.strides().empty());
+
+        shape_t shape = x.shape();
+        stride_t strides = x.strides();
+
+        ndarray<TypeParam> z(std::move(x));
+        ASSERT_EQ(x.base().use_count(), 2);
+        ASSERT_TRUE(x.shape().empty());
+        ASSERT_TRUE(x.strides().empty());
+        ASSERT_EQ(shape, z.shape());
+        ASSERT_EQ(strides, z.strides());
+    }
+
     TYPED_TEST_P(TestNdArrayArithmetic, TestConstructorPointerAndShape) {
         shape_t const shape({3, 4, 5});
         size_t const nelem = 3 * 4 * 5;
@@ -991,6 +1007,7 @@ namespace nd {
                                TestConstructorShape,
                                TestConstructorCopyExplicit,
                                TestConstructorCopy,
+                               TestConstructorMove,
                                TestConstructorPointerAndShape,
                                TestConstructorPointerAndShapeAndStride);
     INSTANTIATE_TYPED_TEST_CASE_P(My, TestNdArrayArithmetic, MyArithmeticTypes);

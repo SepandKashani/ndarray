@@ -49,12 +49,6 @@ nd::ndarray_iterator<T>
 
     * Add a move constructor
 
-nd::ndarray<T>
-
-    * Add a move constructor(s). Do not change function return types to
-      ndarray<T>&&: the compiler will automatically move an ndarray<T> out of
-      the function.
-
 nd::ndarray<T>::where()
 
     * use std::inserter() to populate `buffer`.

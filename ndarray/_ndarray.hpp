@@ -15,6 +15,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "_ndforward.hpp"
@@ -71,6 +72,14 @@ namespace nd {
         m_data(other.m_data),
         m_shape(other.m_shape),
         m_strides(other.m_strides),
+        m_contiguous(other.m_contiguous) {}
+
+    template <typename T>
+    ndarray<T>::ndarray(ndarray<T> && other):
+        m_base(other.m_base),
+        m_data(other.m_data),
+        m_shape(std::move(other.m_shape)),
+        m_strides(std::move(other.m_strides)),
         m_contiguous(other.m_contiguous) {}
 
     template <typename T>

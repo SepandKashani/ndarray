@@ -448,6 +448,13 @@ namespace nd {  // Classes
             ndarray(ndarray<T> const& other);
 
             /*
+             * Move constructor.
+             *
+             * Move-initializes shape/stride information from `other`.
+             */
+            ndarray(ndarray<T> && other);
+
+            /*
              * Interpret pre-existing contiguous memory block as an array.
              *
              * Parameters
