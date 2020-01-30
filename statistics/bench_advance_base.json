@@ -1,0 +1,112 @@
+{
+  "context": {
+    "date": "2020-01-30 16:46:02",
+    "host_name": "sep-L480",
+    "executable": "/home/sep/Documents/Repositories/ndarray/build/ndarray/bin/benchmark_ndarray",
+    "num_cpus": 8,
+    "mhz_per_cpu": 4000,
+    "cpu_scaling_enabled": true,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 32000000,
+        "num_sharing": 2
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 32000000,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 256000000,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 8192000000,
+        "num_sharing": 8
+      }
+    ],
+    "load_avg": [0.45,0.55,0.59],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "BM_NDITER_ADVANCE_mean",
+      "run_name": "BM_NDITER_ADVANCE",
+      "run_type": "aggregate",
+      "repetitions": 0,
+      "threads": 1,
+      "aggregate_name": "mean",
+      "iterations": 15,
+      "real_time": 2.2286836908052128e+05,
+      "cpu_time": 2.2285173656591095e+05,
+      "time_unit": "ns"
+    },
+    {
+      "name": "BM_NDITER_ADVANCE_median",
+      "run_name": "BM_NDITER_ADVANCE",
+      "run_type": "aggregate",
+      "repetitions": 0,
+      "threads": 1,
+      "aggregate_name": "median",
+      "iterations": 15,
+      "real_time": 2.2341275913135023e+05,
+      "cpu_time": 2.2341382588161211e+05,
+      "time_unit": "ns"
+    },
+    {
+      "name": "BM_NDITER_ADVANCE_stddev",
+      "run_name": "BM_NDITER_ADVANCE",
+      "run_type": "aggregate",
+      "repetitions": 0,
+      "threads": 1,
+      "aggregate_name": "stddev",
+      "iterations": 15,
+      "real_time": 5.4236235140864437e+03,
+      "cpu_time": 5.4180090361509083e+03,
+      "time_unit": "ns"
+    },
+    {
+      "name": "BM_NDITER_ADVANCE_MANUAL_mean",
+      "run_name": "BM_NDITER_ADVANCE_MANUAL",
+      "run_type": "aggregate",
+      "repetitions": 0,
+      "threads": 1,
+      "aggregate_name": "mean",
+      "iterations": 15,
+      "real_time": 6.4799726654791129e+03,
+      "cpu_time": 6.4787581745806092e+03,
+      "time_unit": "ns"
+    },
+    {
+      "name": "BM_NDITER_ADVANCE_MANUAL_median",
+      "run_name": "BM_NDITER_ADVANCE_MANUAL",
+      "run_type": "aggregate",
+      "repetitions": 0,
+      "threads": 1,
+      "aggregate_name": "median",
+      "iterations": 15,
+      "real_time": 6.4456071178434559e+03,
+      "cpu_time": 6.4449968723343773e+03,
+      "time_unit": "ns"
+    },
+    {
+      "name": "BM_NDITER_ADVANCE_MANUAL_stddev",
+      "run_name": "BM_NDITER_ADVANCE_MANUAL",
+      "run_type": "aggregate",
+      "repetitions": 0,
+      "threads": 1,
+      "aggregate_name": "stddev",
+      "iterations": 15,
+      "real_time": 1.1859027328389065e+02,
+      "cpu_time": 1.1793046587628764e+02,
+      "time_unit": "ns"
+    }
+  ]
+}

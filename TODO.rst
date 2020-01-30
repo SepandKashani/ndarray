@@ -38,16 +38,38 @@ nd::util::[apply, reduce, reduce3D]() interface
 
 nd::ndarray_iterator<T>
 
-    * Augment to a RandomAccessIterator to allow broader use of STL methods.
+    It seems impossible to provide any meaningful speedups for the general
+    multi-dim case. The best solution is to offer tailored polymorphic iteration
+    based on properties of the array, but this will have a runtime cost itself.
+    In the interest of speed, we will go for a concrete-class implementation as
+    below.
 
-    * This class is used pervasively by all functions/methods of the library:
-      any speed increase here has tremendous performance ramifications across
-      the board.
-      As of commit f3c46be102a4f50552ebbe34a63d19f95ab2f0b4 (benchmarks
-      implemented), it seems like plain iteration of 1D arrays using a pointer
-      is 15x faster than using ndarray_iterator<T>.
+    ndarray_iterator<T>
+        private
+            ndarray<T>* m_iterable
+            index_t m_index
+            int m_offset  // byte offset
+            iter_tag = {single_stride, multi_stride}
 
-    * Add a move constructor
+            void advance() // implementation varies based on tag
+
+        public
+            ndarray_iterator() = delete;
+            ndarray_iterator(ndarray<T>* const x);
+            ndarray_iterator(ndarray<T>* const x, index_t const& index);
+            ndarray_iterator(ndarray_iterator<T> const& other);
+            ~ndarray_iterator();
+
+            ndarray_iterator<T>& operator=(ndarray_iterator<T> const& other);
+            bool operator==(ndarray_iterator<T> const& other) const;
+            bool operator!=(ndarray_iterator<T> const& other) const;
+            T& operator*() const;
+            ndarray_iterator<T>& operator++();
+
+    Will need to redefine what begin()/end() mean for these different iterators.
+    Overhaul iterator tests to verify functionality.
+    Do not break public interface of ndarray.
+    Benchmark w.r.t WIP commit.
 
 nd::ndarray<T>::where()
 

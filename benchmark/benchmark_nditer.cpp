@@ -150,4 +150,31 @@ BENCHMARK(BM_NDITER_ND_CONTIGUOUS_WITH_DEREFERENCE);
 BENCHMARK(BM_NDITER_ND_STRIDED);
 BENCHMARK(BM_NDITER_ND_STRIDED_WITH_DEREFERENCE);
 
+void BM_NDITER_ADVANCE(benchmark::State& state) {
+    using T = int;
+
+    auto x = (nd::arange<T>(0, 1024 * 2 * 3 * 4, 1)
+              .reshape({32 * 2, 8 * 3, 4 * 4}));
+    size_t N = x.size();
+
+    for (auto _ : state) {
+        auto _x = x.begin();
+        for (size_t i = 0; i < N; ++i, ++_x) {}
+    }
+}
+void BM_NDITER_ADVANCE_MANUAL(benchmark::State& state) {
+    using T = int;
+
+    auto x = (nd::arange<T>(0, 1024 * 2 * 3 * 4, 1)
+              .reshape({32 * 2, 8 * 3, 4 * 4}));
+    size_t N = x.size();
+
+    for (auto _ : state) {
+        auto _x = x.data();
+        for (size_t i = 0; i < N; ++i, ++_x) {}
+    }
+}
+BENCHMARK(BM_NDITER_ADVANCE);
+BENCHMARK(BM_NDITER_ADVANCE_MANUAL);
+
 #endif // BENCHMARK_NDITER_CPP
